@@ -1,0 +1,15 @@
+.vscode/
+output/
+seeds/
+*.st
+*.gch
+*.o
+*.so
+*.a
+*.dSYM
+*.disabled
+*.log
+*.pyc
+*.cfg
+openplc
+*.original
