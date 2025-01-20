@@ -24,7 +24,14 @@ $ make
 
 使用AFL-Fuzz编译这段代码
 
+
+% 当然，如果不想要AFL-Fuzz，可以直接用gcc编译，就不需要加上下面这句话了。
+
+
+CC=gcc CXX=g++
+
 CC=afl-clang-fast CXX=afl-clang-fast++ 
+
 g++ -std=gnu++11 -I ./lib -c Config0.c -lasiodnp3 -lasiopal -lopendnp3 -lopenpal -w
 g++ -std=gnu++11 -I ./lib -c Res0.c -lasiodnp3 -lasiopal -lopendnp3 -lopenpal -w $ETHERCAT_INC
 echo "Generating glueVars..."
@@ -34,11 +41,20 @@ g++ -std=gnu++11 *.cpp *.o -o openplc -I ./lib -pthread -fpermissive `pkg-config
 echo "Compilation finished successfully!"
 
 
+./openplc < input.txt  > output.txt
+
 说明：glue_generator是用来生成glueVars的，如果没有glueVars.cpp这个文件，可以先运行一下./glue_generator。
 这个文件也是OpenPLC中预先提供的，不需要自己写，而且也不需要进入fuzz变异流程
 
 
+<!-- 下面这一段，如果是用afl-fuzz编译，的话，需要设置一些变量然后运行模糊测试程序 -->
 export AFL_DEBUG=1 AFL_QEMU_DEBUG_MAPS=1
 export AFL_SKIP_CPUFREQ=1
 export AFL_SKIP_BIN_CHECK=1
+export AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1
+export AFL_MAP_SIZE=10000000
 afl-fuzz -i ~/Project/fuzzbuild/plcfuzz/seeds -o ~/Project/fuzzbuild/plcfuzz/output -- ./openplc @@
+
+(加入-Q指令的话可以在QEMU模式下做模糊测试)
+
+<!-- 如果不是通过afl-fuzz编译，那么可以直接运行./openplc 进行测试 -->

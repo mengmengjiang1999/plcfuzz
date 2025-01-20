@@ -243,8 +243,10 @@ int main(int argc,char **argv)
     //======================================================
     tzset();
     time(&start_time);
-    pthread_t interactive_thread;
-    pthread_create(&interactive_thread, NULL, interactiveServerThread, NULL);
+
+    // pthread_t interactive_thread;
+    // pthread_create(&interactive_thread, NULL, interactiveServerThread, NULL);
+
     config_init__();
     glueVars();
 
@@ -324,7 +326,8 @@ int main(int argc,char **argv)
 	//======================================================
 	//                    MAIN LOOP
 	//======================================================
-	while(run_openplc)
+	// while(run_openplc)
+    for(int i=0;i<10;i++)
 	{
 		// Get the start time for the running cycle
         // printf("Getting current time...main loop\n");
@@ -380,7 +383,7 @@ int main(int argc,char **argv)
         
 		updateTime();
 
-        printf("23232333\n");
+        // printf("23232333\n");
 
 		// Get the end time for the running cycle
 		clock_gettime(CLOCK_MONOTONIC, &cycle_end);
@@ -419,7 +422,7 @@ int main(int argc,char **argv)
     //======================================================
 	//             SHUTTING DOWN OPENPLC RUNTIME
 	//======================================================
-    pthread_join(interactive_thread, NULL);
+    // pthread_join(interactive_thread, NULL);
 #ifdef _ethercat_src
     ethercat_terminate_src();
 #endif
@@ -427,7 +430,11 @@ int main(int argc,char **argv)
     disableOutputs();
     updateCustomOut();
     updateBuffersOut();
+
+    // 这一步检查是否会产生输出震荡的问题
+    printf("Checking output change=%d\n, ", checkOutputChange());
 	finalizeHardware();
     printf("Shutting down OpenPLC Runtime...\n");
-    exit(0);
+    // exit(0);
+    return 0;
 }

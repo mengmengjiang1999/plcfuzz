@@ -13,3 +13,4 @@ seeds/
 *.cfg
 openplc
 *.original
+*.txt

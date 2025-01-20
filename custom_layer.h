@@ -43,7 +43,7 @@ void updateCustomIn()
     // single line of code in this function:
     //     if (int_input[3] != NULL) *int_input[3] = 53;
 
-    printf("Updating custom input...\n");
+    // printf("Updating custom input...\n");
 }
 
 //-----------------------------------------------------------------------------
