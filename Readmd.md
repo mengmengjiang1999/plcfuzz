@@ -15,7 +15,9 @@ $ make
 
 将plc源代码编译成C代码
 
-./iec2c xxx.st
+
+-T 参数表示的是制定输出文件的路径
+./iec2c -T ./buildfiles xxx.st 
 
 
 % todo：有需要修改的地方
@@ -32,14 +34,16 @@ CC=gcc CXX=g++
 
 CC=afl-clang-fast CXX=afl-clang-fast++ 
 
-g++ -std=gnu++11 -I ./lib -c Config0.c -lasiodnp3 -lasiopal -lopendnp3 -lopenpal -w
-g++ -std=gnu++11 -I ./lib -c Res0.c -lasiodnp3 -lasiopal -lopendnp3 -lopenpal -w $ETHERCAT_INC
+g++ -std=gnu++11 -I ./lib -c ./buildfiles/Config0.c -lasiodnp3 -lasiopal -lopendnp3 -lopenpal -w
+g++ -std=gnu++11 -I ./lib -c ./buildfiles/Res0.c -lasiodnp3 -lasiopal -lopendnp3 -lopenpal -w $ETHERCAT_INC
 echo "Generating glueVars..."
 ./glue_generator
 echo "Compiling main program..."
-g++ -std=gnu++11 *.cpp *.o -o openplc -I ./lib -pthread -fpermissive `pkg-config --cflags --libs libmodbus` -lasiodnp3 -lasiopal -lopendnp3 -lopenpal -w $ETHERCAT_INC
+g++ -std=gnu++11  *.cpp *.o -o openplc -I ./lib -I ./buildfiles/ -pthread -fpermissive `pkg-config --cflags --libs libmodbus` -lasiodnp3 -lasiopal -lopendnp3 -lopenpal -w $ETHERCAT_INC
 echo "Compilation finished successfully!"
 
+
+<!-- 注意：下面这一段需要用到sudo权限。主要的 -->
 
 ./openplc < input.txt  > output.txt
 
@@ -48,11 +52,13 @@ echo "Compilation finished successfully!"
 
 
 <!-- 下面这一段，如果是用afl-fuzz编译，的话，需要设置一些变量然后运行模糊测试程序 -->
-export AFL_DEBUG=1 AFL_QEMU_DEBUG_MAPS=1
+export AFL_DEBUG=1 
+exportAFL_QEMU_DEBUG_MAPS=1
 export AFL_SKIP_CPUFREQ=1
 export AFL_SKIP_BIN_CHECK=1
 export AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1
 export AFL_MAP_SIZE=10000000
+AFL_AUTORESUME=1
 afl-fuzz -i ~/Project/fuzzbuild/plcfuzz/seeds -o ~/Project/fuzzbuild/plcfuzz/output -- ./openplc @@
 
 (加入-Q指令的话可以在QEMU模式下做模糊测试)

@@ -13,8 +13,6 @@ extern unsigned long long common_ticktime__;
 #include "POUS.h"
 
 #include "Config0.h"
-__DECLARE_GLOBAL(BOOL,RES0,TEST1)
-__DECLARE_GLOBAL(BOOL,RES0,TEST2)
 
 #include "POUS.c"
 
@@ -25,8 +23,7 @@ PROGRAM0 RES0__INSTANCE0;
 void RES0_init__(void) {
   BOOL retain;
   retain = 0;
-  __INIT_GLOBAL(BOOL,TEST1,__INITIAL_VALUE(__BOOL_LITERAL(FALSE)),retain)
-  __INIT_GLOBAL(BOOL,TEST2,__INITIAL_VALUE(__BOOL_LITERAL(FALSE)),retain)
+  
   TASK0 = __BOOL_LITERAL(FALSE);
   PROGRAM0_init__(&INSTANCE0,retain);
 }

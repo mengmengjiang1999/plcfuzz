@@ -1,0 +1,1 @@
+./iec2c -T ./buildfiles $1

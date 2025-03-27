@@ -1,0 +1,11 @@
+# environment variables:
+AFL_CUSTOM_INFO_PROGRAM=./openplc
+AFL_CUSTOM_INFO_PROGRAM_ARGV=@@ -Q
+AFL_CUSTOM_INFO_OUT=/home/mmj/Project/fuzzbuild/plcfuzz/output2/default
+AFL_DEBUG=1
+AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1
+AFL_MAP_SIZE=10000000
+AFL_SKIP_BIN_CHECK=1
+AFL_SKIP_CPUFREQ=1
+# command line:
+'afl-fuzz' '-i' '/home/mmj/Project/fuzzbuild/plcfuzz/seeds' '-o' '/home/mmj/Project/fuzzbuild/plcfuzz/output2' '--' './openplc' '@@' '-Q'

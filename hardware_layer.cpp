@@ -35,9 +35,9 @@
 #include "custom_layer.h"
 #include "crash_check.h"
 
-static InputHistory input_history;
+static BufferHistory bool_history;
 
-static InputHistory output_history;
+// static BufferHistory output_history;
 
 //-----------------------------------------------------------------------------
 // This function is called by the main OpenPLC routine when it is initializing.
@@ -53,15 +53,13 @@ void initializeHardware()
 		}
 	}
 
-	input_history.updateHistory(bool_input);
-
 	for(int i = 0; i < BUFFER_SIZE; i++){
 		for(int j = 0; j < 8; j++){
 			bool_output[i][j] = new IEC_BOOL;
 		}
 	}
 
-	output_history.updateHistory(bool_output);
+	bool_history.updateBoolHistory(bool_input,bool_output);
 
 }
 
@@ -83,6 +81,16 @@ void finalizeHardware()
 
 // 写输入数据，从标准输入中模拟
 
+void showInput(){
+	std::cout << "Input values:\n";
+	for(int i = 0; i < BUFFER_SIZE; i++){
+		for(int j = 0; j < 8; j++){
+			printf("%d,%d, %hhu\n", i, j, *bool_input[i][j]);
+		}
+		std::cout << std::endl;
+	}
+}
+
 void updateBuffersIn()
 {
 	// printf("Get input values:\n");
@@ -103,7 +111,6 @@ void updateBuffersIn()
 			IEC_BOOL value;
 			// std::cin>>value;
 			if(scanf("%hhu", &value) != 1){
-				printf("Error reading input buffer\n");
 			}else{
 				printf("Input buffer: %d,%d, %hhu\n", i, j, value);
 				*bool_input[i][j] = value;
@@ -118,7 +125,10 @@ void updateBuffersIn()
 		}
 	}
 
-	input_history.updateHistory(bool_input);
+	// bool_history.updateBoolHistory(bool_input,bool_output);
+	// bool_history.printHistory();
+
+	showInput();
 
 	pthread_mutex_unlock(&bufferLock); //unlock mutex
 }
@@ -145,30 +155,10 @@ void updateBuffersOut()
 
 	**************************************************/
 
-	for(int i = 0; i < BUFFER_SIZE; i++){
-		for(int j = 0; j < 8; j++){
-			// printf("i=%d, j=%d\n", i, j);
+	showInput();
 
-			if(*bool_output[i][j] == NULL){
-				// printf("output buffer is null\n");
-			}else{
-				// printf("output buffer: %d,%d, %hhu\n", i, j, *bool_output[i][j]);
-
-				// std::cout<<*bool_output[i][j]<<" ";
-				// printf("\n");
-				// if(printf("%hhu", *bool_output[i][j]) != 1){
-				// 	printf("Error writing output buffer\n");
-				// }else{
-				// 	printf("Output buffer: %d,%d, %hhu\n", i, j, *bool_output[i][j]);
-				// }
-				// printf("\n ");
-			}
-
-
-		}
-	}
-
-	output_history.updateHistory(bool_output);
+	bool_history.updateBoolHistory(bool_input,bool_output);
+	bool_history.printHistory();
 
 	// printf("out mutex output values\n");
 
@@ -180,5 +170,5 @@ void updateBuffersOut()
 
 
 bool checkOutputChange(){
-	return output_history.checkChange();
+	return bool_history.checkChange();
 }
