@@ -39,13 +39,13 @@ BufferHistory::BufferHistory(){
                 dint_memory_history[i][k] = new IEC_UDINT;
             }
         }
-    this->printHistory();
+    // this->printHistory();
 }
 
 
 // 这个函数需要在每次更新输入的时候调用一下
 void BufferHistory::updateBoolHistory(IEC_BOOL *(*input)[8], IEC_BOOL *(*output)[8]) {
-    std::cout << "updateBoolHistory called." << std::endl;
+    // std::cout << "updateBoolHistory called." << std::endl;
     // update input and output history
     for (size_t i = 0; i < BUFFER_SIZE; i++) {
         for (size_t j = 0; j < 8; j++) {
@@ -86,7 +86,7 @@ bool BufferHistory::checkChange() {
             change_count++;
         }
     }
-    this->printHistory();
+    // this->printHistory();
     if (change_count > 0) {
         // crash detected
         // do something

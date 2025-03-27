@@ -128,7 +128,7 @@ void updateBuffersIn()
 	// bool_history.updateBoolHistory(bool_input,bool_output);
 	// bool_history.printHistory();
 
-	showInput();
+	// showInput();
 
 	pthread_mutex_unlock(&bufferLock); //unlock mutex
 }
@@ -155,10 +155,10 @@ void updateBuffersOut()
 
 	**************************************************/
 
-	showInput();
+	// showInput();
 
 	bool_history.updateBoolHistory(bool_input,bool_output);
-	bool_history.printHistory();
+	// bool_history.printHistory();
 
 	// printf("out mutex output values\n");
 

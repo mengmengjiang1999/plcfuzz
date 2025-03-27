@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include<iostream>
 #include <stdexcept>  // 包含标准异常类
 
 #include "iec_types.h"
@@ -330,7 +331,7 @@ int main(int argc,char **argv)
 	// while(run_openplc)
     for(int i=0;i<100;i++)
 	{
-        printf("Main loop iteration %d\n", i);
+        // printf("Main loop iteration %d\n", i);
 		// Get the start time for the running cycle
         // printf("Getting current time...main loop\n");
 		clock_gettime(CLOCK_MONOTONIC, &cycle_start);
@@ -429,12 +430,22 @@ int main(int argc,char **argv)
     ethercat_terminate_src();
 #endif
 
+    // char *crash = NULL;
+    // crash[0] = 1;
+
     // 这一步检查是否会产生输出震荡的问题
     // printf("Checking output change=%d\n, ", checkOutputChange());
     if(checkOutputChange()){
         // todo:最后一次执行updateBufferOut的时候，会将outputBuffer的值清空。所以在做比较的时候不应该计入最后一次。
-        printf("Output change detected, shutting down OpenPLC Runtime...\n");
+        std::cout<<"Racing bug detected, shutting down OpenPLC Runtime...\n"<<std::endl;
         // throw std::runtime_error("Output change detected, shutting down OpenPLC Runtime...");
+
+        // 这里是手动指定了一个会crash的点来使得其产生crash
+        // exit(1);
+        char *crash = NULL;
+        crash[0] = 1;
+    }else{
+        printf("No racing bug detected, shutting down OpenPLC Runtime...\n");
     }
 
     printf("Disabling outputs\n");
