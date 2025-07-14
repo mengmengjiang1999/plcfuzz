@@ -34,6 +34,7 @@
 
 #include "iec_types.h"
 #include "ladder.h"
+#include "input_data_simulator.h"
 #ifdef _ethercat_src
 #include "ethercat_src.h"
 #endif
@@ -224,9 +225,13 @@ u_int64_t *lint_input_call_back(int a){ return lint_input[a]; }
 u_int64_t *lint_output_call_back(int a){ return lint_output[a]; }
 void logger_callback(char *msg){ log(msg);}
 
+
+InputDataSimulator INPUT_BOOL_DATA;
+
 int main(int argc,char **argv)
 {
     // Define the max/min/avg/total cycle and latency variables used in REAL-TIME computation(in nanoseconds)
+    printf("Initializing variables for REAL-TIME computation\n");
     long cycle_avg, cycle_max, cycle_min, cycle_total;
     long latency_avg, latency_max, latency_min, latency_total;
     cycle_max = 0;
@@ -239,6 +244,20 @@ int main(int argc,char **argv)
     char log_msg[1000];
     sprintf(log_msg, "OpenPLC Runtime starting...\n");
     log(log_msg);
+
+    BoolBlock input_bool_block;
+    int cnt_blocks=0;
+    std::cin>>input_bool_block;
+    printf("Block 1: \n");
+    cnt_blocks++;
+    input_bool_block.print();
+    INPUT_BOOL_DATA.add_bool_block(input_bool_block);
+    while(std::cin>>input_bool_block){
+        cnt_blocks++;
+        printf("Block %d: \n", cnt_blocks);
+        INPUT_BOOL_DATA.add_bool_block(input_bool_block);
+    }
+    printf("Total blocks: %d\n", cnt_blocks);
 
     //======================================================
     //                 PLC INITIALIZATION
@@ -331,7 +350,7 @@ int main(int argc,char **argv)
 	// while(run_openplc)
     for(int i=0;i<100;i++)
 	{
-        // printf("Main loop iteration %d\n", i);
+        printf("Main loop iteration %d\n", i);
 		// Get the start time for the running cycle
         // printf("Getting current time...main loop\n");
 		clock_gettime(CLOCK_MONOTONIC, &cycle_start);
@@ -430,11 +449,6 @@ int main(int argc,char **argv)
     ethercat_terminate_src();
 #endif
 
-    // char *crash = NULL;
-    // crash[0] = 1;
-
-    // 这一步检查是否会产生输出震荡的问题
-    // printf("Checking output change=%d\n, ", checkOutputChange());
     if(checkOutputChange()){
         // todo:最后一次执行updateBufferOut的时候，会将outputBuffer的值清空。所以在做比较的时候不应该计入最后一次。
         std::cout<<"Racing bug detected, shutting down OpenPLC Runtime...\n"<<std::endl;
