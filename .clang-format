@@ -1,0 +1,11 @@
+BasedOnStyle: Google  # 基础风格（可选：LLVM, Google, Chromium, Mozilla等）
+IndentWidth: 4        # 缩进空格数
+TabWidth: 4           # Tab宽度
+UseTab: Never         # 禁止使用Tab（只用空格）
+BreakBeforeBraces: Attach  # 大括号不换行（K&R风格）
+AllowShortIfStatementsOnASingleLine: false  # 禁止单行if
+AlignAfterOpenBracket: Align  # 对齐括号后的内容
+ColumnLimit: 130      # 单行最大长度
+# 函数之间的空行控制（需 clang-format 12+）
+BraceWrapping:
+  AfterFunction: true       # 函数结束后换行
