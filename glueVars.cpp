@@ -27,61 +27,57 @@
 TIME __CURRENT_TIME;
 extern unsigned long long common_ticktime__;
 
-//Internal buffers for I/O and memory. These buffers are defined in the
-//auto-generated glueVars.cpp file
-#define BUFFER_SIZE		1024
+// Internal buffers for I/O and memory. These buffers are defined in the
+// auto-generated glueVars.cpp file
+#define BUFFER_SIZE 1024
 
-//Booleans
+// Booleans
 IEC_BOOL *bool_input[BUFFER_SIZE][8];
 IEC_BOOL *bool_output[BUFFER_SIZE][8];
 
-//Bytes
+// Bytes
 IEC_BYTE *byte_input[BUFFER_SIZE];
 IEC_BYTE *byte_output[BUFFER_SIZE];
 
-//Analog I/O
+// Analog I/O
 IEC_UINT *int_input[BUFFER_SIZE];
 IEC_UINT *int_output[BUFFER_SIZE];
 
-//32bit I/O
+// 32bit I/O
 IEC_UDINT *dint_input[BUFFER_SIZE];
 IEC_UDINT *dint_output[BUFFER_SIZE];
 
-//64bit I/O
+// 64bit I/O
 IEC_ULINT *lint_input[BUFFER_SIZE];
 IEC_ULINT *lint_output[BUFFER_SIZE];
 
-//Memory
+// Memory
 IEC_UINT *int_memory[BUFFER_SIZE];
 IEC_UDINT *dint_memory[BUFFER_SIZE];
 IEC_ULINT *lint_memory[BUFFER_SIZE];
 
-//Special Functions
+// Special Functions
 IEC_ULINT *special_functions[BUFFER_SIZE];
-
 
 #define __LOCATED_VAR(type, name, ...) type __##name;
 #include "LOCATED_VARIABLES.h"
 #undef __LOCATED_VAR
-#define __LOCATED_VAR(type, name, ...) type* name = &__##name;
+#define __LOCATED_VAR(type, name, ...) type *name = &__##name;
 #include "LOCATED_VARIABLES.h"
 #undef __LOCATED_VAR
 
-void glueVars()
-{
-	bool_input[0][0] = (IEC_BOOL *)__IX0_0;
-	bool_output[0][0] = (IEC_BOOL *)__QX0_0;
-	bool_output[0][1] = (IEC_BOOL *)__QX0_1;
+void glueVars() {
+    bool_input[0][0] = (IEC_BOOL *)__IX0_0;
+    bool_output[0][0] = (IEC_BOOL *)__QX0_0;
+    bool_output[0][1] = (IEC_BOOL *)__QX0_1;
 }
 
-void updateTime()
-{
-	__CURRENT_TIME.tv_sec  += common_ticktime__ / 1000000000ULL;
-	__CURRENT_TIME.tv_nsec += common_ticktime__ % 1000000000ULL;
+void updateTime() {
+    __CURRENT_TIME.tv_sec += common_ticktime__ / 1000000000ULL;
+    __CURRENT_TIME.tv_nsec += common_ticktime__ % 1000000000ULL;
 
-	if (__CURRENT_TIME.tv_nsec >= 1000000000ULL)
-	{
-		__CURRENT_TIME.tv_nsec -= 1000000000ULL;
-		__CURRENT_TIME.tv_sec += 1;
-	}
+    if (__CURRENT_TIME.tv_nsec >= 1000000000ULL) {
+        __CURRENT_TIME.tv_nsec -= 1000000000ULL;
+        __CURRENT_TIME.tv_sec += 1;
+    }
 }

@@ -25,17 +25,17 @@
 // Thiago Alves, Dec 2015
 //-----------------------------------------------------------------------------
 
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <pthread.h>
-#include<iostream>
 
-#include "ladder.h"
-#include "custom_layer.h"
+#include <iostream>
+
 #include "crash_check.h"
-
+#include "custom_layer.h"
 #include "input_data_simulator.h"
+#include "ladder.h"
 
 static BufferHistory bool_history;
 
@@ -46,33 +46,29 @@ static BufferHistory bool_history;
 // Hardware initialization procedures should be here.
 //-----------------------------------------------------------------------------
 
-void initializeHardware()
-{
-	// initialize bool input and output buffers
-	printf("Initializing hardware layer...\n");
-	for(int i = 0; i < BUFFER_SIZE; i++){
-		for(int j = 0; j < 8; j++){
-			bool_input[i][j] = new IEC_BOOL;
-		}
-	}
+void initializeHardware() {
+    // initialize bool input and output buffers
+    printf("Initializing hardware layer...\n");
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+        for (int j = 0; j < 8; j++) {
+            bool_input[i][j] = new IEC_BOOL;
+        }
+    }
 
-	for(int i = 0; i < BUFFER_SIZE; i++){
-		for(int j = 0; j < 8; j++){
-			bool_output[i][j] = new IEC_BOOL;
-		}
-	}
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+        for (int j = 0; j < 8; j++) {
+            bool_output[i][j] = new IEC_BOOL;
+        }
+    }
 
-	bool_history.updateBoolHistory(bool_input,bool_output);
-
+    bool_history.updateBoolHistory(bool_input, bool_output);
 }
 
 //-----------------------------------------------------------------------------
 // This function is called by the main OpenPLC routine when it is finalizing.
 // Resource clearing procedures should be here.
 //-----------------------------------------------------------------------------
-void finalizeHardware()
-{
-}
+void finalizeHardware() {}
 
 //-----------------------------------------------------------------------------
 // This function is called by the OpenPLC in a loop. Here the internal buffers
@@ -80,134 +76,121 @@ void finalizeHardware()
 // must be used to protect access to the buffers on a threaded environment.
 //-----------------------------------------------------------------------------
 
-
-
 // 写输入数据，从标准输入中模拟
 
-void showInput(){
-	std::cout << "Input values:\n";
-	for(int i = 0; i < BUFFER_SIZE; i++){
-		for(int j = 0; j < 8; j++){
-			printf("%d,%d, %hhu\n", i, j, *bool_input[i][j]);
-		}
-		std::cout << std::endl;
-	}
+void showInput() {
+    std::cout << "Input values:\n";
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+        for (int j = 0; j < 8; j++) {
+            printf("%d,%d, %hhu\n", i, j, *bool_input[i][j]);
+        }
+        std::cout << std::endl;
+    }
 }
-
 
 // 旧版的updateBuffersIn，从标准输入中读取数据，并写入到bool_input中
-void updateBuffersIn(int t)
-{
-	// printf("Get input values:\n");
-	pthread_mutex_lock(&bufferLock); //lock mutex
+void updateBuffersIn(int t) {
+    // printf("Get input values:\n");
+    pthread_mutex_lock(&bufferLock);  // lock mutex
 
-	/*********READING AND WRITING TO I/O**************
+    /*********READING AND WRITING TO I/O**************
 
-	*bool_input[0][0] = read_digital_input(0);
-	write_digital_output(0, *bool_output[0][0]);
+    *bool_input[0][0] = read_digital_input(0);
+    write_digital_output(0, *bool_output[0][0]);
 
-	*int_input[0] = read_analog_input(0);
-	write_analog_output(0, *int_output[0]);
+    *int_input[0] = read_analog_input(0);
+    write_analog_output(0, *int_output[0]);
 
-	**************************************************/
+    **************************************************/
 
-	for(int i = 0; i < BUFFER_SIZE; i++){
-		for(int j = 0; j < 8; j++){
-			IEC_BOOL value;
-			// std::cin>>value;
-			if(scanf("%hhu", &value) != 1){
-			}else{
-				printf("Input buffer: %d,%d, %hhu\n", i, j, value);
-				*bool_input[i][j] = value;
-			}
-		}
-	}
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+        for (int j = 0; j < 8; j++) {
+            IEC_BOOL value;
+            // std::cin>>value;
+            if (scanf("%hhu", &value) != 1) {
+            } else {
+                printf("Input buffer: %d,%d, %hhu\n", i, j, value);
+                *bool_input[i][j] = value;
+            }
+        }
+    }
 
-	// bool_history.updateBoolHistory(bool_input,bool_output);
-	// bool_history.printHistory();
+    // bool_history.updateBoolHistory(bool_input,bool_output);
+    // bool_history.printHistory();
 
-	// showInput();
+    // showInput();
 
-	pthread_mutex_unlock(&bufferLock); //unlock mutex
+    pthread_mutex_unlock(&bufferLock);  // unlock mutex
 }
-
-
 
 // 新版本的update
-void updateBuffersIn()
-{
-	// printf("Get input values:\n");
-	pthread_mutex_lock(&bufferLock); //lock mutex
+void updateBuffersIn() {
+    // printf("Get input values:\n");
+    pthread_mutex_lock(&bufferLock);  // lock mutex
 
-	/*********READING AND WRITING TO I/O**************
+    /*********READING AND WRITING TO I/O**************
 
-	*bool_input[0][0] = read_digital_input(0);
-	write_digital_output(0, *bool_output[0][0]);
+    *bool_input[0][0] = read_digital_input(0);
+    write_digital_output(0, *bool_output[0][0]);
 
-	*int_input[0] = read_analog_input(0);
-	write_analog_output(0, *int_output[0]);
+    *int_input[0] = read_analog_input(0);
+    write_analog_output(0, *int_output[0]);
 
-	**************************************************/
+    **************************************************/
 
-	// 总之就是获得下一个cycle的模拟版的输入数据，并且将其写入到bool_input，模拟这是通过外设输入的数据
-	BoolBlock boolblock=INPUT_BOOL_DATA.get_current_bool_block();
-	for(int i = 0; i < BUFFER_SIZE; i++){
-		for(int j = 0; j < 8; j++){
-			// std::cin>>value;
-			// if(scanf("%hhu", &value) != 1){
-			// }else{
-			// 	printf("Input buffer: %d,%d, %hhu\n", i, j, value);
-			// 	*bool_input[i][j] = value;
-			// }
-			*bool_input[i][j] = (IEC_BOOL)boolblock.bool_input[i][j];
-		}
-	}
+    // 总之就是获得下一个cycle的模拟版的输入数据，并且将其写入到bool_input，模拟这是通过外设输入的数据
+    BoolBlock boolblock = INPUT_BOOL_DATA.get_current_bool_block();
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+        for (int j = 0; j < 8; j++) {
+            // std::cin>>value;
+            // if(scanf("%hhu", &value) != 1){
+            // }else{
+            // 	printf("Input buffer: %d,%d, %hhu\n", i, j, value);
+            // 	*bool_input[i][j] = value;
+            // }
+            *bool_input[i][j] = (IEC_BOOL)boolblock.bool_input[i][j];
+        }
+    }
 
-	// bool_history.updateBoolHistory(bool_input,bool_output);
-	// bool_history.printHistory();
+    // bool_history.updateBoolHistory(bool_input,bool_output);
+    // bool_history.printHistory();
 
-	// showInput();
+    // showInput();
 
-	pthread_mutex_unlock(&bufferLock); //unlock mutex
+    pthread_mutex_unlock(&bufferLock);  // unlock mutex
 }
-
 
 //-----------------------------------------------------------------------------
 // This function is called by the OpenPLC in a loop. Here the internal buffers
 // must be updated to reflect the actual Output state. The mutex bufferLock
 // must be used to protect access to the buffers on a threaded environment.
 //-----------------------------------------------------------------------------
-void updateBuffersOut()
-{
-	// printf("update output values:\n");
-	pthread_mutex_lock(&bufferLock); //lock mutex
+void updateBuffersOut() {
+    // printf("update output values:\n");
+    pthread_mutex_lock(&bufferLock);  // lock mutex
 
-	// printf("in mutex output values\n");
+    // printf("in mutex output values\n");
 
-	/*********READING AND WRITING TO I/O**************
+    /*********READING AND WRITING TO I/O**************
 
-	*bool_input[0][0] = read_digital_input(0);
-	write_digital_output(0, *bool_output[0][0]);
+    *bool_input[0][0] = read_digital_input(0);
+    write_digital_output(0, *bool_output[0][0]);
 
-	*int_input[0] = read_analog_input(0);
-	write_analog_output(0, *int_output[0]);
+    *int_input[0] = read_analog_input(0);
+    write_analog_output(0, *int_output[0]);
 
-	**************************************************/
+    **************************************************/
 
-	// showInput();
+    // showInput();
 
-	bool_history.updateBoolHistory(bool_input,bool_output);
-	// bool_history.printHistory();
+    bool_history.updateBoolHistory(bool_input, bool_output);
+    // bool_history.printHistory();
 
-	// printf("out mutex output values\n");
+    // printf("out mutex output values\n");
 
-	pthread_mutex_unlock(&bufferLock); //unlock mutex
+    pthread_mutex_unlock(&bufferLock);  // unlock mutex
 
-	// printf("end update output values\n");
+    // printf("end update output values\n");
 }
 
-
-
-bool checkOutputChange(){
-	return bool_history.checkChange();
-}
+bool checkOutputChange() { return bool_history.checkChange(); }
