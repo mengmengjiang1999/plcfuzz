@@ -64,3 +64,6 @@ afl-fuzz -i ~/Project/fuzzbuild/plcfuzz/seeds -o ~/Project/fuzzbuild/plcfuzz/out
 (加入-Q指令的话可以在QEMU模式下做模糊测试)
 
 <!-- 如果不是通过afl-fuzz编译，那么可以直接运行./openplc 进行测试 -->
+
+
+这里直接使用了iec2c和iec2iec的二进制文件。因为没有修改OpenPLC的源码，所以不用重新编译，使用二进制文件可以加快编译速度。

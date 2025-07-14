@@ -7,10 +7,11 @@ BoolBlock::BoolBlock(){
 }
 
 void BoolBlock::print(){
+    std::cout<<"BoolBlock::print():"<<std::endl;
     std::cout<<"Cycles: "<<this->cycles<<std::endl;
     for(int i=0;i<BUFFER_SIZE;i++){
         for(int j=0;j<8;j++){
-            std::cout<<this->bool_input[i][j]<<" ";
+            std::cout<<static_cast<unsigned int>(this->bool_input[i][j])<<" ";
         }
     }
     std::cout<<std::endl;
@@ -19,6 +20,7 @@ void BoolBlock::print(){
 // 重载了operator
 // 假设输入数据就是一个int类型的cycle+BUFFER_SIZE*8个unsigned char类型的数据
 std::istream& operator>>(std::istream& is,BoolBlock& sim){
+    std::cout<<"operator>>(std::istream& is,BoolBlock& sim)"<<std::endl;
     printf("Inputs: \n");
     is>>sim.cycles;
     printf("Cycles: %d \n",sim.cycles);
@@ -32,7 +34,7 @@ std::istream& operator>>(std::istream& is,BoolBlock& sim){
             sim.bool_input[i/8][i%8]=temp;
         else
             sim.bool_input[i/8][i%8]=0;
-        printf("%u \n",sim.bool_input[i/8][i%8]);
+        printf("%d \n",sim.bool_input[i/8][i%8]);
     }
     printf("\n");
 }
