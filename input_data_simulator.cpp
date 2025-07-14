@@ -36,7 +36,14 @@ std::istream& operator>>(std::istream& is,BoolBlock& sim){
             sim.bool_input[i/8][i%8]=0;
         printf("%d \n",sim.bool_input[i/8][i%8]);
     }
-    printf("\n");
+    //     // 检查行尾是否有额外数据
+    // if (is.peek() == '\n') {
+    //     is.ignore();  // 忽略换行符
+    // } else if (!is.eof()) {
+    //     std::cerr << "警告：行尾有多余数据\n";
+    //     is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    // }
+    return is;
 }
 
 // 下面开始写InputDataSimulator类

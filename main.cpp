@@ -253,9 +253,15 @@ int main(int argc,char **argv)
     input_bool_block.print();
     INPUT_BOOL_DATA.add_bool_block(input_bool_block);
     while(std::cin>>input_bool_block){
+        std::cout<<"Block %d: \n", cnt_blocks;std::cout<<std::endl;
         cnt_blocks++;
-        printf("Block %d: \n", cnt_blocks);
         INPUT_BOOL_DATA.add_bool_block(input_bool_block);
+    }
+
+       // 检查是否因为错误而终止
+    if (!std::cin.eof() && std::cin.fail()) {
+        std::cerr << "错误：输入格式不正确\n";
+        return 1;
     }
     printf("Total blocks: %d\n", cnt_blocks);
 
