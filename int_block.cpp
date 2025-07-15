@@ -29,7 +29,7 @@ std::istream& operator>>(std::istream& is, IntBlock& sim) {
         unsigned int temp;
         is >> temp;
         std::cout << i << " " << temp << " ";
-        if (temp <= static_cast<unsigned int>(std::numeric_limits<unsigned char>::max()))
+        if (temp <= static_cast<unsigned int>(std::numeric_limits<uint16_t>::max()))
             sim.int_input[i / 8][i % 8] = temp;
         else
             sim.int_input[i / 8][i % 8] = 0;
