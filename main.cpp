@@ -217,7 +217,7 @@ u_int64_t *lint_input_call_back(int a) { return lint_input[a]; }
 u_int64_t *lint_output_call_back(int a) { return lint_output[a]; }
 void logger_callback(char *msg) { log(msg); }
 
-InputDataSimulator INPUT_BOOL_DATA;
+InputDataSimulator<BoolBlock> INPUT_BOOL_DATA;
 
 int main(int argc, char **argv) {
     // Define the max/min/avg/total cycle and latency variables used in REAL-TIME computation(in nanoseconds)
