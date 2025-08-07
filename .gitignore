@@ -1,9 +1,7 @@
 .vscode/
+build/
 output/
-output2/
 seeds/
-testcases/
-buildfiles/
 *.st
 *.gch
 *.o
