@@ -142,12 +142,6 @@ void updateBuffersIn() {
     BoolBlock boolblock = INPUT_BOOL_DATA.get_current_bool_block();
     for (int i = 0; i < BUFFER_SIZE; i++) {
         for (int j = 0; j < 8; j++) {
-            // std::cin>>value;
-            // if(scanf("%hhu", &value) != 1){
-            // }else{
-            // 	printf("Input buffer: %d,%d, %hhu\n", i, j, value);
-            // 	*bool_input[i][j] = value;
-            // }
             *bool_input[i][j] = (IEC_BOOL)boolblock.bool_input[i][j];
         }
     }
