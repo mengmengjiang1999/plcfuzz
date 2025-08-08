@@ -9,4 +9,4 @@ echo "Compiling main program..."
 g++ -std=gnu++11  ./src/*.cpp ./build/*.o -o openplc -I ./lib -I ./plclogic/ -I ./include/ -pthread -fpermissive `pkg-config --cflags --libs libmodbus` -lasiodnp3 -lasiopal -lopendnp3 -lopenpal -w $ETHERCAT_INC
 echo "Compilation finished successfully!"
 
-./openplc < input.txt  > output.txt
+./openplc < ./terminaloutput/input.txt  > ./terminaloutput/output.txt
