@@ -35,6 +35,7 @@
 
 #include "iec_types.h"
 #include "input_data_simulator.h"
+#include "int_block.h"
 #include "ladder.h"
 #ifdef _ethercat_src
 #include "ethercat_src.h"
@@ -218,6 +219,7 @@ u_int64_t *lint_output_call_back(int a) { return lint_output[a]; }
 void logger_callback(char *msg) { log(msg); }
 
 InputDataSimulator<BoolBlock> INPUT_BOOL_DATA;
+InputDataSimulator<IntBlock> INPUT_INT_DATA;
 
 int main(int argc, char **argv) {
     // Define the max/min/avg/total cycle and latency variables used in REAL-TIME computation(in nanoseconds)
@@ -241,12 +243,12 @@ int main(int argc, char **argv) {
     printf("Block 1: \n");
     cnt_blocks++;
     input_bool_block.print();
-    INPUT_BOOL_DATA.add_bool_block(input_bool_block);
+    INPUT_BOOL_DATA.add_block(input_bool_block);
     while (std::cin >> input_bool_block) {
         std::cout << "Block %d: \n", cnt_blocks;
         std::cout << std::endl;
         cnt_blocks++;
-        INPUT_BOOL_DATA.add_bool_block(input_bool_block);
+        INPUT_BOOL_DATA.add_block(input_bool_block);
     }
 
     printf("Total blocks: %d\n", cnt_blocks);

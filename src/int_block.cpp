@@ -3,8 +3,6 @@
 #include <iostream>  // 用于输出
 #include <limits>    // 用于获取类型范围
 
-IntBlock::IntBlock() {}
-
 void IntBlock::print() {
     std::cout << "IntBlock::print():" << std::endl;
     std::cout << "Cycles: " << this->cycles << std::endl;

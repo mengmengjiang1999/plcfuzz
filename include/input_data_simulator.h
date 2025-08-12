@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "bool_block.h"
+#include "int_block.h"
 #include "ladder.h"
 
 template <typename T>
@@ -13,11 +14,12 @@ class InputDataSimulator {
    public:
     InputDataSimulator();
     void print();
-    void add_bool_block(T block);
+    void add_block(T block);
     T get_current_bool_block();
 };
 
 extern InputDataSimulator<BoolBlock> INPUT_BOOL_DATA;
+extern InputDataSimulator<IntBlock> INPUT_INT_DATA;
 
 template <typename T>
 InputDataSimulator<T>::InputDataSimulator() {
@@ -33,7 +35,7 @@ void InputDataSimulator<T>::print() {
 }
 
 template <typename T>
-void InputDataSimulator<T>::add_bool_block(T block) {
+void InputDataSimulator<T>::add_block(T block) {
     this->input_blocks.push_back(block);
 }
 
