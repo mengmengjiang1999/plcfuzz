@@ -3,8 +3,6 @@
 #include <iostream>  // 用于输出
 #include <limits>    // 用于获取类型范围
 
-BoolBlock::BoolBlock() {}
-
 void BoolBlock::print() {
     std::cout << "BoolBlock::print():" << std::endl;
     std::cout << "Cycles: " << this->cycles << std::endl;
