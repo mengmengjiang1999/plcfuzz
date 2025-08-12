@@ -1,0 +1,1 @@
+./tools/iec2c -T ./plclogic $1
