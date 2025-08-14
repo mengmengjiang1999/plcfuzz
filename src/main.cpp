@@ -34,6 +34,7 @@
 #include <stdexcept>  // 包含标准异常类
 
 #include "byte_block.h"
+#include "dint_block.h"
 #include "iec_types.h"
 #include "input_data_simulator.h"
 #include "int_block.h"
@@ -222,6 +223,7 @@ void logger_callback(char *msg) { log(msg); }
 InputDataSimulator<BoolBlock> INPUT_BOOL_DATA;
 InputDataSimulator<ByteBlock> INPUT_BYTE_DATA;
 InputDataSimulator<IntBlock> INPUT_INT_DATA;
+InputDataSimulator<DIntBlock> INPUT_DINT_DATA;
 
 int main(int argc, char **argv) {
     // Define the max/min/avg/total cycle and latency variables used in REAL-TIME computation(in nanoseconds)
@@ -242,30 +244,34 @@ int main(int argc, char **argv) {
     BoolBlock input_bool_block;
     ByteBlock input_byte_block;
     IntBlock input_int_block;
+    DIntBlock input_dint_block;
     int cnt_blocks = 0;
-    std::cin >> input_bool_block >> input_byte_block >> input_int_block;
+    std::cin >> input_bool_block >> input_byte_block >> input_int_block >> input_dint_block;
     printf("Block 1: \n");
     cnt_blocks++;
     input_bool_block.print();
     input_byte_block.print();
     input_int_block.print();
+    input_dint_block.print();
     INPUT_BOOL_DATA.add_block(input_bool_block);
     INPUT_BYTE_DATA.add_block(input_byte_block);
     INPUT_INT_DATA.add_block(input_int_block);
+    INPUT_DINT_DATA.add_block(input_dint_block);
 
     while (true) {
-        // spdlog::info("Block {}: \n", cnt_blocks);
         std::cout << "before input...." << cnt_blocks << ":\n";
-        if (std::cin >> input_bool_block >> input_byte_block >> input_int_block) {
+        if (std::cin >> input_bool_block >> input_byte_block >> input_int_block >> input_dint_block) {
             std::cout << "Block " << cnt_blocks << ":\n";
             std::cout << std::endl;
             cnt_blocks++;
             input_bool_block.print();
             input_byte_block.print();
             input_int_block.print();
+            input_dint_block.print();
             INPUT_BOOL_DATA.add_block(input_bool_block);
             INPUT_BYTE_DATA.add_block(input_byte_block);
             INPUT_INT_DATA.add_block(input_int_block);
+            INPUT_DINT_DATA.add_block(input_dint_block);
         } else {
             std::cout << "End of input stream\n";
             break;

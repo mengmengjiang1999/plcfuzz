@@ -103,7 +103,7 @@ int readCommandArgument(unsigned char *command) {
         argument[j] = '\0';
     }
 
-    return atoi(argument);
+    return atoi((const char *)argument);
 }
 //-----------------------------------------------------------------------------
 // Read string argument from a command function
