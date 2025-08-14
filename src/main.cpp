@@ -38,6 +38,7 @@
 #include "iec_types.h"
 #include "input_data_simulator.h"
 #include "int_block.h"
+#include "int_memory_block.h"
 #include "ladder.h"
 #include "lint_block.h"
 #ifdef _ethercat_src
@@ -226,6 +227,7 @@ InputDataSimulator<ByteBlock> INPUT_BYTE_DATA;
 InputDataSimulator<IntBlock> INPUT_INT_DATA;
 InputDataSimulator<DIntBlock> INPUT_DINT_DATA;
 InputDataSimulator<LIntBlock> INPUT_LINT_DATA;
+InputDataSimulator<IntMemoryBlock> INPUT_INT_MEM_DATA;
 
 int main(int argc, char **argv) {
     // Define the max/min/avg/total cycle and latency variables used in REAL-TIME computation(in nanoseconds)
@@ -248,8 +250,10 @@ int main(int argc, char **argv) {
     IntBlock input_int_block;
     DIntBlock input_dint_block;
     LIntBlock input_lint_block;
+    IntMemoryBlock input_int_mem_block;
     int cnt_blocks = 0;
-    std::cin >> input_bool_block >> input_byte_block >> input_int_block >> input_dint_block >> input_lint_block;
+    std::cin >> input_bool_block >> input_byte_block >> input_int_block >> input_dint_block >> input_lint_block >>
+        input_int_mem_block;
     printf("Block 1: \n");
     cnt_blocks++;
     input_bool_block.print();
@@ -257,15 +261,18 @@ int main(int argc, char **argv) {
     input_int_block.print();
     input_dint_block.print();
     input_lint_block.print();
+    input_int_mem_block.print();
     INPUT_BOOL_DATA.add_block(input_bool_block);
     INPUT_BYTE_DATA.add_block(input_byte_block);
     INPUT_INT_DATA.add_block(input_int_block);
     INPUT_DINT_DATA.add_block(input_dint_block);
     INPUT_LINT_DATA.add_block(input_lint_block);
+    INPUT_INT_MEM_DATA.add_block(input_int_mem_block);
 
     while (true) {
         std::cout << "before input...." << cnt_blocks << ":\n";
-        if (std::cin >> input_bool_block >> input_byte_block >> input_int_block >> input_dint_block >> input_lint_block) {
+        if (std::cin >> input_bool_block >> input_byte_block >> input_int_block >> input_dint_block >> input_lint_block >>
+            input_int_mem_block) {
             std::cout << "Block " << cnt_blocks << ":\n";
             std::cout << std::endl;
             cnt_blocks++;
@@ -274,11 +281,13 @@ int main(int argc, char **argv) {
             input_int_block.print();
             input_dint_block.print();
             input_lint_block.print();
+            input_int_mem_block.print();
             INPUT_BOOL_DATA.add_block(input_bool_block);
             INPUT_BYTE_DATA.add_block(input_byte_block);
             INPUT_DINT_DATA.add_block(input_dint_block);
             INPUT_INT_DATA.add_block(input_int_block);
             INPUT_LINT_DATA.add_block(input_lint_block);
+            INPUT_INT_MEM_DATA.add_block(input_int_mem_block);
         } else {
             std::cout << "End of input stream\n";
             break;
