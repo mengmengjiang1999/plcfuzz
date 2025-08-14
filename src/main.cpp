@@ -249,7 +249,7 @@ int main(int argc, char **argv) {
     INPUT_BYTE_DATA.add_block(input_int_block);
     while (true) {
         if (std::cin >> input_bool_block >> input_int_block) {
-            std::cout << "Block %d: \n", cnt_blocks;
+            std::cout << "Block " << cnt_blocks << ":\n";
             std::cout << std::endl;
             cnt_blocks++;
             input_bool_block.print();
