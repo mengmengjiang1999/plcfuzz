@@ -22,16 +22,15 @@ std::istream& operator>>(std::istream& is, BoolBlock& sim) {
     is >> sim.cycles;
     printf("Cycles: %d \n", sim.cycles);
     std::cout << "BUFFER_SIZE: " << BUFFER_SIZE << std::endl;
-    std::cout << static_cast<unsigned int>(std::numeric_limits<unsigned char>::max()) << std::endl;
     for (int i = 0; i < BUFFER_SIZE * 8; i++) {
         unsigned int temp;
         is >> temp;
-        std::cout << i << " " << temp << " ";
+        // std::cout << i << " " << temp << " ";
         if (temp <= static_cast<unsigned int>(std::numeric_limits<unsigned char>::max()))
             sim.bool_input[i / 8][i % 8] = temp;
         else
             sim.bool_input[i / 8][i % 8] = 0;
-        printf("%d \n", sim.bool_input[i / 8][i % 8]);
+        // printf("%d \n", sim.bool_input[i / 8][i % 8]);
     }
     // 检查行尾是否有额外数据
     if (is.peek() == '\n') {
@@ -40,6 +39,6 @@ std::istream& operator>>(std::istream& is, BoolBlock& sim) {
         std::cerr << "警告：行尾有多余数据\n";
         is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
-    // 重要：返回值是is
+    std::cout << "operator>>(std::istream& is,BoolBlock& sim) end" << std::endl;
     return is;
 }

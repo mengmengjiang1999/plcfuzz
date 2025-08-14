@@ -33,9 +33,9 @@
 #include <iostream>
 #include <stdexcept>  // 包含标准异常类
 
+#include "byte_block.h"
 #include "iec_types.h"
 #include "input_data_simulator.h"
-#include "int_block.h"
 #include "ladder.h"
 #ifdef _ethercat_src
 #include "ethercat_src.h"
@@ -219,7 +219,7 @@ u_int64_t *lint_output_call_back(int a) { return lint_output[a]; }
 void logger_callback(char *msg) { log(msg); }
 
 InputDataSimulator<BoolBlock> INPUT_BOOL_DATA;
-InputDataSimulator<IntBlock> INPUT_INT_DATA;
+InputDataSimulator<ByteBlock> INPUT_BYTE_DATA;
 
 int main(int argc, char **argv) {
     // Define the max/min/avg/total cycle and latency variables used in REAL-TIME computation(in nanoseconds)
@@ -238,17 +238,28 @@ int main(int argc, char **argv) {
     log(log_msg);
 
     BoolBlock input_bool_block;
+    ByteBlock input_int_block;
     int cnt_blocks = 0;
-    std::cin >> input_bool_block;
+    std::cin >> input_bool_block >> input_int_block;
     printf("Block 1: \n");
     cnt_blocks++;
     input_bool_block.print();
+    input_int_block.print();
     INPUT_BOOL_DATA.add_block(input_bool_block);
-    while (std::cin >> input_bool_block) {
-        std::cout << "Block %d: \n", cnt_blocks;
-        std::cout << std::endl;
-        cnt_blocks++;
-        INPUT_BOOL_DATA.add_block(input_bool_block);
+    INPUT_BYTE_DATA.add_block(input_int_block);
+    while (true) {
+        if (std::cin >> input_bool_block >> input_int_block) {
+            std::cout << "Block %d: \n", cnt_blocks;
+            std::cout << std::endl;
+            cnt_blocks++;
+            input_bool_block.print();
+            input_int_block.print();
+            INPUT_BOOL_DATA.add_block(input_bool_block);
+            INPUT_BYTE_DATA.add_block(input_int_block);
+        } else {
+            std::cout << "End of input stream\n";
+            break;
+        }
     }
 
     printf("Total blocks: %d\n", cnt_blocks);
@@ -275,9 +286,9 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    //======================================================
-    //              HARDWARE INITIALIZATION
-    //======================================================
+//======================================================
+//              HARDWARE INITIALIZATION
+//======================================================
 #ifdef _ethercat_src
     type_logger_callback logger = logger_callback;
     ethercat_configure("../utils/ethercat_src/build/ethercat.cfg", logger);
@@ -420,10 +431,10 @@ int main(int argc, char **argv) {
     printf("###Summary: The maximum/minimum/average latency in microsecond is %ld/%ld/%ld\n", latency_max / 1000,
            latency_min / 1000, latency_avg / 1000);
 
-    //======================================================
-    //             SHUTTING DOWN OPENPLC RUNTIME
-    //======================================================
-    // pthread_join(interactive_thread, NULL);
+//======================================================
+//             SHUTTING DOWN OPENPLC RUNTIME
+//======================================================
+// pthread_join(interactive_thread, NULL);
 #ifdef _ethercat_src
     ethercat_terminate_src();
 #endif

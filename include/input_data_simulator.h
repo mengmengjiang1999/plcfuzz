@@ -2,7 +2,7 @@
 #include <vector>
 
 #include "bool_block.h"
-#include "int_block.h"
+#include "byte_block.h"
 #include "ladder.h"
 
 template <typename T>
@@ -15,11 +15,11 @@ class InputDataSimulator {
     InputDataSimulator();
     void print();
     void add_block(T block);
-    T get_current_bool_block();
+    T get_current_block();
 };
 
 extern InputDataSimulator<BoolBlock> INPUT_BOOL_DATA;
-extern InputDataSimulator<IntBlock> INPUT_INT_DATA;
+extern InputDataSimulator<ByteBlock> INPUT_BYTE_DATA;
 
 template <typename T>
 InputDataSimulator<T>::InputDataSimulator() {
@@ -40,8 +40,9 @@ void InputDataSimulator<T>::add_block(T block) {
 }
 
 template <typename T>
-T InputDataSimulator<T>::get_current_bool_block() {
-    std::cout << "InputDataSimulator::get_current_bool_block():" << std::endl;
+T InputDataSimulator<T>::get_current_block() {
+    std::cout << "InputDataSimulator::get_current_block(): " << this->current_block_index
+              << ", size=" << this->input_blocks.size() << std::endl;
     T block = this->input_blocks[this->current_block_index];
     // 如果cycle不够这个block的持续cycle的数量那么
     if (this->current_block_cycle < block.cycles) {

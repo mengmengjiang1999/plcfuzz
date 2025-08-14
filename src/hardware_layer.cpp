@@ -50,12 +50,14 @@ void initializeHardware() {
     // initialize bool input and output buffers
     printf("Initializing hardware layer...\n");
     for (int i = 0; i < BUFFER_SIZE; i++) {
+        byte_input[i] = new IEC_BYTE;
         for (int j = 0; j < 8; j++) {
             bool_input[i][j] = new IEC_BOOL;
         }
     }
 
     for (int i = 0; i < BUFFER_SIZE; i++) {
+        byte_input[i] = new IEC_BYTE;
         for (int j = 0; j < 8; j++) {
             bool_output[i][j] = new IEC_BOOL;
         }
@@ -139,10 +141,12 @@ void updateBuffersIn() {
     **************************************************/
 
     // 总之就是获得下一个cycle的模拟版的输入数据，并且将其写入到bool_input，模拟这是通过外设输入的数据
-    BoolBlock boolblock = INPUT_BOOL_DATA.get_current_bool_block();
+    BoolBlock boolblock = INPUT_BOOL_DATA.get_current_block();
+    ByteBlock byteblock = INPUT_BYTE_DATA.get_current_block();
     for (int i = 0; i < BUFFER_SIZE; i++) {
         for (int j = 0; j < 8; j++) {
             *bool_input[i][j] = (IEC_BOOL)boolblock.bool_input[i][j];
+            *byte_input[i] = (IEC_BYTE)byteblock.byte_input[i];
         }
     }
 
