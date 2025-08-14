@@ -85,8 +85,6 @@ bool BufferHistory::checkChange() {
     }
     // this->printHistory();
     if (change_count > 0) {
-        // crash detected
-        // do something
         // std::cout << "Change detected!" <<change_count<< std::endl;
         return true;
     } else {

@@ -51,6 +51,7 @@ void initializeHardware() {
     printf("Initializing hardware layer...\n");
     for (int i = 0; i < BUFFER_SIZE; i++) {
         byte_input[i] = new IEC_BYTE;
+        int_input[i] = new IEC_UINT;
         for (int j = 0; j < 8; j++) {
             bool_input[i][j] = new IEC_BOOL;
         }
@@ -58,6 +59,7 @@ void initializeHardware() {
 
     for (int i = 0; i < BUFFER_SIZE; i++) {
         byte_input[i] = new IEC_BYTE;
+        int_input[i] = new IEC_UINT;
         for (int j = 0; j < 8; j++) {
             bool_output[i][j] = new IEC_BOOL;
         }

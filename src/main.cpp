@@ -248,6 +248,8 @@ int main(int argc, char **argv) {
     INPUT_BOOL_DATA.add_block(input_bool_block);
     INPUT_BYTE_DATA.add_block(input_int_block);
     while (true) {
+        // spdlog::info("Block {}: \n", cnt_blocks);
+        std::cout << "before input...." << cnt_blocks << ":\n";
         if (std::cin >> input_bool_block >> input_int_block) {
             std::cout << "Block " << cnt_blocks << ":\n";
             std::cout << std::endl;
