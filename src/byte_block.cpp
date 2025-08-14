@@ -33,10 +33,11 @@ std::istream& operator>>(std::istream& is, ByteBlock& sim) {
     // 检查行尾是否有额外数据
     if (is.peek() == '\n') {
         is.ignore();  // 忽略换行符
-    } else if (!is.eof()) {
-        std::cerr << "警告：行尾有多余数据\n";
-        is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
+    // else if (!is.eof()) {
+    //     std::cerr << "警告：行尾有多余数据 ByteBlock\n";
+    //     is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    // }
     // 重要：返回值是is
     std::cout << "operator>>(std::istream& is,ByteBlock& sim) end" << std::endl;
     return is;
