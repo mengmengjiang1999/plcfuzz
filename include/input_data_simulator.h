@@ -1,8 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#include "bool_block.h"
-#include "byte_block.h"
+#include "basic_input_block.h"
 #include "ladder.h"
 
 template <typename T>

@@ -33,15 +33,10 @@
 #include <iostream>
 #include <stdexcept>  // 包含标准异常类
 
-#include "byte_block.h"
-#include "dint_block.h"
-#include "dint_memory_block.h"
+#include "basic_input_block.h"
 #include "iec_types.h"
 #include "input_data_simulator.h"
-#include "int_block.h"
-#include "int_memory_block.h"
 #include "ladder.h"
-#include "lint_block.h"
 #ifdef _ethercat_src
 #include "ethercat_src.h"
 #endif
