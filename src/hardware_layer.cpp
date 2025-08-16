@@ -155,8 +155,8 @@ void updateBuffersIn() {
     ByteBlock byteblock = INPUT_BYTE_DATA.get_current_block();
     for (int i = 0; i < BUFFER_SIZE; i++) {
         for (int j = 0; j < 8; j++) {
-            *bool_input[i][j] = (IEC_BOOL)boolblock.bool_input[i][j];
-            *byte_input[i] = (IEC_BYTE)byteblock.byte_input[i];
+            *bool_input[i][j] = (IEC_BOOL)boolblock.input[i][j];
+            *byte_input[i] = (IEC_BYTE)byteblock.input[i];
         }
     }
 
