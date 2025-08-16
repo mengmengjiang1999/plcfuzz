@@ -52,14 +52,22 @@ void initializeHardware() {
     for (int i = 0; i < BUFFER_SIZE; i++) {
         byte_input[i] = new IEC_BYTE;
         int_input[i] = new IEC_UINT;
+        dint_input[i] = new IEC_UDINT;
+        lint_input[i] = new IEC_ULINT;
+        int_memory[i] = new IEC_UINT;
+        dint_memory[i] = new IEC_UDINT;
+        lint_memory[i] = new IEC_ULINT;
         for (int j = 0; j < 8; j++) {
             bool_input[i][j] = new IEC_BOOL;
         }
     }
 
     for (int i = 0; i < BUFFER_SIZE; i++) {
-        byte_input[i] = new IEC_BYTE;
-        int_input[i] = new IEC_UINT;
+        byte_output[i] = new IEC_BYTE;
+        int_output[i] = new IEC_UINT;
+        dint_output[i] = new IEC_UDINT;
+        lint_output[i] = new IEC_ULINT;
+        
         for (int j = 0; j < 8; j++) {
             bool_output[i][j] = new IEC_BOOL;
         }
