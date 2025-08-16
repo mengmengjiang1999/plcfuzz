@@ -1,3 +1,1 @@
-
-
 ./openplc < ./terminaloutput/input.txt  > ./terminaloutput/output.txt

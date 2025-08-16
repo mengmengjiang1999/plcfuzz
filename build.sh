@@ -1,4 +1,9 @@
 CC=gcc CXX=g++
+
+if [ "$1" = "-f" ]; then
+    CC=afl-clang-fast CXX=afl-clang-fast++
+fi
+
 rm -rf ./build
 mkdir ./build
 g++ -std=gnu++11 -I ./lib -c ./plclogic/Config0.c  -o ./build/Config0.o -lasiodnp3 -lasiopal -lopendnp3 -lopenpal -w 
