@@ -37,6 +37,7 @@
 #include "iec_types.h"
 #include "input_data_simulator.h"
 #include "ladder.h"
+#include "plc_input_block.h"
 #ifdef _ethercat_src
 #include "ethercat_src.h"
 #endif

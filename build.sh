@@ -4,8 +4,8 @@ if [ "$1" = "-f" ]; then
     CC=afl-clang-fast CXX=afl-clang-fast++
 fi
 
-rm -rf ./build
-mkdir ./build
+rm -rf ./build_plclogic
+mkdir ./build_plclogic
 g++ -std=gnu++11 -I ./lib -c ./plclogic/Config0.c  -o ./build/Config0.o -lasiodnp3 -lasiopal -lopendnp3 -lopenpal -w 
 g++ -std=gnu++11 -I ./lib -c ./plclogic/Res0.c  -o ./build/Res0.o  -lasiodnp3 -lasiopal -lopendnp3 -lopenpal -w $ETHERCAT_INC
 echo "Generating glueVars..."

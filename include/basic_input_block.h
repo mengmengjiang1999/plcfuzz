@@ -4,8 +4,10 @@
 
 #include "ladder.h"
 
+class SuperBasicInputBlock {};
+
 template <typename T, int Dim = 1>
-class BasicInputBlock {
+class BasicInputBlock : public SuperBasicInputBlock {
    public:
     int cycles;
     T input[BUFFER_SIZE];
@@ -25,6 +27,19 @@ class BasicInputBlock {
         }
         std::cout << std::endl;
     };
+    virtual std::string serialize_data() const {
+        std::string buffer;
+        buffer += std::to_string(this->cycles);
+        for (int i = 0; i < BUFFER_SIZE; i++) {
+            buffer += std::to_string(this->input[i]);
+        }
+        return buffer;
+    }
+
+    size_t size() const {
+        return sizeof(cycles) +          // int类型的大小
+               sizeof(T) * BUFFER_SIZE;  // 一维数组的大小
+    }
 };
 
 template <typename T>
@@ -57,6 +72,21 @@ class BasicInputBlock<T, 2> {
         }
         std::cout << std::endl;
     };
+
+    virtual std::string serialize_data() const {
+        std::string buffer;
+        buffer += std::to_string(this->cycles);
+        for (int i = 0; i < BUFFER_SIZE; i++) {
+            for (int j = 0; j < 8; j++) {
+                buffer += std::to_string(this->input[i][j]);
+            }
+        }
+        return buffer;
+    }
+    size_t size() const {
+        return sizeof(cycles) +              // int类型的大小
+               sizeof(T) * BUFFER_SIZE * 8;  // 一维数组的大小
+    }
 };
 
 class BoolBlock : public BasicInputBlock<unsigned char, 2> {};

@@ -1,7 +1,6 @@
 start         = bigblocks
 bigblocks     = bigblock | bigblocks bigblock
-bigblock      = blocks
-blocks        = bool_block byte_block int_block dint_block lint_block int_mem_block dint_mem_block
+bigblock      = bool_block byte_block int_block dint_block lint_block int_mem_block dint_mem_block
 bool_block        = header 64_w8numbers
 byte_block        = header 8_w8numbers
 int_block        = header 8_w16numbers
