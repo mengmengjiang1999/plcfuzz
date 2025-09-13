@@ -24,7 +24,7 @@ $ make
 
 
 -T 参数表示的是制定输出文件的路径
-./iec2c -T ./buildfiles xxx.st 
+./iec2c -T ./plclogic xxx.st 
 
 现在要想顺利跑起来，缺了一个文件：beremiz.h这个文件。但是不知道这个文件是从哪里来的，现在只能先复制过来
 
@@ -36,8 +36,8 @@ CC=gcc CXX=g++
 
 CC=afl-clang-fast CXX=afl-clang-fast++ 
 
-g++ -std=gnu++11 -I ./lib -c ./buildfiles/Config0.c -lasiodnp3 -lasiopal -lopendnp3 -lopenpal -w
-g++ -std=gnu++11 -I ./lib -c ./buildfiles/Res0.c -lasiodnp3 -lasiopal -lopendnp3 -lopenpal -w $ETHERCAT_INC
+g++ -std=gnu++11 -I ./lib -c ./plclogic/Config0.c -lasiodnp3 -lasiopal -lopendnp3 -lopenpal -w
+g++ -std=gnu++11 -I ./lib -c ./plclogic/Res0.c -lasiodnp3 -lasiopal -lopendnp3 -lopenpal -w $ETHERCAT_INC
 echo "Generating glueVars..."
 ./glue_generator
 echo "Compiling main program..."

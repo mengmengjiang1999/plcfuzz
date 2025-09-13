@@ -1,0 +1,1 @@
+./build_plcfiles.sh ./testcases/race_bug.st
