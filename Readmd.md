@@ -12,60 +12,26 @@ $ autoreconf -i
 $ ./configure
 $ make
 
-如果这个过程需要插入模糊测试，那么第二句变成：
 
-./configure CC=afl-clang-fast CXX=afl-clang-fast++
+## PLC到C++的运行脚本和输出脚本
 
+1. build_plc_to_c.sh
+这个脚本将plc代码编译成C代码。编译的过程中需要修改脚本，指定到底要编译哪个文件。
 
-然后得到的./iec2c 二进制文件，就是可以将plc源代码编译成C代码的工具。
+2. build_plcfiles.sh
+实际运行的将plc代码编译成C代码的脚本。编译出来的C代码会放在./plclogic文件夹下
 
+3. build_shared_library.sh
+这个脚本将plc的自定义变异策略（放在文件夹./fuzz_config下面）编译成一个共享库。
+主要使用了本文件夹下的CMakeLists.txt文件，和./fuzz_config文件夹下的CMakeLists.txt文件。
 
-将plc源代码编译成C代码
+4. build.sh
+使用方法：
+./build.sh 不插桩的方法build放在./plclogic文件夹下的plc的C代码
+./build.sh -f 插桩的方法来build放在./plclogic文件夹下的plc的C代码
 
+5. run.sh
+普通地运行一下生成的未插桩的可执行文件。
 
--T 参数表示的是制定输出文件的路径
-./iec2c -T ./plclogic xxx.st 
-
-现在要想顺利跑起来，缺了一个文件：beremiz.h这个文件。但是不知道这个文件是从哪里来的，现在只能先复制过来
-
-使用AFL-Fuzz编译这段代码
-
-% 当然，如果不想要AFL-Fuzz，可以直接用gcc编译，就不需要加上下面这句话了。
-
-CC=gcc CXX=g++
-
-CC=afl-clang-fast CXX=afl-clang-fast++ 
-
-g++ -std=gnu++11 -I ./lib -c ./plclogic/Config0.c -lasiodnp3 -lasiopal -lopendnp3 -lopenpal -w
-g++ -std=gnu++11 -I ./lib -c ./plclogic/Res0.c -lasiodnp3 -lasiopal -lopendnp3 -lopenpal -w $ETHERCAT_INC
-echo "Generating glueVars..."
-./glue_generator
-echo "Compiling main program..."
-g++ -std=gnu++11  *.cpp *.o -o openplc -I ./lib -I ./buildfiles/ -pthread -fpermissive `pkg-config --cflags --libs libmodbus` -lasiodnp3 -lasiopal -lopendnp3 -lopenpal -w $ETHERCAT_INC
-echo "Compilation finished successfully!"
-
-
-<!-- 注意：下面这一段需要用到sudo权限。主要的 -->
-
-./openplc < input.txt  > output.txt
-
-说明：glue_generator是用来生成glueVars的，如果没有glueVars.cpp这个文件，可以先运行一下./glue_generator。
-这个文件也是OpenPLC中预先提供的，不需要自己写，而且也不需要进入fuzz变异流程
-
-
-<!-- 下面这一段，如果是用afl-fuzz编译，的话，需要设置一些变量然后运行模糊测试程序 -->
-export AFL_DEBUG=1 
-exportAFL_QEMU_DEBUG_MAPS=1
-export AFL_SKIP_CPUFREQ=1
-export AFL_SKIP_BIN_CHECK=1
-export AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1
-export AFL_MAP_SIZE=10000000
-AFL_AUTORESUME=1
-afl-fuzz -i ~/Project/fuzzbuild/plcfuzz/seeds -o ~/Project/fuzzbuild/plcfuzz/output -- ./openplc @@
-
-(加入-Q指令的话可以在QEMU模式下做模糊测试)
-
-<!-- 如果不是通过afl-fuzz编译，那么可以直接运行./openplc 进行测试 -->
-
-
-这里直接使用了iec2c和iec2iec的二进制文件。因为没有修改OpenPLC的源码，所以不用重新编译，使用二进制文件可以加快编译速度。
+6. run_fuzz.sh
+运行插桩过后的可执行文件。脚本已写好，链接共享库，使用自定义的变异策略。
