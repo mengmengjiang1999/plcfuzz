@@ -43,7 +43,7 @@ BufferHistory::BufferHistory() {
 
 // 这个函数需要在每次更新输入的时候调用一下
 void BufferHistory::updateBoolHistory(IEC_BOOL *(*input)[8], IEC_BOOL *(*output)[8]) {
-    // std::cout << "updateBoolHistory called." << std::endl;
+    std::cout << "updateBoolHistory called." << std::endl;
     // update input and output history
     for (size_t i = 0; i < BUFFER_SIZE; i++) {
         for (size_t j = 0; j < 8; j++) {
@@ -52,6 +52,7 @@ void BufferHistory::updateBoolHistory(IEC_BOOL *(*input)[8], IEC_BOOL *(*output)
         }
     }
     current_index_bool_input = (current_index_bool_input + 1) % MAX_RESULTS;
+    std::cout << "BufferHistory::updateBoolHistory end" << std::endl;
 }
 
 // void BufferHistory::updateByteHistory(IEC_BYTE *input, IEC_BYTE *output) {

@@ -11,11 +11,21 @@ class BasicInputBlock : public SuperBasicInputBlock {
    public:
     int cycles;
     T input[BUFFER_SIZE];
-    BasicInputBlock() = default;
+    BasicInputBlock() {
+        cycles = 0;
+        for (int i = 0; i < BUFFER_SIZE; i++) {
+            input[i] = 0;
+        }
+    }
     friend std::istream& operator>>(std::istream& is, BasicInputBlock<T, Dim>& obj) {
         is >> obj.cycles;
+        std::cout << "cycles=" << obj.cycles << std::endl;
         for (int i = 0; i < BUFFER_SIZE; i++) {
-            is >> obj.input[i];
+            uint64_t tmp;
+            is >> tmp;
+            obj.input[i] = (T)tmp;
+            std::cout << "i=" << i << " tmp=" << tmp << std::endl;
+            std::cout << "i=" << i << " input=" << obj.input[i] << std::endl;
         }
         return is;
     }
@@ -47,17 +57,25 @@ class BasicInputBlock<T, 2> {
    public:
     int cycles;
     T input[BUFFER_SIZE][8];
-    BasicInputBlock() = default;
-    friend std::istream& operator>>(std::istream& is, BasicInputBlock<T, 2>& obj) {
-        is >> obj.cycles;
+    BasicInputBlock() {
+        cycles = 0;
         for (int i = 0; i < BUFFER_SIZE; i++) {
             for (int j = 0; j < 8; j++) {
-                uint32_t tmp;
-                is >> tmp;
-                obj.input[i][j] = (T)tmp;
+                input[i][j] = 0;
             }
-            //     is >> obj.input[i][j];
-            // }
+        }
+    }
+    friend std::istream& operator>>(std::istream& is, BasicInputBlock<T, 2>& obj) {
+        is >> obj.cycles;
+        std::cout << "cycles=" << obj.cycles << std::endl;
+        for (int i = 0; i < BUFFER_SIZE; i++) {
+            for (int j = 0; j < 8; j++) {
+                uint64_t tmp;
+                is >> tmp;
+                std::cout << "i=" << i << " j=" << j << " tmp=" << tmp << std::endl;
+                obj.input[i][j] = (T)tmp;
+                std::cout << "i=" << i << " j=" << j << " input=" << obj.input[i][j] << std::endl;
+            }
         }
         return is;
     }
@@ -66,7 +84,7 @@ class BasicInputBlock<T, 2> {
         std::cout << "cycles: " << cycles << std::endl;
         for (int i = 0; i < BUFFER_SIZE; i++) {
             for (int j = 0; j < 8; j++) {
-                std::cout << (uint32_t)input[i][j] << " ";
+                std::cout << (uint64_t)input[i][j] << " ";
             }
             std::cout << std::endl;
         }

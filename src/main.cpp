@@ -38,6 +38,7 @@
 #include "input_data_simulator.h"
 #include "ladder.h"
 #include "plc_input_block.h"
+#include "plc_input_simulator.h"
 #ifdef _ethercat_src
 #include "ethercat_src.h"
 #endif
@@ -219,13 +220,16 @@ u_int64_t *lint_input_call_back(int a) { return lint_input[a]; }
 u_int64_t *lint_output_call_back(int a) { return lint_output[a]; }
 void logger_callback(char *msg) { log(msg); }
 
-InputDataSimulator<BoolBlock> INPUT_BOOL_DATA;
-InputDataSimulator<ByteBlock> INPUT_BYTE_DATA;
-InputDataSimulator<IntBlock> INPUT_INT_DATA;
-InputDataSimulator<DIntBlock> INPUT_DINT_DATA;
-InputDataSimulator<LIntBlock> INPUT_LINT_DATA;
-InputDataSimulator<IntMemoryBlock> INPUT_INT_MEM_DATA;
-InputDataSimulator<DIntMemoryBlock> INPUT_DINT_MEM_DATA;
+// InputDataSimulator<PLCInputBlock> INPUT_PLC_DATA;
+
+// InputDataSimulator<BoolBlock> INPUT_BOOL_DATA;
+// InputDataSimulator<ByteBlock> INPUT_BYTE_DATA;
+// InputDataSimulator<IntBlock> INPUT_INT_DATA;
+// InputDataSimulator<DIntBlock> INPUT_DINT_DATA;
+// InputDataSimulator<LIntBlock> INPUT_LINT_DATA;
+// InputDataSimulator<IntMemoryBlock> INPUT_INT_MEM_DATA;
+// InputDataSimulator<DIntMemoryBlock> INPUT_DINT_MEM_DATA;
+PLCInputSimulator INPUT_PLC_DATA;
 
 int main(int argc, char **argv) {
     // Define the max/min/avg/total cycle and latency variables used in REAL-TIME computation(in nanoseconds)
@@ -243,61 +247,65 @@ int main(int argc, char **argv) {
     sprintf(log_msg, "OpenPLC Runtime starting...\n");
     log(log_msg);
 
-    BoolBlock input_bool_block;
-    ByteBlock input_byte_block;
-    IntBlock input_int_block;
-    DIntBlock input_dint_block;
-    LIntBlock input_lint_block;
-    IntMemoryBlock input_int_mem_block;
-    DIntMemoryBlock input_dint_mem_block;
+    PLCInputBlock input_plc_block;
+
+    // BoolBlock input_bool_block;
+    // ByteBlock input_byte_block;
+    // IntBlock input_int_block;
+    // DIntBlock input_dint_block;
+    // LIntBlock input_lint_block;
+    // IntMemoryBlock input_int_mem_block;
+    // DIntMemoryBlock input_dint_mem_block;
     int cnt_blocks = 0;
-    std::cin >> input_bool_block >> input_byte_block >> input_int_block >> input_dint_block >> input_lint_block >>
-        input_int_mem_block >> input_dint_mem_block;
+    // std::cin >> input_bool_block >> input_byte_block >> input_int_block >> input_dint_block >> input_lint_block >>
+    //     input_int_mem_block >> input_dint_mem_block;
+    std::cin >> input_plc_block;
+
     printf("Block 1: \n");
     cnt_blocks++;
-    input_bool_block.print();
-    input_byte_block.print();
-    input_int_block.print();
-    input_dint_block.print();
-    input_lint_block.print();
-    input_int_mem_block.print();
-    input_dint_mem_block.print();
-    INPUT_BOOL_DATA.add_block(input_bool_block);
-    INPUT_BYTE_DATA.add_block(input_byte_block);
-    INPUT_INT_DATA.add_block(input_int_block);
-    INPUT_DINT_DATA.add_block(input_dint_block);
-    INPUT_LINT_DATA.add_block(input_lint_block);
-    INPUT_INT_MEM_DATA.add_block(input_int_mem_block);
-    INPUT_DINT_MEM_DATA.add_block(input_dint_mem_block);
+    // input_bool_block.print();
+    // input_byte_block.print();
+    // input_int_block.print();
+    // input_dint_block.print();
+    // input_lint_block.print();
+    // input_int_mem_block.print();
+    // input_dint_mem_block.print();
+    input_plc_block.print();
+    // INPUT_BOOL_DATA.add_block(input_bool_block);
+    // INPUT_BYTE_DATA.add_block(input_byte_block);
+    // INPUT_INT_DATA.add_block(input_int_block);
+    // INPUT_DINT_DATA.add_block(input_dint_block);
+    // INPUT_LINT_DATA.add_block(input_lint_block);
+    // INPUT_INT_MEM_DATA.add_block(input_int_mem_block);
+    // INPUT_DINT_MEM_DATA.add_block(input_dint_mem_block);
+    INPUT_PLC_DATA.add_block(input_plc_block);
 
     while (true) {
         std::cout << "before input...." << cnt_blocks << ":\n";
-        if (std::cin >> input_bool_block >> input_byte_block >> input_int_block >> input_dint_block >> input_lint_block >>
-            input_int_mem_block >> input_dint_mem_block) {
+        // if (std::cin >> input_bool_block >> input_byte_block >> input_int_block >> input_dint_block >> input_lint_block >>
+        //     input_int_mem_block >> input_dint_mem_block)
+        if (std::cin >> input_plc_block) {
+            cnt_blocks++;
             std::cout << "Block " << cnt_blocks << ":\n";
             std::cout << std::endl;
-            cnt_blocks++;
-            input_bool_block.print();
-            input_byte_block.print();
-            input_int_block.print();
-            input_dint_block.print();
-            input_lint_block.print();
-            input_int_mem_block.print();
-            input_dint_mem_block.print();
-            INPUT_BOOL_DATA.add_block(input_bool_block);
-            INPUT_BYTE_DATA.add_block(input_byte_block);
-            INPUT_DINT_DATA.add_block(input_dint_block);
-            INPUT_INT_DATA.add_block(input_int_block);
-            INPUT_LINT_DATA.add_block(input_lint_block);
-            INPUT_INT_MEM_DATA.add_block(input_int_mem_block);
-            INPUT_DINT_MEM_DATA.add_block(input_dint_mem_block);
+            input_plc_block.print();
+            INPUT_PLC_DATA.add_block(input_plc_block);
         } else {
             std::cout << "End of input stream\n";
             break;
         }
     }
 
+    uint64_t tmp;
+    while (true) {
+        if (std::cin >> tmp) {
+            std::cout << tmp << std::endl;
+        } else {
+            break;
+        }
+    }
     printf("Total blocks: %d\n", cnt_blocks);
+    // return 0;
 
     //======================================================
     //                 PLC INITIALIZATION
@@ -477,10 +485,8 @@ int main(int argc, char **argv) {
     if (checkOutputChange()) {
         // todo:最后一次执行updateBufferOut的时候，会将outputBuffer的值清空。所以在做比较的时候不应该计入最后一次。
         std::cout << "Racing bug detected, shutting down OpenPLC Runtime...\n" << std::endl;
-        // throw std::runtime_error("Output change detected, shutting down OpenPLC Runtime...");
 
         // 这里是手动指定了一个会crash的点来使得其产生crash
-        // exit(1);
         char *crash = NULL;
         crash[0] = 1;
     } else {

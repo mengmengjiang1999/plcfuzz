@@ -26,18 +26,22 @@
 //-----------------------------------------------------------------------------
 
 #include <pthread.h>
+// #include <spdlog/spdlog.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include <iostream>
 
 #include "crash_check.h"
 #include "custom_layer.h"
-#include "input_data_simulator.h"
 #include "ladder.h"
+#include "plc_input_simulator.h"
 
 static BufferHistory bool_history;
+
+extern PLCInputSimulator INPUT_PLC_DATA;
 
 // static BufferHistory output_history;
 
@@ -62,16 +66,34 @@ void initializeHardware() {
         }
     }
 
+    memset(byte_input, 0, BUFFER_SIZE * sizeof(IEC_BYTE));
+    memset(int_input, 0, BUFFER_SIZE * sizeof(IEC_UINT));
+    memset(dint_input, 0, BUFFER_SIZE * sizeof(IEC_UDINT));
+    memset(lint_input, 0, BUFFER_SIZE * sizeof(IEC_ULINT));
+
+    memset(int_memory, 0, BUFFER_SIZE * sizeof(IEC_UINT));
+    memset(dint_memory, 0, BUFFER_SIZE * sizeof(IEC_UDINT));
+    memset(lint_memory, 0, BUFFER_SIZE * sizeof(IEC_ULINT));
+    memset(bool_input, 0, BUFFER_SIZE * 8 * sizeof(IEC_BOOL));
+
+    // initialize bool output buffer
+
     for (int i = 0; i < BUFFER_SIZE; i++) {
         byte_output[i] = new IEC_BYTE;
         int_output[i] = new IEC_UINT;
         dint_output[i] = new IEC_UDINT;
         lint_output[i] = new IEC_ULINT;
-        
+
         for (int j = 0; j < 8; j++) {
             bool_output[i][j] = new IEC_BOOL;
         }
     }
+
+    memset(byte_output, 0, BUFFER_SIZE * sizeof(IEC_BYTE));
+    memset(int_output, 0, BUFFER_SIZE * sizeof(IEC_UINT));
+    memset(dint_output, 0, BUFFER_SIZE * sizeof(IEC_UDINT));
+    memset(lint_output, 0, BUFFER_SIZE * sizeof(IEC_ULINT));
+    memset(bool_output, 0, BUFFER_SIZE * 8 * sizeof(IEC_BOOL));
 
     bool_history.updateBoolHistory(bool_input, bool_output);
 }
@@ -151,8 +173,8 @@ void updateBuffersIn() {
     **************************************************/
 
     // 总之就是获得下一个cycle的模拟版的输入数据，并且将其写入到bool_input，模拟这是通过外设输入的数据
-    BoolBlock boolblock = INPUT_BOOL_DATA.get_current_block();
-    ByteBlock byteblock = INPUT_BYTE_DATA.get_current_block();
+    BoolBlock boolblock = INPUT_PLC_DATA.get_current_block().input_bool_block;
+    ByteBlock byteblock = INPUT_PLC_DATA.get_current_block().input_byte_block;
     for (int i = 0; i < BUFFER_SIZE; i++) {
         for (int j = 0; j < 8; j++) {
             *bool_input[i][j] = (IEC_BOOL)boolblock.input[i][j];
@@ -201,4 +223,8 @@ void updateBuffersOut() {
     // printf("end update output values\n");
 }
 
-bool checkOutputChange() { return bool_history.checkChange(); }
+bool checkOutputChange() {
+    // spdlog::info("Checking output change");
+    std::cout << "Checking output change" << std::endl;
+    return bool_history.checkChange();
+}
