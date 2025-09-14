@@ -34,6 +34,7 @@
 #include <stdexcept>  // 包含标准异常类
 
 #include "basic_input_block.h"
+#include "buffer_history.h"
 #include "iec_types.h"
 #include "input_data_simulator.h"
 #include "ladder.h"

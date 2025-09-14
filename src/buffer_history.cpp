@@ -1,4 +1,4 @@
-#include "crash_check.h"
+#include "buffer_history.h"
 
 // 具体的话，我在ladder里面定义一个数据结构，存储最近10个周期的输出
 // 如果最近100个周期的输出在不停地变动，那么就认为程序产生了崩溃

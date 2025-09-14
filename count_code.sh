@@ -1,0 +1,1 @@
+cloc ./src ./include --csv --include-lang="C,C++,C/C++ Header" -by-file
