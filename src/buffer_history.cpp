@@ -5,113 +5,77 @@
 
 // 这个函数需要在每次plccycle的时候都记录
 // 调用地点在hardware_layer.cpp这里
-BufferHistory::BufferHistory() {
-    std::cout << "InputHistory constructor called." << std::endl;
-    current_index_bool_input = 0;
-    current_index_byte = 0;
-    for (int i = 0; i < BUFFER_SIZE; i++) {
-        for (int j = 0; j < 8; j++) {
-            for (int k = 0; k < MAX_RESULTS; k++) {
-                buffer_bool_input[i][j][k] = new IEC_BOOL;
-                buffer_bool_output[i][j][k] = new IEC_BOOL;
-            }
-        }
-        for (int k = 0; k < MAX_RESULTS; k++) {
-            byte_input_history[i][k] = new IEC_BYTE;
-            byte_output_history[i][k] = new IEC_BYTE;
-        }
-        for (int k = 0; k < MAX_RESULTS; k++) {
-            int_input_history[i][k] = new IEC_UINT;
-            int_output_history[i][k] = new IEC_UINT;
-        }
-        for (int k = 0; k < MAX_RESULTS; k++) {
-            dint_input_history[i][k] = new IEC_UDINT;
-            dint_output_history[i][k] = new IEC_UDINT;
-        }
+BufferHistory::BufferHistory() { std::cout << "InputHistory constructor called." << std::endl; }
 
-        for (int k = 0; k < MAX_RESULTS; k++) {
-            lint_input_history[i][k] = new IEC_ULINT;
-            lint_output_history[i][k] = new IEC_ULINT;
-        }
-        for (int k = 0; k < MAX_RESULTS; k++) {
-            int_memory_history[i][k] = new IEC_UINT;
-            dint_memory_history[i][k] = new IEC_UDINT;
-        }
-    }
-    // this->printHistory();
-}
-
-// 这个函数需要在每次更新输入的时候调用一下
-void BufferHistory::updateBoolHistory(IEC_BOOL *(*input)[8], IEC_BOOL *(*output)[8]) {
-    std::cout << "updateBoolHistory called." << std::endl;
-    // update input and output history
-    for (size_t i = 0; i < BUFFER_SIZE; i++) {
-        for (size_t j = 0; j < 8; j++) {
-            *buffer_bool_input[i][j][current_index_bool_input] = *input[i][j];
-            *buffer_bool_output[i][j][current_index_bool_input] = *output[i][j];
-        }
-    }
-    current_index_bool_input = (current_index_bool_input + 1) % MAX_RESULTS;
-    std::cout << "BufferHistory::updateBoolHistory end" << std::endl;
-}
-
-// void BufferHistory::updateByteHistory(IEC_BYTE *input, IEC_BYTE *output) {
-//     // update input and output history
-//     for (size_t i = 0; i < BUFFER_SIZE; i++) {
-//         *byte_input_history[i][current_index_byte] = *input;
-//         *byte_output_history[i][current_index_byte] = *output;
-//     }
-//     current_index_byte = (current_index_byte + 1) % MAX_RESULTS;
+// // 这个函数需要在每次更新输入的时候调用一下
+// void BufferHistory::updateBoolHistory(IEC_BOOL *(*input)[8], IEC_BOOL *(*output)[8]) {
+//     std::cout << "updateBoolHistory called." << std::endl;
+//     this->bool_history.update_history(input, output);
 // }
 
-bool BufferHistory::checkChange() {
-    // check crash
-    int change_count = 0;
-    for (size_t i = 1; i < MAX_RESULTS; i++) {
-        bool is_crash = false;
-        for (size_t j = 0; j < 8; j++) {
-            for (size_t k = 0; k < BUFFER_SIZE; k++) {
-                if (*buffer_bool_output[k][j][i] != *buffer_bool_output[k][j][i - 1]) {
-                    is_crash = true;
-                    break;
-                }
-            }
-            if (is_crash) {
-                break;
-            }
-        }
-        if (is_crash) {
-            change_count++;
-        }
-    }
-    // this->printHistory();
-    if (change_count > 0) {
-        // std::cout << "Change detected!" <<change_count<< std::endl;
-        return true;
-    } else {
-        // std::cout << "No change detected." << std::endl;
-        return false;
-    }
+void BufferHistory::updateBoolHistory(IEC_BOOL *bool_input[BUFFER_SIZE][8], IEC_BOOL *bool_output[BUFFER_SIZE][8]) {
+    std::cout << "updateBoolHistory called." << std::endl;
+    this->bool_history.update_history(bool_input, bool_output);
+}
+
+void BufferHistory::updateByteHistory(IEC_BYTE *input[8], IEC_BYTE *output[8]) {
+    std::cout << "updateByteHistory called." << std::endl;
+    this->byte_history.update_history(input, output);
+}
+
+void BufferHistory::updateIntHistory(IEC_UINT *input[8], IEC_UINT *output[8]) {
+    std::cout << "updateIntHistory called." << std::endl;
+    this->int_history.update_history(input, output);
+}
+
+void BufferHistory::updateDintHistory(IEC_UDINT *input[8], IEC_UDINT *output[8]) {
+    std::cout << "updateDintHistory called." << std::endl;
+    this->dint_history.update_history(input, output);
+}
+
+void BufferHistory::updateLintHistory(IEC_ULINT *input[8], IEC_ULINT *output[8]) {
+    std::cout << "updateLintHistory called." << std::endl;
+    this->lint_history.update_history(input, output);
+}
+
+void BufferHistory::updateIntMemoryHistory(IEC_UINT *input[8], IEC_UINT *output[8]) {
+    std::cout << "updateIntMemoryHistory called." << std::endl;
+    this->int_memory_history.update_history(input, output);
+}
+
+void BufferHistory::updateDintMemoryHistory(IEC_UDINT *input[8], IEC_UDINT *output[8]) {
+    std::cout << "updateDintMemoryHistory called." << std::endl;
+    this->dint_memory_history.update_history(input, output);
+}
+
+void BufferHistory::updateHistory(IEC_BOOL *bool_input[BUFFER_SIZE][8], IEC_BOOL *bool_output[BUFFER_SIZE][8],
+                                  IEC_BYTE *input_byte[8], IEC_BYTE *output_byte[8], IEC_UINT *input_int[8],
+                                  IEC_UINT *output_int[8], IEC_UDINT *input_dint[8], IEC_UDINT *output_dint[8],
+                                  IEC_ULINT *input_lint[8], IEC_ULINT *output_lint[8], IEC_UINT *input_int_memory[8],
+                                  IEC_UINT *output_int_memory[8], IEC_UDINT *input_dint_memory[8],
+                                  IEC_UDINT *output_dint_memory[8]) {
+    this->updateBoolHistory(bool_input, bool_output);
+    this->updateByteHistory(input_byte, output_byte);
+    this->updateIntHistory(input_int, output_int);
+    this->updateDintHistory(input_dint, output_dint);
+    this->updateLintHistory(input_lint, output_lint);
+    this->updateIntMemoryHistory(input_int_memory, output_int_memory);
+    this->updateDintMemoryHistory(input_dint_memory, output_dint_memory);
+}
+
+bool BufferHistory::checkChange() {  // 里面有一个不稳定的就会报错
+    return this->bool_history.check_change() || this->byte_history.check_change() || this->int_history.check_change() ||
+           this->dint_history.check_change() || this->lint_history.check_change() || this->int_memory_history.check_change() ||
+           this->dint_memory_history.check_change();
 }
 
 void BufferHistory::printHistory() {
-    // print history
-    for (size_t k = 0; k < MAX_RESULTS; k++) {
-        std::cout << "Cycle: " << k << std::endl;
-        std::cout << "input: " << std::endl;
-        for (size_t i = 0; i < BUFFER_SIZE; i++) {
-            for (size_t j = 0; j < 8; j++) {
-                std::cout << int(*buffer_bool_input[i][j][k]) << " ";
-            }
-            std::cout << std::endl;
-        }
-        std::cout << "output:" << std::endl;
-        for (size_t i = 0; i < BUFFER_SIZE; i++) {
-            for (size_t j = 0; j < 8; j++) {
-                std::cout << int(*buffer_bool_output[i][j][k]) << " ";
-            }
-            std::cout << std::endl;
-        }
-        std::cout << std::endl;
-    }
+    std::cout << "BufferHistory::printHistory()" << std::endl;
+    this->bool_history.print_history();
+    this->byte_history.print_history();
+    this->int_history.print_history();
+    this->dint_history.print_history();
+    this->lint_history.print_history();
+    this->int_memory_history.print_history();
+    this->dint_memory_history.print_history();
 }

@@ -39,7 +39,7 @@
 #include "ladder.h"
 #include "plc_input_simulator.h"
 
-static BufferHistory bool_history;
+static BufferHistory io_history;
 
 extern PLCInputSimulator INPUT_PLC_DATA;
 
@@ -95,7 +95,7 @@ void initializeHardware() {
     memset(lint_output, 0, BUFFER_SIZE * sizeof(IEC_ULINT));
     memset(bool_output, 0, BUFFER_SIZE * 8 * sizeof(IEC_BOOL));
 
-    bool_history.updateBoolHistory(bool_input, bool_output);
+    io_history.updateBoolHistory(bool_input, bool_output);
 }
 
 //-----------------------------------------------------------------------------
@@ -149,11 +149,6 @@ void updateBuffersIn(int t) {
         }
     }
 
-    // bool_history.updateBoolHistory(bool_input,bool_output);
-    // bool_history.printHistory();
-
-    // showInput();
-
     pthread_mutex_unlock(&bufferLock);  // unlock mutex
 }
 
@@ -162,30 +157,24 @@ void updateBuffersIn() {
     // printf("Get input values:\n");
     pthread_mutex_lock(&bufferLock);  // lock mutex
 
-    /*********READING AND WRITING TO I/O**************
-
-    *bool_input[0][0] = read_digital_input(0);
-    write_digital_output(0, *bool_output[0][0]);
-
-    *int_input[0] = read_analog_input(0);
-    write_analog_output(0, *int_output[0]);
-
-    **************************************************/
-
     // 总之就是获得下一个cycle的模拟版的输入数据，并且将其写入到bool_input，模拟这是通过外设输入的数据
     BoolBlock boolblock = INPUT_PLC_DATA.get_current_block().input_bool_block;
     ByteBlock byteblock = INPUT_PLC_DATA.get_current_block().input_byte_block;
+    DIntBlock intblock = INPUT_PLC_DATA.get_current_block().input_dint_block;
+    LIntBlock lintblock = INPUT_PLC_DATA.get_current_block().input_lint_block;
+    IntMemoryBlock intmemblock = INPUT_PLC_DATA.get_current_block().input_int_mem_block;
+    DIntMemoryBlock dintmemblock = INPUT_PLC_DATA.get_current_block().input_dint_mem_block;
     for (int i = 0; i < BUFFER_SIZE; i++) {
         for (int j = 0; j < 8; j++) {
             *bool_input[i][j] = (IEC_BOOL)boolblock.input[i][j];
-            *byte_input[i] = (IEC_BYTE)byteblock.input[i];
         }
+        *byte_input[i] = (IEC_BYTE)byteblock.input[i];
+        *int_input[i] = (IEC_UINT)intblock.input[i];
+        *dint_input[i] = (IEC_UDINT)intblock.input[i];
+        *lint_input[i] = (IEC_ULINT)lintblock.input[i];
+        *int_memory[i] = (IEC_UINT)intmemblock.input[i];
+        *dint_memory[i] = (IEC_UDINT)dintmemblock.input[i];
     }
-
-    // bool_history.updateBoolHistory(bool_input,bool_output);
-    // bool_history.printHistory();
-
-    // showInput();
 
     pthread_mutex_unlock(&bufferLock);  // unlock mutex
 }
@@ -197,34 +186,19 @@ void updateBuffersIn() {
 //-----------------------------------------------------------------------------
 void updateBuffersOut() {
     // printf("update output values:\n");
+    std::cout << "UpdateBuffersOut :\n";
     pthread_mutex_lock(&bufferLock);  // lock mutex
 
-    // printf("in mutex output values\n");
-
-    /*********READING AND WRITING TO I/O**************
-
-    *bool_input[0][0] = read_digital_input(0);
-    write_digital_output(0, *bool_output[0][0]);
-
-    *int_input[0] = read_analog_input(0);
-    write_analog_output(0, *int_output[0]);
-
-    **************************************************/
-
-    // showInput();
-
-    bool_history.updateBoolHistory(bool_input, bool_output);
-    // bool_history.printHistory();
-
-    // printf("out mutex output values\n");
+    // 经过程序执行，output这些数组里面已经存了本周期的运行结果。
+    // 此时将output这些数组里面的内容给保存到当前的BufferHistory里面，以便于后续进行进一步的比较
+    // io_history.updateHistory(bool_input, bool_output, byte_input, byte_output, int_input, int_output, dint_input, dint_output,
+    //                          lint_input, lint_output, int_memory, int_memory, dint_memory, dint_memory);
+    io_history.updateBoolHistory(bool_input, bool_output);
 
     pthread_mutex_unlock(&bufferLock);  // unlock mutex
-
-    // printf("end update output values\n");
 }
 
 bool checkOutputChange() {
-    // spdlog::info("Checking output change");
     std::cout << "Checking output change" << std::endl;
-    return bool_history.checkChange();
+    return io_history.checkChange();
 }

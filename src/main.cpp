@@ -439,8 +439,6 @@ int main(int argc, char **argv) {
 
         updateTime();
 
-        // printf("23232333\n");
-
         // Get the end time for the running cycle
         clock_gettime(CLOCK_MONOTONIC, &cycle_end);
         // Compute the time usage in one cycle and do max/min/total comparison/recording

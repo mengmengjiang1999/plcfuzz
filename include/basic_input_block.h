@@ -111,11 +111,11 @@ class BoolBlock : public BasicInputBlock<unsigned char, 2> {};
 
 class ByteBlock : public BasicInputBlock<IEC_BYTE, 1> {};
 
-class IntBlock : public BasicInputBlock<IEC_INT, 1> {};
+class IntBlock : public BasicInputBlock<IEC_UINT, 1> {};
 
-class DIntBlock : public BasicInputBlock<IEC_DINT, 1> {};
+class DIntBlock : public BasicInputBlock<IEC_UDINT, 1> {};
 
-class LIntBlock : public BasicInputBlock<IEC_LINT, 1> {};
+class LIntBlock : public BasicInputBlock<IEC_ULINT, 1> {};
 
 class IntMemoryBlock : public BasicInputBlock<IEC_UINT, 1> {};
 
