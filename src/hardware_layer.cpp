@@ -66,15 +66,18 @@ void initializeHardware() {
         }
     }
 
-    memset(byte_input, 0, BUFFER_SIZE * sizeof(IEC_BYTE));
-    memset(int_input, 0, BUFFER_SIZE * sizeof(IEC_UINT));
-    memset(dint_input, 0, BUFFER_SIZE * sizeof(IEC_UDINT));
-    memset(lint_input, 0, BUFFER_SIZE * sizeof(IEC_ULINT));
-
-    memset(int_memory, 0, BUFFER_SIZE * sizeof(IEC_UINT));
-    memset(dint_memory, 0, BUFFER_SIZE * sizeof(IEC_UDINT));
-    memset(lint_memory, 0, BUFFER_SIZE * sizeof(IEC_ULINT));
-    memset(bool_input, 0, BUFFER_SIZE * 8 * sizeof(IEC_BOOL));
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+        for (int j = 0; j < 8; j++) {
+            *bool_input[i][j] = 0;
+        }
+        *byte_input[i] = 0;
+        *int_input[i] = 0;
+        *dint_input[i] = 0;
+        *lint_input[i] = 0;
+        *int_memory[i] = 0;
+        *dint_memory[i] = 0;
+        *lint_memory[i] = 0;
+    }
 
     // initialize bool output buffer
 
@@ -89,11 +92,23 @@ void initializeHardware() {
         }
     }
 
-    memset(byte_output, 0, BUFFER_SIZE * sizeof(IEC_BYTE));
-    memset(int_output, 0, BUFFER_SIZE * sizeof(IEC_UINT));
-    memset(dint_output, 0, BUFFER_SIZE * sizeof(IEC_UDINT));
-    memset(lint_output, 0, BUFFER_SIZE * sizeof(IEC_ULINT));
-    memset(bool_output, 0, BUFFER_SIZE * 8 * sizeof(IEC_BOOL));
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+        for (int j = 0; j < 8; j++) {
+            *bool_output[i][j] = 0;
+        }
+        *byte_output[i] = 0;
+        *int_output[i] = 0;
+        *dint_output[i] = 0;
+        *lint_output[i] = 0;
+    }
+
+    std::cout << "Initializing hardware layer done." << std::endl;
+
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+        for (int j = 0; j < 8; j++) {
+            printf("bool_input[%d][%d] = %p\n", i, j, bool_input[i][j]);
+        }
+    }
 
     io_history.updateBoolHistory(bool_input, bool_output);
 }
