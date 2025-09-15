@@ -15,7 +15,7 @@ class BasicBufferHistory : public SuperBasicBufferHistory {
     T buffer_input[BUFFER_SIZE][MAX_RESULTS];
     T buffer_output[BUFFER_SIZE][MAX_RESULTS];
     BasicBufferHistory() {
-        std::cout << "BasicBufferHistory<T, " << Dim << ">::BasicBufferHistory() called." << std::endl;
+        // std::cout << "BasicBufferHistory<T, " << Dim << ">::BasicBufferHistory() called." << std::endl;
         for (int i = 0; i < BUFFER_SIZE; i++) {
             for (int j = 0; j < MAX_RESULTS; j++) {
                 buffer_input[i][j] = 0;
@@ -24,10 +24,7 @@ class BasicBufferHistory : public SuperBasicBufferHistory {
         }
     }
     void update_history(T *input[BUFFER_SIZE], T *output[BUFFER_SIZE]) {
-        std::cout << "BasicBufferHistory<T, " << Dim << ">::update_history() called." << std::endl;
-        std::cout << "index = " << index << std::endl;
-        std::cout << "input address = " << input << std::endl;
-        std::cout << "output address = " << output << std::endl;
+        // std::cout << "BasicBufferHistory<T, " << Dim << ">::update_history() called." << std::endl;
         for (int i = 0; i < BUFFER_SIZE; i++) {
             buffer_input[i][index] = *input[i];
             buffer_output[i][index] = *output[i];
@@ -35,7 +32,7 @@ class BasicBufferHistory : public SuperBasicBufferHistory {
         index = (index + 1) % MAX_RESULTS;
     }
     bool check_change() {
-        std::cout << "BasicBufferHistory<T, Dim>::check_change() called." << std::endl;
+        // std::cout << "BasicBufferHistory<T, Dim>::check_change() called." << std::endl;
         int change_count = 0;
         for (size_t i = 1; i < MAX_RESULTS; i++) {
             bool is_crash = false;
@@ -75,7 +72,7 @@ class BasicBufferHistory<T, 2> : public SuperBasicBufferHistory {
     T buffer_input[BUFFER_SIZE][8][MAX_RESULTS];
     T buffer_output[BUFFER_SIZE][8][MAX_RESULTS];
     BasicBufferHistory() {
-        std::cout << "BasicBufferHistory<T, 2>::BasicBufferHistory() called." << std::endl;
+        // std::cout << "BasicBufferHistory<T, 2>::BasicBufferHistory() called." << std::endl;
         for (int i = 0; i < BUFFER_SIZE; i++) {
             for (int j = 0; j < 8; j++) {
                 for (int k = 0; k < MAX_RESULTS; k++) {
@@ -86,14 +83,8 @@ class BasicBufferHistory<T, 2> : public SuperBasicBufferHistory {
         }
     }
     void update_history(T *bool_input[BUFFER_SIZE][8], T *bool_output[BUFFER_SIZE][8]) {
-        std::cout << "BasicBufferHistory<T, 2>::updateHistory() called." << std::endl;
-        std::cout << "index = " << index << std::endl;
-        std::cout << "bool_input address = " << bool_input << std::endl;
-        std::cout << "bool_output address = " << bool_output << std::endl;
         buffer_input[0][0][index] = 60;
         buffer_output[0][0][index] = 60;
-        std::cout << "buffer_input[0][0][index] = " << buffer_input[0][0][index] << std::endl;
-        std::cout << "buffer_output[0][0][index] = " << buffer_output[0][0][index] << std::endl;
         for (int i = 0; i < BUFFER_SIZE; i++) {
             for (int j = 0; j < 8; j++) {
                 buffer_input[i][j][index] = *bool_input[i][j];
@@ -102,19 +93,6 @@ class BasicBufferHistory<T, 2> : public SuperBasicBufferHistory {
         }
         index = (index + 1) % MAX_RESULTS;
     }
-    // void update_history(T *(*input)[BUFFER_SIZE], T *(*output)[BUFFER_SIZE]) {
-    //     std::cout << "BasicBufferHistory<T, 2>::update_history() called." << std::endl;
-    //     std::cout << "index = " << index << std::endl;
-    //     std::cout << "input address = " << input << std::endl;
-    //     std::cout << "output address = " << output << std::endl;
-    //     for (int i = 0; i < BUFFER_SIZE; i++) {
-    //         for (int j = 0; j < 8; j++) {
-    //             buffer_input[i][j][index] = input[i][j];
-    //             buffer_output[i][j][index] = output[i][j];
-    //         }
-    //     }
-    //     index = (index + 1) % MAX_RESULTS;
-    // }
     bool check_change() {
         int change_count = 0;
         for (size_t i = 1; i < MAX_RESULTS; i++) {

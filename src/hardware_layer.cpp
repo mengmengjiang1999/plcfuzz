@@ -110,7 +110,9 @@ void initializeHardware() {
         }
     }
 
-    io_history.updateBoolHistory(bool_input, bool_output);
+    io_history.updateHistory(bool_input, bool_output, byte_input, byte_output, int_input, int_output, dint_input, dint_output,
+                             lint_input, lint_output, int_memory, int_memory, dint_memory, dint_memory);
+    // io_history.updateBoolHistory(bool_input, bool_output);
 }
 
 //-----------------------------------------------------------------------------
@@ -206,9 +208,9 @@ void updateBuffersOut() {
 
     // 经过程序执行，output这些数组里面已经存了本周期的运行结果。
     // 此时将output这些数组里面的内容给保存到当前的BufferHistory里面，以便于后续进行进一步的比较
-    // io_history.updateHistory(bool_input, bool_output, byte_input, byte_output, int_input, int_output, dint_input, dint_output,
-    //                          lint_input, lint_output, int_memory, int_memory, dint_memory, dint_memory);
-    io_history.updateBoolHistory(bool_input, bool_output);
+    io_history.updateHistory(bool_input, bool_output, byte_input, byte_output, int_input, int_output, dint_input, dint_output,
+                             lint_input, lint_output, int_memory, int_memory, dint_memory, dint_memory);
+    // io_history.updateBoolHistory(bool_input, bool_output);
 
     pthread_mutex_unlock(&bufferLock);  // unlock mutex
 }

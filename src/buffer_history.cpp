@@ -14,37 +14,37 @@ BufferHistory::BufferHistory() { std::cout << "InputHistory constructor called."
 // }
 
 void BufferHistory::updateBoolHistory(IEC_BOOL *bool_input[BUFFER_SIZE][8], IEC_BOOL *bool_output[BUFFER_SIZE][8]) {
-    std::cout << "updateBoolHistory called." << std::endl;
+    // std::cout << "updateBoolHistory called." << std::endl;
     this->bool_history.update_history(bool_input, bool_output);
 }
 
 void BufferHistory::updateByteHistory(IEC_BYTE *input[8], IEC_BYTE *output[8]) {
-    std::cout << "updateByteHistory called." << std::endl;
+    // std::cout << "updateByteHistory called." << std::endl;
     this->byte_history.update_history(input, output);
 }
 
 void BufferHistory::updateIntHistory(IEC_UINT *input[8], IEC_UINT *output[8]) {
-    std::cout << "updateIntHistory called." << std::endl;
+    // std::cout << "updateIntHistory called." << std::endl;
     this->int_history.update_history(input, output);
 }
 
 void BufferHistory::updateDintHistory(IEC_UDINT *input[8], IEC_UDINT *output[8]) {
-    std::cout << "updateDintHistory called." << std::endl;
+    // std::cout << "updateDintHistory called." << std::endl;
     this->dint_history.update_history(input, output);
 }
 
 void BufferHistory::updateLintHistory(IEC_ULINT *input[8], IEC_ULINT *output[8]) {
-    std::cout << "updateLintHistory called." << std::endl;
+    // std::cout << "updateLintHistory called." << std::endl;
     this->lint_history.update_history(input, output);
 }
 
 void BufferHistory::updateIntMemoryHistory(IEC_UINT *input[8], IEC_UINT *output[8]) {
-    std::cout << "updateIntMemoryHistory called." << std::endl;
+    // std::cout << "updateIntMemoryHistory called." << std::endl;
     this->int_memory_history.update_history(input, output);
 }
 
 void BufferHistory::updateDintMemoryHistory(IEC_UDINT *input[8], IEC_UDINT *output[8]) {
-    std::cout << "updateDintMemoryHistory called." << std::endl;
+    // std::cout << "updateDintMemoryHistory called." << std::endl;
     this->dint_memory_history.update_history(input, output);
 }
 
@@ -70,7 +70,7 @@ bool BufferHistory::checkChange() {  // 里面有一个不稳定的就会报错
 }
 
 void BufferHistory::printHistory() {
-    std::cout << "BufferHistory::printHistory()" << std::endl;
+    // std::cout << "BufferHistory::printHistory()" << std::endl;
     this->bool_history.print_history();
     this->byte_history.print_history();
     this->int_history.print_history();

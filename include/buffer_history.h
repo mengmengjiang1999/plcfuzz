@@ -7,6 +7,15 @@
 // Booleans
 
 class BufferHistory {
+   private:
+    void updateBoolHistory(IEC_BOOL *bool_input[BUFFER_SIZE][8], IEC_BOOL *bool_output[BUFFER_SIZE][8]);
+    void updateByteHistory(IEC_BYTE *input[8], IEC_BYTE *output[8]);
+    void updateIntHistory(IEC_UINT *input[8], IEC_UINT *output[8]);
+    void updateDintHistory(IEC_UDINT *input[8], IEC_UDINT *output[8]);
+    void updateLintHistory(IEC_ULINT *input[8], IEC_ULINT *output[8]);
+    void updateIntMemoryHistory(IEC_UINT *input[8], IEC_UINT *output[8]);
+    void updateDintMemoryHistory(IEC_UDINT *input[8], IEC_UDINT *output[8]);
+
    public:
     BoolBufferHistory bool_history;
     ByteBufferHistory byte_history;
@@ -17,18 +26,12 @@ class BufferHistory {
     DIntMemoryBufferHistory dint_memory_history;
 
     BufferHistory();
-    void updateHistory(IEC_BOOL *bool_input[BUFFER_SIZE][8], IEC_BOOL *bool_output[BUFFER_SIZE][8], IEC_BYTE *input_byte[8], IEC_BYTE *output_byte[8],
-                       IEC_UINT *input_int[8], IEC_UINT *output_int[8], IEC_UDINT *input_dint[8], IEC_UDINT *output_dint[8],
-                       IEC_ULINT *input_lint[8], IEC_ULINT *output_lint[8], IEC_UINT *input_int_memory[8],
-                       IEC_UINT *output_int_memory[8], IEC_UDINT *input_dint_memory[8], IEC_UDINT *output_dint_memory[8]);
-    // void updateBoolHistory(IEC_BOOL *(*input)[8], IEC_BOOL *(*output)[8]);
-    void updateBoolHistory(IEC_BOOL *bool_input[BUFFER_SIZE][8], IEC_BOOL *bool_output[BUFFER_SIZE][8]);
-    void updateByteHistory(IEC_BYTE *input[8], IEC_BYTE *output[8]);
-    void updateIntHistory(IEC_UINT *input[8], IEC_UINT *output[8]);
-    void updateDintHistory(IEC_UDINT *input[8], IEC_UDINT *output[8]);
-    void updateLintHistory(IEC_ULINT *input[8], IEC_ULINT *output[8]);
-    void updateIntMemoryHistory(IEC_UINT *input[8], IEC_UINT *output[8]);
-    void updateDintMemoryHistory(IEC_UDINT *input[8], IEC_UDINT *output[8]);
+    void updateHistory(IEC_BOOL *bool_input[BUFFER_SIZE][8], IEC_BOOL *bool_output[BUFFER_SIZE][8], IEC_BYTE *input_byte[8],
+                       IEC_BYTE *output_byte[8], IEC_UINT *input_int[8], IEC_UINT *output_int[8], IEC_UDINT *input_dint[8],
+                       IEC_UDINT *output_dint[8], IEC_ULINT *input_lint[8], IEC_ULINT *output_lint[8],
+                       IEC_UINT *input_int_memory[8], IEC_UINT *output_int_memory[8], IEC_UDINT *input_dint_memory[8],
+                       IEC_UDINT *output_dint_memory[8]);
+
     bool checkChange();
     void printHistory();
 };
