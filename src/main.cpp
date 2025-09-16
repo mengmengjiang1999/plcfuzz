@@ -29,6 +29,7 @@
 #include <sys/mman.h>
 #include <time.h>
 #include <unistd.h>
+#include <chrono>
 
 #include <iostream>
 #include <sstream>
@@ -246,27 +247,6 @@ int main(int argc, char **argv) {
     sprintf(log_msg, "OpenPLC Runtime starting...\n");
     log(log_msg);
 
-    // // 一次性读取所有输入到字符串
-    // std::string input_data;
-    // char ch;
-    // while (std::cin.get(ch)) {  // 逐字符读取，直到EOF
-    //     input_data += ch;
-    // }
-    // // 检查是否成功读取输入
-    // if (input_data.empty()) {
-    //     std::cerr << "No input data received!" << std::endl;
-    //     return 1;
-    // }
-
-    // // 将输入数据包装成 stream
-    // std::istringstream input_stream(input_data);
-
-    // if (isatty(fileno(stdin))) {
-    //     printf("Input is from a terminal\n");
-    // } else {
-    //     printf("Input is from a pipe/file (AFL++ mode)\n");
-    // }
-
     if (argc < 2) {
         printf("Usage: %s <input_file>\n", argv[0]);
         return 1;
@@ -298,89 +278,34 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    // 打印读取结果（前 64 字节，避免终端爆炸）
-    printf("Read %zu bytes (showing first 64 bytes):\n", bytes_read);
-    for (size_t i = 0; i < bytes_read && i < 64; i++) {
-        printf("%02x ", buffer[i]);
-        if ((i + 1) % 16 == 0)
-            printf("\n");  // 每 16 字节换行
-    }
-    printf("\n");
+    // 将字节数据转换为字符串流
+    std::string input_str(reinterpret_cast<char *>(buffer), bytes_read);
 
     free(buffer);  // 释放缓冲区
-    return 0;
 
-    // std::vector<char> buffer;
-    // int ch;
+    // std::cout << input_str << std::endl;
+    std::istringstream input_stream(input_str);
 
-    // ch = getchar();
-    // if (ch != EOF) {
-    //     buffer.push_back(static_cast<char>(ch));
-    // }
+    // std::cout << "out" << std::endl;
 
-    // // 逐字节读取直到 EOF
-    // while ((ch = getchar()) != EOF) {
-    //     buffer.push_back(static_cast<char>(ch));
-    // }
-
-    // if (buffer.empty()) {
-    //     std::cerr << "No input data received!" << std::endl;
-    //     return 1;
-    // }
-
-    // 将数据包装成 stream（可选）
-    // std::istringstream input_stream(std::string(buffer.data(), buffer.size()));
-
-    // uint64_t tmp;
-    // while (input_stream >> tmp) {
-    //     std::cout << tmp << " ";
-    //     std::cout.flush();
-    // }
-    // std::cout << "before end" << std::endl;
-    return 0;
     PLCInputBlock input_plc_block;
 
-    // BoolBlock input_bool_block;
-    // ByteBlock input_byte_block;
-    // IntBlock input_int_block;
-    // DIntBlock input_dint_block;
-    // LIntBlock input_lint_block;
-    // IntMemoryBlock input_int_mem_block;
-    // DIntMemoryBlock input_dint_mem_block;
     int cnt_blocks = 0;
-    // std::cin >> input_bool_block >> input_byte_block >> input_int_block >> input_dint_block >> input_lint_block >>
-    //     input_int_mem_block >> input_dint_mem_block;
-    std::cin >> input_plc_block;
+    input_stream >> input_plc_block;
 
     printf("Block 1: \n");
     cnt_blocks++;
     // input_plc_block.print();
     INPUT_PLC_DATA.add_block(input_plc_block);
 
-    while (true) {
-        // std::cout << "before input...." << cnt_blocks << ":\n";
-        // if (std::cin >> input_bool_block >> input_byte_block >> input_int_block >> input_dint_block >> input_lint_block >>
-        //     input_int_mem_block >> input_dint_mem_block)
-        if (std::cin >> input_plc_block) {
-            cnt_blocks++;
-            // std::cout << "Block " << cnt_blocks << ":\n";
-            // std::cout << std::endl;
-            // input_plc_block.print();
-            INPUT_PLC_DATA.add_block(input_plc_block);
-        } else {
-            std::cout << "End of input stream\n";
-            break;
-        }
+    while (input_stream >> input_plc_block) {
+        cnt_blocks++;
+        // std::cout << "Block " << cnt_blocks << ":\n";
+        INPUT_PLC_DATA.add_block(input_plc_block);
     }
 
-    // uint64_t tmp;
-    // while (true) {
-    //     if (std::cin >> tmp) {
-    //         std::cout << tmp << std::endl;
-    //     } else {
-    //         break;
-    //     }
-    // }
+    std::cout << "Read end. Total blocks: %d\n" << cnt_blocks << std::endl;
+
     printf("Total blocks: %d\n", cnt_blocks);
     // return 0;
 

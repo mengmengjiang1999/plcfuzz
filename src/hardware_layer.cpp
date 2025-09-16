@@ -104,17 +104,12 @@ void initializeHardware() {
 
     std::cout << "Initializing hardware layer done." << std::endl;
 
+    // std::cout<<"bool_input"<<std::endl;
     // for (int i = 0; i < BUFFER_SIZE; i++) {
     //     for (int j = 0; j < 8; j++) {
-    //         printf("bool_input[%d][%d] = %p\n", i, j, bool_input[i][j]);
-    //     }
+    //         std::cout<<static_cast<uint32_t>(*bool_input[i][j])<<" ";
+    //     }std::cout<<std::endl;
     // }
-    std::cout<<"bool_input"<<std::endl;
-    for (int i = 0; i < BUFFER_SIZE; i++) {
-        for (int j = 0; j < 8; j++) {
-            std::cout<<static_cast<uint32_t>(*bool_input[i][j])<<" ";
-        }std::cout<<std::endl;
-    }
 
     io_history.updateHistory(bool_input, bool_output, byte_input, byte_output, int_input, int_output, dint_input, dint_output,
                              lint_input, lint_output, int_memory, int_memory, dint_memory, dint_memory);

@@ -72,7 +72,7 @@ class BasicInputBlock<T, 2> {
             for (int j = 0; j < 8; j++) {
                 uint64_t tmp;
                 is >> tmp;
-                std::cout << "i=" << i << " j=" << j << " tmp=" << tmp << std::endl;
+                // std::cout << "i=" << i << " j=" << j << " tmp=" << tmp << std::endl;
                 obj.input[i][j] = (T)tmp;
                 // std::cout << "i=" << i << " j=" << j << " input=" << obj.input[i][j] << std::endl;
             }

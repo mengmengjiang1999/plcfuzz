@@ -14,7 +14,7 @@ class PLCInputBlock {
     IntMemoryBlock input_int_mem_block;
     DIntMemoryBlock input_dint_mem_block;
     friend std::istream& operator>>(std::istream& is, PLCInputBlock& plc_input_block) {
-        std::cin >> plc_input_block.input_bool_block >> plc_input_block.input_byte_block >> plc_input_block.input_int_block >>
+        is >> plc_input_block.input_bool_block >> plc_input_block.input_byte_block >> plc_input_block.input_int_block >>
             plc_input_block.input_dint_block >> plc_input_block.input_lint_block >> plc_input_block.input_int_mem_block >>
             plc_input_block.input_dint_mem_block;
         return is;
