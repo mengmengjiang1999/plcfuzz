@@ -64,6 +64,14 @@ void BufferHistory::updateHistory(IEC_BOOL *bool_input[BUFFER_SIZE][8], IEC_BOOL
 }
 
 bool BufferHistory::checkChange() {  // 里面有一个不稳定的就会报错
+    std::cout << "BufferHistory::checkChange()" << std::endl;
+    std::cout << "bool_history.check_change():" << this->bool_history.check_change() << std::endl;
+    std::cout << "byte_history.check_change():" << this->byte_history.check_change() << std::endl;
+    std::cout << "int_history.check_change():" << this->int_history.check_change() << std::endl;
+    std::cout << "dint_history.check_change():" << this->dint_history.check_change() << std::endl;
+    std::cout << "lint_history.check_change():" << this->lint_history.check_change() << std::endl;
+    std::cout << "int_memory_history.check_change():" << this->int_memory_history.check_change() << std::endl;
+    std::cout << "dint_memory_history.check_change():" << this->dint_memory_history.check_change() << std::endl;
     return this->bool_history.check_change() || this->byte_history.check_change() || this->int_history.check_change() ||
            this->dint_history.check_change() || this->lint_history.check_change() || this->int_memory_history.check_change() ||
            this->dint_memory_history.check_change();

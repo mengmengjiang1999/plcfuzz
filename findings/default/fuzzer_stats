@@ -1,0 +1,45 @@
+start_time        : 1757999172
+last_update       : 1757999173
+run_time          : 0
+fuzzer_pid        : 1264372
+cycles_done       : 0
+cycles_wo_finds   : 0
+time_wo_finds     : 0
+execs_done        : 824
+execs_per_sec     : 934.24
+execs_ps_last_min : 0.00
+corpus_count      : 10
+corpus_favored    : 1
+corpus_found      : 7
+corpus_imported   : 0
+corpus_variable   : 0
+max_depth         : 3
+cur_item          : 3
+pending_favs      : 0
+pending_total     : 6
+stability         : 100.00%
+bitmap_cvg        : 5.16%
+saved_crashes     : 0
+saved_hangs       : 0
+last_find         : 1757999173
+last_crash        : 0
+last_hang         : 0
+execs_since_crash : 824
+exec_timeout      : 10000
+slowest_exec_ms   : 0
+peak_rss_mb       : 4
+cpu_affinity      : 0
+edges_found       : 109
+total_edges       : 2113
+var_byte_count    : 0
+havoc_expansion   : 0
+auto_dict_entries : 0
+testcache_size    : 1990
+testcache_count   : 10
+testcache_evict   : 0
+afl_banner        : ./openplc_fuzz
+afl_version       : ++4.10c
+target_mode       : shmem_testcase default
+command_line      : afl-fuzz -t 10000 -i seeds/ -o findings/ -- ./openplc_fuzz @@
+virgin_bytes     : 1199[fe] 1200[df] 1201[fe] 1253[fe] 1254[fe] 1259[fe] 1260[81] 1261[81] 1262[f0] 1263[81] 1264[fe] 1272[fe] 1273[fe] 1274[fe] 1275[fe] 1276[fe] 1277[fe] 1320[fe] 1321[fe] 1323[fe] 1324[fe] 1325[fe] 1326[fe] 1328[fe] 1329[fe] 1330[fe] 1331[fe] 1333[fe] 1336[fe] 1337[fe] 1338[fe] 1339[fe] 1341[fe] 1342[fe] 1343[fe] 1344[fe] 1346[fe] 1347[fe] 1348[fe] 1349[fe] 1351[fe] 1354[fe] 1355[fe] 1356[fe] 1357[fe] 1359[fe] 1360[fe] 1361[fe] 1362[fe] 1364[fe] 1365[fe] 1366[fe] 1367[fe] 1369[fe] 1372[fe] 1373[fe] 1374[fe] 1375[fe] 1377[fe] 1378[fe] 1379[fe] 1380[fe] 1382[fe] 1383[fe] 1384[fe] 1385[fe] 1387[fe] 1390[fe] 1391[fe] 1392[fe] 1393[fe] 1395[fe] 1396[fe] 1397[fe] 1398[fe] 1400[fe] 1401[fe] 1402[fe] 1403[fe] 1405[fe] 1408[fe] 1409[fe] 1410[fe] 1411[fe] 1413[fe] 1414[fe] 1415[fe] 1416[fe] 1418[fe] 1419[fe] 1420[fe] 1421[fe] 1423[fe] 1426[fe] 1427[fe] 1428[fe] 1429[fe] 1430[fe] 1432[fe] 1433[fe] 1434[fe] 1435[fe] 1437[fe] 1438[fe] 1439[fe] 1440[fe] 1442[fe] 1445[fe] 1446[fe]
+var_bytes        :

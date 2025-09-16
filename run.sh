@@ -1,1 +1,1 @@
-./openplc < ./terminaloutput/input.txt  > ./terminaloutput/output.txt
+./openplc ./terminaloutput/input.txt  > ./terminaloutput/output.txt

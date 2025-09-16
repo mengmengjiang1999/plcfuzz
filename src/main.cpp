@@ -31,6 +31,7 @@
 #include <unistd.h>
 
 #include <iostream>
+#include <sstream>
 #include <stdexcept>  // 包含标准异常类
 
 #include "basic_input_block.h"
@@ -126,7 +127,7 @@ void log(char *logmsg) {
 // Interactive Server Thread. Creates the server to listen to commands on
 // localhost
 //-----------------------------------------------------------------------------
-void *interactiveServerThread(void *arg) { startInteractiveServer(43628); }
+// void *interactiveServerThread(void *arg) { startInteractiveServer(43628); }
 
 //-----------------------------------------------------------------------------
 // Verify if pin is present in one of the ignored vectors
@@ -221,18 +222,15 @@ u_int64_t *lint_input_call_back(int a) { return lint_input[a]; }
 u_int64_t *lint_output_call_back(int a) { return lint_output[a]; }
 void logger_callback(char *msg) { log(msg); }
 
-// InputDataSimulator<PLCInputBlock> INPUT_PLC_DATA;
-
-// InputDataSimulator<BoolBlock> INPUT_BOOL_DATA;
-// InputDataSimulator<ByteBlock> INPUT_BYTE_DATA;
-// InputDataSimulator<IntBlock> INPUT_INT_DATA;
-// InputDataSimulator<DIntBlock> INPUT_DINT_DATA;
-// InputDataSimulator<LIntBlock> INPUT_LINT_DATA;
-// InputDataSimulator<IntMemoryBlock> INPUT_INT_MEM_DATA;
-// InputDataSimulator<DIntMemoryBlock> INPUT_DINT_MEM_DATA;
 PLCInputSimulator INPUT_PLC_DATA;
 
+#define BUFFER_SIZE (1 << 20)  // 1MB = 1024 * 1024 bytes
+
 int main(int argc, char **argv) {
+    // 禁用缓冲（确保数据立即刷新）
+    setvbuf(stdin, NULL, _IONBF, 0);
+    setvbuf(stdout, NULL, _IONBF, 0);
+
     // Define the max/min/avg/total cycle and latency variables used in REAL-TIME computation(in nanoseconds)
     printf("Initializing variables for REAL-TIME computation\n");
     long cycle_avg, cycle_max, cycle_min, cycle_total;
@@ -248,6 +246,98 @@ int main(int argc, char **argv) {
     sprintf(log_msg, "OpenPLC Runtime starting...\n");
     log(log_msg);
 
+    // // 一次性读取所有输入到字符串
+    // std::string input_data;
+    // char ch;
+    // while (std::cin.get(ch)) {  // 逐字符读取，直到EOF
+    //     input_data += ch;
+    // }
+    // // 检查是否成功读取输入
+    // if (input_data.empty()) {
+    //     std::cerr << "No input data received!" << std::endl;
+    //     return 1;
+    // }
+
+    // // 将输入数据包装成 stream
+    // std::istringstream input_stream(input_data);
+
+    // if (isatty(fileno(stdin))) {
+    //     printf("Input is from a terminal\n");
+    // } else {
+    //     printf("Input is from a pipe/file (AFL++ mode)\n");
+    // }
+
+    if (argc < 2) {
+        printf("Usage: %s <input_file>\n", argv[0]);
+        return 1;
+    }
+
+    // 从文件读取输入
+    FILE *file = fopen(argv[1], "rb");
+    if (!file) {
+        printf("Failed to open input file!\n");
+        return 1;
+    }
+
+    // 分配 1MB 缓冲区并初始化为 0
+    unsigned char *buffer = (unsigned char *)malloc(BUFFER_SIZE);
+    if (!buffer) {
+        fprintf(stderr, "Failed to allocate memory!\n");
+        fclose(file);
+        return 1;
+    }
+    memset(buffer, 0, BUFFER_SIZE);  // 可选：清零缓冲区
+
+    // 读取文件内容
+    size_t bytes_read = fread(buffer, 1, BUFFER_SIZE, file);
+    fclose(file);  // 立即关闭文件
+
+    if (bytes_read == 0) {
+        fprintf(stderr, "No data read from file!\n");
+        free(buffer);
+        return 1;
+    }
+
+    // 打印读取结果（前 64 字节，避免终端爆炸）
+    printf("Read %zu bytes (showing first 64 bytes):\n", bytes_read);
+    for (size_t i = 0; i < bytes_read && i < 64; i++) {
+        printf("%02x ", buffer[i]);
+        if ((i + 1) % 16 == 0)
+            printf("\n");  // 每 16 字节换行
+    }
+    printf("\n");
+
+    free(buffer);  // 释放缓冲区
+    return 0;
+
+    // std::vector<char> buffer;
+    // int ch;
+
+    // ch = getchar();
+    // if (ch != EOF) {
+    //     buffer.push_back(static_cast<char>(ch));
+    // }
+
+    // // 逐字节读取直到 EOF
+    // while ((ch = getchar()) != EOF) {
+    //     buffer.push_back(static_cast<char>(ch));
+    // }
+
+    // if (buffer.empty()) {
+    //     std::cerr << "No input data received!" << std::endl;
+    //     return 1;
+    // }
+
+    // 将数据包装成 stream（可选）
+    // std::istringstream input_stream(std::string(buffer.data(), buffer.size()));
+
+    // uint64_t tmp;
+    // while (input_stream >> tmp) {
+    //     std::cout << tmp << " ";
+    //     std::cout.flush();
+    // }
+    // std::cout << "before end" << std::endl;
+    return 0;
     PLCInputBlock input_plc_block;
 
     // BoolBlock input_bool_block;
@@ -264,32 +354,18 @@ int main(int argc, char **argv) {
 
     printf("Block 1: \n");
     cnt_blocks++;
-    // input_bool_block.print();
-    // input_byte_block.print();
-    // input_int_block.print();
-    // input_dint_block.print();
-    // input_lint_block.print();
-    // input_int_mem_block.print();
-    // input_dint_mem_block.print();
-    input_plc_block.print();
-    // INPUT_BOOL_DATA.add_block(input_bool_block);
-    // INPUT_BYTE_DATA.add_block(input_byte_block);
-    // INPUT_INT_DATA.add_block(input_int_block);
-    // INPUT_DINT_DATA.add_block(input_dint_block);
-    // INPUT_LINT_DATA.add_block(input_lint_block);
-    // INPUT_INT_MEM_DATA.add_block(input_int_mem_block);
-    // INPUT_DINT_MEM_DATA.add_block(input_dint_mem_block);
+    // input_plc_block.print();
     INPUT_PLC_DATA.add_block(input_plc_block);
 
     while (true) {
-        std::cout << "before input...." << cnt_blocks << ":\n";
+        // std::cout << "before input...." << cnt_blocks << ":\n";
         // if (std::cin >> input_bool_block >> input_byte_block >> input_int_block >> input_dint_block >> input_lint_block >>
         //     input_int_mem_block >> input_dint_mem_block)
         if (std::cin >> input_plc_block) {
             cnt_blocks++;
-            std::cout << "Block " << cnt_blocks << ":\n";
-            std::cout << std::endl;
-            input_plc_block.print();
+            // std::cout << "Block " << cnt_blocks << ":\n";
+            // std::cout << std::endl;
+            // input_plc_block.print();
             INPUT_PLC_DATA.add_block(input_plc_block);
         } else {
             std::cout << "End of input stream\n";
@@ -297,14 +373,14 @@ int main(int argc, char **argv) {
         }
     }
 
-    uint64_t tmp;
-    while (true) {
-        if (std::cin >> tmp) {
-            std::cout << tmp << std::endl;
-        } else {
-            break;
-        }
-    }
+    // uint64_t tmp;
+    // while (true) {
+    //     if (std::cin >> tmp) {
+    //         std::cout << tmp << std::endl;
+    //     } else {
+    //         break;
+    //     }
+    // }
     printf("Total blocks: %d\n", cnt_blocks);
     // return 0;
 
@@ -393,7 +469,7 @@ int main(int argc, char **argv) {
     //======================================================
     // while(run_openplc)
     for (int i = 0; i < 100; i++) {
-        printf("Main loop iteration %d\n", i);
+        // printf("Main loop iteration %d\n", i);
         // Get the start time for the running cycle
         // printf("Getting current time...main loop\n");
         clock_gettime(CLOCK_MONOTONIC, &cycle_start);
