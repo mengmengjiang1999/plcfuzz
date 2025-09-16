@@ -16,3 +16,4 @@ openplc
 *.original
 *.txt
 !**/CMakeLists.txt
+findings/
