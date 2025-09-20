@@ -19,13 +19,11 @@ class BasicInputBlock : public SuperBasicInputBlock {
     }
     friend std::istream& operator>>(std::istream& is, BasicInputBlock<T, Dim>& obj) {
         is >> obj.cycles;
-        // std::cout << "cycles=" << obj.cycles << std::endl;
+
         for (int i = 0; i < BUFFER_SIZE; i++) {
             uint64_t tmp;
             is >> tmp;
             obj.input[i] = (T)tmp;
-            // std::cout << "i=" << i << " tmp=" << tmp << std::endl;
-            // std::cout << "i=" << i << " input=" << obj.input[i] << std::endl;
         }
         return is;
     }
