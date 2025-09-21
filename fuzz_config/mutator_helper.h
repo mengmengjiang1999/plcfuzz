@@ -82,21 +82,21 @@ bool parse_plc_data(const uint8_t *data, size_t size, std::vector<PLCInputBlock>
             // 7. 解析IntBlock
             if (remaining_size < new_block.input_int_block.size())
                 break;
-            parse_basic_block<IEC_INT, 1>(current_pos, new_block.input_int_block);
+            parse_basic_block<IEC_UINT, 1>(current_pos, new_block.input_int_block);
             current_pos += new_block.input_int_block.size();
             remaining_size -= new_block.input_int_block.size();
 
             // 8. 解析DIntBlock
             if (remaining_size < new_block.input_dint_block.size())
                 break;
-            parse_basic_block<IEC_DINT, 1>(current_pos, new_block.input_dint_block);
+            parse_basic_block<IEC_UDINT, 1>(current_pos, new_block.input_dint_block);
             current_pos += new_block.input_dint_block.size();
             remaining_size -= new_block.input_dint_block.size();
 
             // 9. 解析LIntBlock
             if (remaining_size < new_block.input_lint_block.size())
                 break;
-            parse_basic_block<IEC_LINT, 1>(current_pos, new_block.input_lint_block);
+            parse_basic_block<IEC_ULINT, 1>(current_pos, new_block.input_lint_block);
             current_pos += new_block.input_lint_block.size();
             remaining_size -= new_block.input_lint_block.size();
 

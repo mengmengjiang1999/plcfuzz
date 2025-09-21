@@ -5,9 +5,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <fstream>
 #include <random>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -26,46 +24,6 @@ size_t afl_custom_fuzz(void *data, uint8_t *buf, size_t buf_size, uint8_t **out_
 void afl_custom_deinit(void *data);
 }
 
-// 变量映射结构体
-struct VariableMapping {
-    std::string var_type;
-    int array_index;
-    int bit_index;  // 仅布尔类型使用
-    std::string var_name;
-};
-
-// 全局变量映射表
-std::vector<VariableMapping> plc_variable_mappings;
-
-// 加载PLC变量映射表
-void load_plc_variable_mappings(const char *csv_file) {
-    std::ifstream file(csv_file);
-    if (!file.is_open())
-        return;
-
-    std::string line;
-    // 跳过标题行
-    std::getline(file, line);
-
-    while (std::getline(file, line)) {
-        std::stringstream ss(line);
-        VariableMapping mapping;
-
-        std::getline(ss, mapping.var_type, ',');
-        std::string temp;
-
-        std::getline(ss, temp, ',');
-        mapping.array_index = std::stoi(temp);
-
-        std::getline(ss, temp, ',');
-        mapping.bit_index = temp.empty() ? -1 : std::stoi(temp);
-
-        std::getline(ss, mapping.var_name, ',');
-
-        plc_variable_mappings.push_back(mapping);
-    }
-}
-
 // 变异器状态
 class MutatorState {
    private:
@@ -73,12 +31,11 @@ class MutatorState {
     unsigned int seed;
     std::mt19937 rng;
     std::vector<PLCInputBlock> seed_cache;
+
     int mutation_rate_ = 50;
 
    public:
-    MutatorState(afl_state_t *afl_ptr, unsigned int s) : afl(afl_ptr), seed(s), rng(s) {
-        load_plc_variable_mappings("plc_variables_mapping.csv");
-    }
+    MutatorState(afl_state_t *afl_ptr, unsigned int s) : afl(afl_ptr), seed(s), rng(s) {}
 
     int mutation_rate() { return mutation_rate_; }
 
@@ -94,17 +51,6 @@ class MutatorState {
             return nullptr;
         std::uniform_int_distribution<size_t> dist(0, seed_cache.size() - 1);
         return &seed_cache[dist(rng)];
-    }
-
-    // 检查是否需要变异该变量
-    bool should_mutate(const std::string &var_type, int array_idx, int bit_idx = -1) {
-        for (const auto &mapping : plc_variable_mappings) {
-            if (mapping.var_type == var_type && mapping.array_index == array_idx &&
-                (bit_idx == -1 || mapping.bit_index == bit_idx)) {
-                return true;
-            }
-        }
-        return false;
     }
 };
 
@@ -158,10 +104,9 @@ void mutate_cycles(PLCInputBlock &block, MutatorState *state) {
 void mutate_bool_block(BasicInputBlock<unsigned char, 2> &block, MutatorState *state) {
     for (int i = 0; i < BUFFER_SIZE; ++i) {
         for (int j = 0; j < 8; ++j) {
-            if (state->should_mutate("bool_inputs", i, j)) {
-                if (random() % 100 < state->mutation_rate()) {
-                    block.input[i][j] = !block.input[i][j];
-                }
+            if (random() % 100 < state->mutation_rate()) {
+                // 布尔值直接取反
+                block.input[i][j] = !block.input[i][j];
             }
         }
     }
@@ -170,7 +115,7 @@ void mutate_bool_block(BasicInputBlock<unsigned char, 2> &block, MutatorState *s
 // ByteBlock专用变异策略
 void mutate_byte_block(BasicInputBlock<IEC_BYTE, 1> &block, MutatorState *state) {
     for (int i = 0; i < BUFFER_SIZE; ++i) {
-        if (state->should_mutate("byte_inputs", i) && random() % 100 < state->mutation_rate()) {
+        if (random() % 100 < state->mutation_rate()) {
             // 字节级变异：位翻转、增减小量、随机值
             switch (random() % 3) {
                 case 0:
@@ -190,7 +135,7 @@ void mutate_byte_block(BasicInputBlock<IEC_BYTE, 1> &block, MutatorState *state)
 // IntBlock专用变异策略
 void mutate_int_block(BasicInputBlock<IEC_INT, 1> &block, MutatorState *state) {
     for (int i = 0; i < BUFFER_SIZE; ++i) {
-        if (state->should_mutate("int_inputs", i) && random() % 100 < state->mutation_rate()) {
+        if (random() % 100 < state->mutation_rate()) {
             // 针对整数的更复杂变异
             switch (random() % 4) {
                 case 0:
@@ -213,7 +158,7 @@ void mutate_int_block(BasicInputBlock<IEC_INT, 1> &block, MutatorState *state) {
 // DIntBlock专用变异策略（32位）
 void mutate_dint_block(BasicInputBlock<IEC_DINT, 1> &block, MutatorState *state) {
     for (int i = 0; i < BUFFER_SIZE; ++i) {
-        if (state->should_mutate("dint_inputs", i) && random() % 100 < state->mutation_rate()) {
+        if (random() % 100 < state->mutation_rate()) {
             switch (random() % 5) {
                 case 0:
                     block.input[i] ^= (1 << (random() % 32));
@@ -238,7 +183,7 @@ void mutate_dint_block(BasicInputBlock<IEC_DINT, 1> &block, MutatorState *state)
 // LIntBlock专用变异策略（64位）
 void mutate_lint_block(BasicInputBlock<IEC_LINT, 1> &block, MutatorState *state) {
     for (int i = 0; i < BUFFER_SIZE; ++i) {
-        if (state->should_mutate("lint_inputs", i) && random() % 100 < state->mutation_rate()) {
+        if (random() % 100 < state->mutation_rate()) {
             switch (random() % 6) {
                 case 0:
                     block.input[i] ^= (1LL << (random() % 64));
@@ -267,7 +212,7 @@ void mutate_lint_block(BasicInputBlock<IEC_LINT, 1> &block, MutatorState *state)
 void mutate_int_mem_block(BasicInputBlock<IEC_UINT, 1> &block, MutatorState *state) {
     // 可以添加内存特定变异，如边界值测试
     for (int i = 0; i < BUFFER_SIZE; ++i) {
-        if (state->should_mutate("int_mem_inputs", i) && random() % 100 < state->mutation_rate()) {
+        if (random() % 100 < state->mutation_rate()) {
             switch (random() % 4) {
                 case 0:
                     block.input[i] = 0;
@@ -289,7 +234,7 @@ void mutate_int_mem_block(BasicInputBlock<IEC_UINT, 1> &block, MutatorState *sta
 void mutate_dint_mem_block(BasicInputBlock<IEC_UDINT, 1> &block, MutatorState *state) {
     // 类似int_mem_block但针对32位
     for (int i = 0; i < BUFFER_SIZE; ++i) {
-        if (state->should_mutate("dint_mem_inputs", i) && random() % 100 < state->mutation_rate()) {
+        if (random() % 100 < state->mutation_rate()) {
             switch (random() % 5) {
                 case 0:
                     block.input[i] = 0;

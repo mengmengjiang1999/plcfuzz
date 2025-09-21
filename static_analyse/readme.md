@@ -10,5 +10,3 @@
 
 plc_variables_mappting.csv
 
-文件中
-

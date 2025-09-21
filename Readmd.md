@@ -35,3 +35,22 @@ $ make
 
 6. run_fuzz.sh
 运行插桩过后的可执行文件。脚本已写好，链接共享库，使用自定义的变异策略。
+
+
+## 使用方法
+
+先分析plc代码，确定需要模糊测试的变量和函数。
+
+./static_analyse/main.py 分析plc代码，生成配置文件。
+
+先编译插桩代码
+
+./build_shared_library.sh 编译共享库
+
+./build.sh 普通编译
+
+./buildfuzz.sh
+
+./run.sh 运行未插桩的可执行文件
+
+./runfuzz.sh 运行插桩过后的可执行文件
