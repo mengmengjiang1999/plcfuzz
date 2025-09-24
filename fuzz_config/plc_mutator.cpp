@@ -113,7 +113,6 @@ extern "C" void *afl_custom_init(afl_state_t *afl, unsigned int seed) { return n
 
 // 公共变异策略 - cycles
 void mutate_cycles(PLCInputBlock &block, MutatorState *state) {
-    // 使用相同的随机变化量保证所有cycles同步变化
     int cycle_delta = (random() % 5) - 2;  // -2到+2的随机变化
     // 随机增减cycles值
     if (random() % 100 < state->mutation_rate()) {
@@ -123,31 +122,37 @@ void mutate_cycles(PLCInputBlock &block, MutatorState *state) {
             block.input_bool_block.cycles = 0;
 
         // 字节块
+        cycle_delta = (random() % 5) - 2;  // -2到+2的随机变化
         block.input_byte_block.cycles += cycle_delta;
         if (block.input_byte_block.cycles < 0)
             block.input_byte_block.cycles = 0;
 
         // 整型块
+        cycle_delta = (random() % 5) - 2;  // -2到+2的随机变化
         block.input_int_block.cycles += cycle_delta;
         if (block.input_int_block.cycles < 0)
             block.input_int_block.cycles = 0;
 
         // 双整型块
+        cycle_delta = (random() % 5) - 2;  // -2到+2的随机变化
         block.input_dint_block.cycles += cycle_delta;
         if (block.input_dint_block.cycles < 0)
             block.input_dint_block.cycles = 0;
 
         // 长整型块
+        cycle_delta = (random() % 5) - 2;  // -2到+2的随机变化
         block.input_lint_block.cycles += cycle_delta;
         if (block.input_lint_block.cycles < 0)
             block.input_lint_block.cycles = 0;
 
         // 整型内存块
+        cycle_delta = (random() % 5) - 2;  // -2到+2的随机变化
         block.input_int_mem_block.cycles += cycle_delta;
         if (block.input_int_mem_block.cycles < 0)
             block.input_int_mem_block.cycles = 0;
 
         // 双整型内存块
+        cycle_delta = (random() % 5) - 2;  // -2到+2的随机变化
         block.input_dint_mem_block.cycles += cycle_delta;
         if (block.input_dint_mem_block.cycles < 0)
             block.input_dint_mem_block.cycles = 0;
@@ -187,22 +192,6 @@ void mutate_bool_block(BasicInputBlock<unsigned char, 2> &block, MutatorState *s
 
 // ByteBlock专用变异策略
 void mutate_byte_block(BasicInputBlock<IEC_BYTE, 1> &block, MutatorState *state) {
-    // for (int i = 0; i < BUFFER_SIZE; ++i) {
-    //     if (state->should_mutate("byte_inputs", i) && random() % 100 < state->mutation_rate()) {
-    //         // 字节级变异：位翻转、增减小量、随机值
-    //         switch (random() % 3) {
-    //             case 0:
-    //                 block.input[i] ^= (1 << (random() % 8));
-    //                 break;  // 位翻转
-    //             case 1:
-    //                 block.input[i] += (random() % 5) - 2;
-    //                 break;  // 小量增减
-    //             case 2:
-    //                 block.input[i] = random() & 0xFF;
-    //                 break;  // 随机值
-    //         }
-    //     }
-    // }
     for (const auto &mapping : plc_variable_mappings) {
         if (mapping.var_type == "byte_inputs") {
             if (random() % 100 < state->mutation_rate()) {

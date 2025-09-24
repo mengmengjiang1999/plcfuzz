@@ -300,7 +300,6 @@ int main(int argc, char **argv) {
 
     while (input_stream >> input_plc_block) {
         cnt_blocks++;
-        // std::cout << "Block " << cnt_blocks << ":\n";
         INPUT_PLC_DATA.add_block(input_plc_block);
     }
 

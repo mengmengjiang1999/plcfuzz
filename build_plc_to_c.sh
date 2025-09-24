@@ -1,1 +1,1 @@
-./build_plcfiles.sh ./testcases/race_bug.st
+./build_plcfiles.sh ./testcases/race_example_in_petrinet.st
