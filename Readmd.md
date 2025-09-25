@@ -41,7 +41,7 @@ $ make
 
 先分析plc代码，确定需要模糊测试的变量和函数。
 
-./static_analyse/main.py 分析plc代码，生成配置文件。
+python3 ./static_analyse/main.py 分析plc代码，生成配置文件。
 
 先编译插桩代码
 
@@ -54,3 +54,23 @@ $ make
 ./run.sh 运行未插桩的可执行文件
 
 ./runfuzz.sh 运行插桩过后的可执行文件
+
+
+
+## 实际使用方法
+
+1. 先修改./build_plc_to_c.sh脚本，指定要编译的plc文件。
+
+2. 运行./build_plc_to_c.sh脚本，将plc代码编译成C代码。
+
+3. python3 ./static_analyse/main.py 分析plc代码，生成配置文件。
+
+4. 运行./build_shared_library.sh脚本，编译共享库。
+
+5. 运行./build.sh脚本，编译未插桩的可执行文件。
+
+6. 运行./buildfuzz.sh脚本，编译插桩过后的可执行文件。
+
+7. 运行./run.sh脚本，运行未插桩的可执行文件。
+
+8. 运行./runfuzz.sh脚本，运行插桩过后的可执行文件。
