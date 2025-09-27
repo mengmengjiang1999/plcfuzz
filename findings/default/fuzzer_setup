@@ -7,4 +7,4 @@ AFL_DEBUG=1
 AFL_MAP_SIZE=10000000
 AFL_SKIP_CPUFREQ=1
 # command line:
-'afl-fuzz' '-t' '10000' '-i' 'seeds/' '-o' 'findings/' '--' './openplc_fuzz' '@@'
+'afl-fuzz' '-t' '10000' '-i' 'seeds/' '-o' 'findings/' '-g' '/home/mmj/Project/fuzzbuild/plcfuzz/fuzz_config/plc.grammar' '--' './openplc_fuzz' '@@'

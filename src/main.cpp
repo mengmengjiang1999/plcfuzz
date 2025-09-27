@@ -29,8 +29,8 @@
 #include <sys/mman.h>
 #include <time.h>
 #include <unistd.h>
-#include <chrono>
 
+#include <chrono>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>  // 包含标准异常类
@@ -449,7 +449,8 @@ int main(int argc, char **argv) {
             cycle_min = cycle_time.tv_nsec;
         cycle_total = cycle_total + cycle_time.tv_nsec;
 
-        sleep_until(&timer_start, common_ticktime__);
+        unsigned long long common_test_ticktime__ = 50ULL * 1ULL; /*ns*/
+        sleep_until(&timer_start, common_test_ticktime__);
 
         // Get the sleep end point which is also the start time/point of the next cycle
         clock_gettime(CLOCK_MONOTONIC, &timer_end);

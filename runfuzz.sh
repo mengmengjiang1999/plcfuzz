@@ -14,12 +14,12 @@ rm program_output.log
 cat /tmp/program_output > program_output.log &
 # AFL_NO_FORKSRV=1 AFL_DONT_OPTIMIZE=1 
 export AFL_AUTORESUME=1
-afl-fuzz -t 10000 -i seeds/ -o findings/ -- ./openplc_fuzz @@
+afl-fuzz -t 10000 -i seeds/ -o findings/ -g ~/Project/fuzzbuild/plcfuzz/fuzz_config/plc.grammar -- ./openplc_fuzz  @@
 
 # # 设置环境变量
 # export AFL_CUSTOM_MUTATOR_LIBRARY=./plc_mutator.py
 # export AFL_CUSTOM_MUTATOR_ONLY=1
-# export AFL_GRAMMAR_FILE=./plc.grammar
+# export AFL_GRAMMAR_FILE=./plc.grammar 
 
 # # 运行模糊测试
 # afl-fuzz -i in -o out -x plc.dict -g plc.grammar ./plc_program
