@@ -1,193 +1,187 @@
-from race_condition_detector import RaceConditionDetector
+from ladder_to_pn import LadderDiagramToPetriNetConverter
 
 from plc_reachability_graph import PLCReachabilityGraph
 
-def detect_race_conditions(petri_net_data, max_depth=50):
+from race_condition_detector import RaceConditionDetector
+
+class PLC_RACE_CONDITION_DETECTION:
     """
-    完整的竞争条件检测函数
-    输入: Petri网数据结构
-    输出: 检测结果报告
+    PLC竞争条件检测器（完整集成版）
+    整合了梯形图转换、Petri网生成和竞争条件检测功能
+    输入：梯形图程序
+    输出：竞争条件检测结果
     """
-    # 初始化检测器
-    detector = RaceConditionDetector(petri_net_data)
     
-    print("🔍 开始竞争条件检测...")
-    print(f"Petri网信息: {len(petri_net_data['places'])}库所, "
-          f"{len(petri_net_data['transitions'])}变迁, "
-          f"{len(petri_net_data['arcs'])}弧")
+    def __init__(self):
+        self.ld_program = None          # 原始梯形图程序
+        self.petri_net = None           # 转换后的Petri网
+        self.reachability_graph = None  # 生成的可达图
+        self.racing_nodes = []          # 检测到的竞争节点
+        self.race_paths = []            # 检测到的竞争路径
     
-    # 步骤1: 生成PLC可达图
-    print("📊 生成PLC可达图...")
-        # 创建PLC可达图生成器
-    reachability_generator = PLCReachabilityGraph(petri_net_data)
-    reachability_graph = reachability_generator.generate_plc_reachability_graph(max_depth)
-
-    print(f"生成 {len(reachability_graph['nodes'])} 个状态节点")
-    print(f"生成 {len(reachability_graph['edges'])} 条状态转移边")
+    def load_ld_program(self, ld_program):
+        """
+        加载梯形图程序
+        Args:
+            ld_program: 梯形图程序，格式为嵌套列表和元组
+        """
+        self.ld_program = ld_program
+        print("✅ 梯形图程序加载成功")
     
-    # 步骤2: 检测竞争节点
-    print("🎯 检测竞争节点...")
-    racing_nodes = detector.detect_racing_nodes()
-    print(f"发现 {len(racing_nodes)} 个竞争节点")
+    def convert_ld_to_petri_net(self):
+        """
+        将梯形图转换为Petri网
+        """
+        if not self.ld_program:
+            raise ValueError("未加载梯形图程序")
+        
+        print("🔄 开始将梯形图转换为Petri网...")
+        converter = LadderDiagramToPetriNetConverter()
+        self.petri_net = converter.convert(self.ld_program)
+        print("✅ 转换完成")
+        return self.petri_net
     
-    # 步骤3: 查找竞争路径
-    print("🔄 查找竞争路径...")
-    race_paths = detector.find_race_paths()
-    print(f"发现 {len(race_paths)} 条竞争路径")
+    def generate_reachability_graph(self, max_depth=100):
+        """
+        生成PLC可达图
+        Args:
+            max_depth: 最大搜索深度
+        """
+        if not self.petri_net:
+            raise ValueError("未生成Petri网")
+        
+        print("🔄 开始生成PLC可达图...")
+        generator = PLCReachabilityGraph(self.petri_net)
+        self.reachability_graph = generator.generate_plc_reachability_graph(max_depth)
+        print(f"✅ 生成完成 - 节点数: {len(self.reachability_graph['nodes'])}, 边数: {len(self.reachability_graph['edges'])}")
+        return self.reachability_graph
     
-    # 步骤4: 生成检测报告
-    report = generate_detection_report(petri_net_data, racing_nodes, race_paths)
+    def detect_race_conditions(self):
+        """
+        检测竞争条件
+        """
+        if not self.reachability_graph:
+            raise ValueError("未生成可达图")
+        
+        print("🔄 开始检测竞争条件...")
+        detector = RaceConditionDetector(self.petri_net)
+        detector.plc_reachability_graph = self.reachability_graph
+        
+        print("🔍 生成可达图...")
+        
+        # 检测竞争节点和路径
+        self.racing_nodes = detector.detect_racing_nodes()
+        self.race_paths = detector.find_race_paths()
+        
+        print(f"✅ 检测完成 - 竞争节点: {len(self.racing_nodes)}, 竞争路径: {len(self.race_paths)}")
+        return {
+            'racing_nodes': self.racing_nodes,
+            'race_paths': self.race_paths
+        }
     
-    return report
-
-def generate_detection_report(petri_net, racing_nodes, race_paths):
-    """生成详细的检测报告"""
-    report = {
-        'has_race': len(race_paths) > 0,
-        'racing_nodes_count': len(racing_nodes),
-        'race_paths_count': len(race_paths),
-        'racing_nodes': racing_nodes,
-        'race_paths': race_paths,
-        'severity': 'none'
-    }
+    def analyze(self, ld_program=None, max_depth=100):
+        """
+        完整分析流程
+        Args:
+            ld_program: 梯形图程序（可选）
+            max_depth: 最大搜索深度
+        Returns:
+            dict: 包含所有分析结果
+        """
+        if ld_program:
+            self.load_ld_program(ld_program)
+        
+        # 执行完整流程
+        self.convert_ld_to_petri_net()
+        self.generate_reachability_graph(max_depth)
+        results = self.detect_race_conditions()
+        
+        return {
+            'petri_net': self.petri_net,
+            'reachability_graph': self.reachability_graph,
+            'race_conditions': results
+        }
     
-    if len(race_paths) > 0:
-        if len(race_paths) <= 2:
-            report['severity'] = 'low'
-        elif len(race_paths) <= 5:
-            report['severity'] = 'medium'
+    def print_results(self):
+        """打印检测结果"""
+        if not self.race_paths:
+            print("\n⚠️ 未检测到竞争条件")
+            return
+        
+        print("\n" + "="*60)
+        print("🏁 竞争条件检测结果")
+        print("="*60)
+        
+        print(f"\n🔍 检测到 {len(self.racing_nodes)} 个竞争节点和 {len(self.race_paths)} 条竞争路径")
+        
+        print("\n📌 竞争节点:")
+        for i, node in enumerate(self.racing_nodes, 1):
+            print(f"  {i}. {node}")
+        
+        print("\n🔄 竞争路径:")
+        for i, path in enumerate(self.race_paths, 1):
+            print(f"\n路径 {i}:")
+            for j, edge in enumerate(path, 1):
+                print(f"  步骤{j}: {edge['from']} --{edge['type']}-> {edge['to']}")
+                if 'transitions' in edge:
+                    print(f"      触发变迁: {', '.join(edge['transitions'])}")
+        
+        print("\n💡 分析建议:")
+        if self.race_paths:
+            print("  - 检测到潜在的竞争条件，可能导致PLC程序行为不确定")
+            print("  - 建议检查自保持电路和并联逻辑的执行顺序")
+            print("  - 考虑添加互锁逻辑或调整扫描顺序")
         else:
-            report['severity'] = 'high'
+            print("  - 未检测到明显竞争条件，程序逻辑较为稳定")
         
-        # 分析竞争类型
-        report['race_types'] = analyze_race_types(race_paths, petri_net)
-    
-    return report
+        print("="*60)
 
-def analyze_race_types(race_paths, petri_net):
-    """分析竞争类型"""
-    race_types = {
-        'self_holding': 0,      # 自保持循环
-        'mutual_triggering': 0, # 相互触发
-        'scan_order': 0,         # 扫描顺序依赖
-        'other': 0               # 其他类型
-    }
-    
-    for path in race_paths:
-        # 分析路径特征判断竞争类型
-        involved_coils = set()
-        
-        for edge in path:
-            for trans_id in edge['transitions']:
-                transition = next((t for t in petri_net['transitions'] if t['id'] == trans_id), None)
-                if transition and '_ON' in trans_id:
-                    coil_name = trans_id.split('_')[1]  # 提取线圈名
-                    involved_coils.add(coil_name)
-        
-        if len(involved_coils) == 1:
-            race_types['self_holding'] += 1
-        elif len(involved_coils) == 2:
-            race_types['mutual_triggering'] += 1
-        else:
-            race_types['other'] += 1
-    
-    return race_types
 
+# 示例使用
 def example_usage():
     """使用示例"""
-    # 假设这是您的Petri网数据
-    example_petri_net = {
-        'places': [
-            {'id': 'p_I0.0_0', 'variable': 'I0.0', 'state': 0},
-            {'id': 'p_I0.0_1', 'variable': 'I0.0', 'state': 1},
-            {'id': 'p_Q0.0_0', 'variable': 'Q0.0', 'state': 0},
-            {'id': 'p_Q0.0_1', 'variable': 'Q0.0', 'state': 1},
-            # ... 更多库所
+    # 定义LD程序
+    plc_ladder_diagram_logic = [
+        # Rung 1: 简单串联 - I0.0 控制 Q0.0
+        [
+            ('I0.0', 'NO'),
+            ('Q0.0', 'COIL')
         ],
-        'transitions': [
-            {'id': 't_I0.0_ON_0', 'type': 'sensing'},
-            {'id': 't_I0.0_OFF_1', 'type': 'sensing'},
-            {'id': 't_Q0.0_ON_2', 'type': 'computing'},
-            {'id': 't_Q0.0_OFF_3', 'type': 'computing'},
-            # ... 更多变迁
+        
+        # Rung 2: 复杂逻辑 - I0.1 串联 (I0.2 并联 M1) 串联 Q0.1
+        [
+            ('I0.1', 'NO'),
+            {  # 并联逻辑
+                (('I0.2', 'NC'),),  # 路径1
+                (('M1', 'NO'),)     # 路径2
+            },
+            ('Q0.1', 'COIL')
         ],
-        'arcs': [
-            {'id': 'arc_0', 'source': 'p_I0.0_0', 'target': 't_I0.0_ON_0', 'type': 'regular'},
-            {'id': 'arc_1', 'source': 't_I0.0_ON_0', 'target': 'p_I0.0_1', 'type': 'regular'},
-            # ... 更多弧
-        ],
-        'initial_marking': {
-            'p_I0.0_0': 1, 'p_I0.0_1': 0,
-            'p_Q0.0_0': 1, 'p_Q0.0_1': 0
-        }
-    }
-    
-    # 运行竞争条件检测
-    result = detect_race_conditions(example_petri_net)
-    
-    # 输出检测结果
-    print("\n" + "="*60)
-    print("🏁 竞争条件检测结果")
-    print("="*60)
-    
-    if result['has_race']:
-        print(f"❌ 发现竞争条件！严重程度: {result['severity'].upper()}")
-        print(f"   竞争节点数量: {result['racing_nodes_count']}")
-        print(f"   竞争路径数量: {result['race_paths_count']}")
         
-        print(f"\n📈 竞争类型分析:")
-        for race_type, count in result['race_types'].items():
-            if count > 0:
-                print(f"   - {race_type}: {count}处")
-        
-        print(f"\n🔧 建议措施:")
-        if result['race_types']['self_holding'] > 0:
-            print("   * 检查自保持逻辑，避免循环依赖")
-        if result['race_types']['mutual_triggering'] > 0:
-            print("   * 添加互锁逻辑防止相互触发")
-        
-    else:
-        print("✅ 未检测到竞争条件 - 程序稳定")
+        # Rung 3: 自保持电路 - I0.3 并联 Q0.2 串联 Q0.2
+        [
+            ('I0.3', 'NO'),
+            {  # 并联逻辑（自保持）
+                (('I0.3', 'NO'),),
+                (('Q0.2', 'NO'),)
+            },
+            ('Q0.2', 'COIL')
+        ]
+    ]
     
-    print("="*60)
+    print("🚀 开始PLC竞争条件检测流程...")
     
-    return result
+    # 创建检测器实例
+    detector = PLC_RACE_CONDITION_DETECTION()
+    
+    # 执行完整分析流程
+    results = detector.analyze(plc_ladder_diagram_logic, max_depth=50)
+    
+    # 打印结果
+    detector.print_results()
+    
+    return results
 
-# 性能优化版本（处理大型Petri网）
-def optimized_detect_races(petri_net, max_states=1000):
-    """优化版的竞争检测，限制状态空间大小"""
-    # 实现状态空间剪枝和近似检测
-    pass
-
-def visualize_detection_results(report, petri_net):
-    """可视化检测结果"""
-    try:
-        import matplotlib.pyplot as plt
-        import networkx as nx
-        
-        # 创建可达图可视化
-        G = nx.DiGraph()
-        
-        # 添加节点和边
-        for i, node in enumerate(report.get('racing_nodes', [])):
-            G.add_node(f"RN_{i}", color='red', size=300)
-        
-        for edge in report.get('race_paths', []):
-            if edge['from'] in G.nodes and edge['to'] in G.nodes:
-                G.add_edge(edge['from'], edge['to'], color='red', width=2)
-        
-        # 绘制图形
-        plt.figure(figsize=(12, 8))
-        pos = nx.spring_layout(G)
-        nx.draw(G, pos, with_labels=True, node_color='lightcoral', 
-                edge_color='red', width=2, font_weight='bold')
-        plt.title("Race Condition Detection Results")
-        plt.show()
-        
-    except ImportError:
-        print("可视化需要安装matplotlib和networkx库")
-        print("安装命令: pip install matplotlib networkx")
 
 if __name__ == "__main__":
-    # 运行示例检测
-    detection_result = example_usage()
+    example_usage()

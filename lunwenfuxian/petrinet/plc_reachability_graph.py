@@ -194,6 +194,7 @@ class PLCReachabilityGraph:
         Returns:
             dict: 包含nodes和edges的可达图
         """
+        print("PLCRG: 开始生成可达图...")
         self.nodes = []
         self.edges = []
         
