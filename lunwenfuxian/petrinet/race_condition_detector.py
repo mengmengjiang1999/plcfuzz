@@ -67,32 +67,38 @@ class RaceConditionDetector:
         """查找竞争路径（只包含虚线边的回路）"""
         self.race_paths = []
         
-        def dfs_find_cycles(current_node, path, visited):
-            if len(path) > 1 and current_node == path[0]:
-                # 找到回路
+        def state_to_key(state_dict):
+            """将状态字典转换为可哈希的键（排序后的元组）"""
+            return tuple(sorted(state_dict.items()))
+        
+        def dfs_find_cycles(current_state, path, visited):
+            current_key = state_to_key(current_state)
+            
+            # 检查是否形成回路（当前状态与路径起始状态相同）
+            if len(path) > 1 and current_key == state_to_key(path[0]['from']):
                 if all(edge['type'] == 'dashed' for edge in path):
                     self.race_paths.append(path.copy())
                 return
             
-            if current_node in visited:
+            if current_key in visited:
                 return
             
-            visited.add(current_node)
+            visited.add(current_key)
             
             for edge in self.plc_reachability_graph['edges']:
-                if edge['from'] == current_node and edge['type'] == 'dashed':
+                # 比较状态是否相同（通过转换后的键）
+                if state_to_key(edge['from']) == current_key and edge['type'] == 'dashed':
                     path.append(edge)
                     dfs_find_cycles(edge['to'], path, visited)
                     path.pop()
             
-            visited.remove(current_node)
+            visited.remove(current_key)
         
         for racing_node in self.racing_nodes:
             dfs_find_cycles(racing_node, [], set())
         
         return self.race_paths
-        
-
+    
 def example_usage():
     """示例用法"""
     # 示例Petri网数据
@@ -141,6 +147,11 @@ def example_usage():
     racing_nodes = detector.detect_racing_nodes()
     print(f"发现 {len(racing_nodes)} 个竞争节点")
     
+    # 在调用find_race_paths之前添加
+    print("可达图节点结构示例:", reachability_graph['nodes'][0])
+    print("可达图边结构示例:", reachability_graph['edges'][0])
+    print("竞争节点示例:", racing_nodes[0])
+    
     print("🔄 查找竞争路径...")
     # 5. 查找竞争路径
     race_paths = detector.find_race_paths()
@@ -149,6 +160,22 @@ def example_usage():
     # 6. 输出详细结果
     print("\n" + "="*60)
     print("🏁 竞争条件检测结果")
+    print("="*60)
+
+    print("\n🔎 详细竞争路径分析：")
+    if not race_paths:
+        print("⚠️ 未检测到明确的竞争路径")
+    else:
+        for i, path in enumerate(race_paths, 1):
+            print(f"\n🔄 竞争路径 {i}:")
+            for j, edge in enumerate(path, 1):
+                print(f"  步骤{j}: {edge['from']} --{edge['type']}-> {edge['to']}")
+                if 'transitions' in edge:
+                    print(f"      触发变迁: {', '.join(edge['transitions'])}")
+
+    print("\n💡 竞争节点分析：")
+    for i, node in enumerate(racing_nodes, 1):
+        print(f"  节点{i}: {node}")
     print("="*60)
 if __name__ == "__main__":
     example_usage()
