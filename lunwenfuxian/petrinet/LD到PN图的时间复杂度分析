@@ -1,0 +1,83 @@
+从ld图到PN图的时间复杂度是多少
+从梯形图(LD)转换为Petri网(PN)的时间复杂度分析需要考虑转换算法的各个步骤。基于您提供的代码实现，我们可以进行详细的时间复杂度分析：
+1. 整体时间复杂度分析
+转换过程主要分为以下几个阶段：
+LD → Petri Net 转换时间复杂度 = 
+   处理输入变量时间 +
+   处理每个梯级时间 +
+   构建结果时间
+2. 各阶段详细分析
+(1) 处理输入变量 (process_input_variables)
+def process_input_variables(self, ld_program):
+    all_variables = set()  # O(1)
+    
+    # 收集所有变量 - O(N), N=梯形图元素总数
+    for rung in ld_program:          # O(R), R=梯级数量
+        for element in rung:         # O(E), E=平均每梯级元素数
+            if isinstance(element, tuple):
+                all_variables.add(element[0])  # O(1)
+            elif isinstance(element, set):
+                for parallel_path in element:  # O(P), P=并联路径数
+                    for contact in parallel_path:  # O(C), C=路径中触点数
+                        all_variables.add(contact[0])  # O(1)
+    
+    # 为每个变量创建变迁 - O(V), V=唯一变量数
+    for var in all_variables:        # O(V)
+        self.process_variable(var, 'input')  # O(1)
+​​时间复杂度​​：O(R × E × P × C) + O(V) ≈ O(N)
+（其中N是梯形图中所有元素的总数）
+(2) 处理单个梯级 (convert_rung)
+def convert_rung(self, rung, rung_index):
+    # 识别线圈 - O(E)
+    coils = [e[0] for e in rung if isinstance(e, tuple) and e[1] == 'COIL']
+    
+    for coil in coils:  # O(C), C=线圈数(通常1-2个)
+        # 查找指令路径 - O(E)
+        instruction_paths = self.find_instruction_paths(rung, coil)  
+        
+        for path in instruction_paths:  # O(P), P=路径数
+            # 创建变迁和弧 - O(1)
+            
+            for contact in path:  # O(K), K=路径长度
+                # 处理触点 - O(1)
+        
+        # 查找割集 - O(E)
+        cut_sets = self.find_cut_sets(rung, coil)
+        
+        for cutset in cut_sets:  # O(S), S=割集数
+            # 创建变迁和弧 - O(1)
+​​单个梯级时间复杂度​​：O(E × P × K) + O(E × S) ≈ O(E²)
+（最坏情况下路径数和割集数与梯级元素数E成正比）
+(3) 完整转换 (convert)
+def convert(self, ld_program):
+    self.process_input_variables(ld_program)  # O(N)
+    
+    for rung_index, rung in enumerate(ld_program):  # O(R)
+        self.convert_rung(rung, rung_index + 1)    # O(E²)
+    
+    # 构建结果 - O(V + T + A), V=库所数, T=变迁数, A=弧数
+​​总时间复杂度​​：O(N) + O(R × E²) + O(V + T + A)
+3. 最坏情况分析
+考虑最坏情况：
+梯形图有R个梯级
+每个梯级有E个元素
+存在复杂的并联结构（P ≈ E）
+路径长度K ≈ E
+则总时间复杂度为：
+O(R × E²)
+4. 各因素的实际影响
+因素
+符号
+实际影响
+梯级数量
+R
+线性影响
+梯级复杂度
+E
+平方影响
+并联路径数
+P
+增加E的系数
+触点变量数
+V
+线性影响

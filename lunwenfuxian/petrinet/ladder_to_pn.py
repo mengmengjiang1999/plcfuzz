@@ -219,6 +219,53 @@ class LadderDiagramToPetriNetConverter:
         """可视化生成的Petri网"""
         # 这里可以实现可视化功能（使用graphviz等库）
         pass
+    
+
+def print_full_petri_net(petri_net):
+    """
+    打印完整的Petri网结构
+    Args:
+        petri_net: 转换后的Petri网数据结构
+    """
+    print("\n" + "="*80)
+    print("📊 完整的Petri网结构")
+    print("="*80)
+    
+    # 1. 打印所有库所(Places)
+    print("\n🏛️ 库所(Places):")
+    print(f"总数: {len(petri_net['places'])}")
+    for place in petri_net['places']:
+        tokens = petri_net['initial_marking'].get(place['id'], 0)
+        print(f"  {place['id']} (变量: {place['variable']}, 状态: {place['state']}, 初始令牌: {tokens})")
+    
+    # 2. 打印所有变迁(Transitions)
+    print("\n🔄 变迁(Transitions):")
+    print(f"总数: {len(petri_net['transitions'])}")
+    for transition in petri_net['transitions']:
+        print(f"  {transition['id']} (类型: {transition['type']})")
+    
+    # 3. 打印所有弧(Arcs)
+    print("\n➡️ 弧(Arcs):")
+    print(f"总数: {len(petri_net['arcs'])}")
+    for arc in petri_net['arcs']:
+        print(f"  {arc['id']}: {arc['source']} → {arc['target']} (类型: {arc['type']})")
+    
+    # 4. 打印初始标识
+    print("\n🔢 初始标识(Initial Marking):")
+    for place_id, tokens in petri_net['initial_marking'].items():
+        print(f"  {place_id}: {tokens} token(s)")
+    
+    print("="*80 + "\n")
+    
+    # import json
+    
+    # print(petri_net)
+    
+    #     # 将字典写入 JSON 文件
+    # with open("petri_net.json", "w", encoding="utf-8") as f:
+    #     json.dump(petri_net, f, ensure_ascii=False, indent=4)
+    
+    return petri_net
 
 
 # 示例使用
@@ -257,20 +304,24 @@ def example_usage():
     converter = LadderDiagramToPetriNetConverter()
     petri_net = converter.convert(plc_ladder_diagram_logic)
     
-    # 输出转换结果摘要
-    print("\n=== 转换结果摘要 ===")
-    print(f"库所数量: {len(petri_net['places'])}")
-    print(f"变迁数量: {len(petri_net['transitions'])}")
-    print(f"弧数量: {len(petri_net['arcs'])}")
+    # # 输出转换结果摘要
+    # print("\n=== 转换结果摘要 ===")
+    # print(f"库所数量: {len(petri_net['places'])}")
+    # print(f"变迁数量: {len(petri_net['transitions'])}")
+    # print(f"弧数量: {len(petri_net['arcs'])}")
     
-    print("\n=== 前5个库所 ===")
-    for place in petri_net['places'][:5]:  # 直接切片列表
-        print(f"  {place['id']} (变量: {place['variable']}, 状态: {place['state']})")
+    # print("\n=== 前5个库所 ===")
+    # for place in petri_net['places'][:5]:  # 直接切片列表
+    #     print(f"  {place['id']} (变量: {place['variable']}, 状态: {place['state']})")
 
     
-    print("\n=== 前5个变迁 ===")
-    for transition in list(petri_net['transitions'])[:5]:
-        print(f"  {transition['id']} (类型: {transition['type']})")
+    # print("\n=== 前5个变迁 ===")
+    # for transition in list(petri_net['transitions'])[:5]:
+    #     print(f"  {transition['id']} (类型: {transition['type']})")
+    
+        
+    # 打印完整的Petri网结构
+    print_full_petri_net(petri_net)
     
     return petri_net
 

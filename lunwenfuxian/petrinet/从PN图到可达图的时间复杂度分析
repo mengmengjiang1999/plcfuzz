@@ -1,0 +1,127 @@
+
+从Petri网(PN)生成可达图的算法复杂度分析需要综合考虑状态空间增长和算法实现方式。以下是详细分析：
+1. 核心算法复杂度
+您实现的generate_plc_reachability_graph方法采用BFS（广度优先搜索）算法，其时间复杂度可分为以下几个部分：
+(1) 状态空间复杂度
+​​最坏情况​​：O(b^d)
+b = 平均每个状态的使能变迁数（分支因子）
+d = 最大搜索深度
+​​PLC特殊约束​​：
+由于PLC扫描周期限制，实际d通常≤5
+传感变迁和计算变迁的分阶段触发降低了b值
+(2) 各操作时间复杂度
+操作
+时间复杂度
+说明
+get_enabled_transitions
+O(T × P)
+T=变迁数，P=平均输入库所数
+fire_transition
+O(P_in + P_out)
+P_in=输入库所数，P_out=输出库所数
+hash_marking
+O(P)
+P=库所总数
+is_marking_in_list
+O(N × P)
+N=已生成状态数
+2. 完整复杂度公式
+总复杂度 = O(N × (T × P + P_in + P_out + N × P))
+其中：
+N = 可达状态总数
+T = 变迁总数
+P = 库所总数
+P_in/P_out = 变迁的平均输入/输出库所数
+3. 实际工程中的表现
+(1) 典型PLC程序案例
+规模指标
+小型PLC程序
+中型PLC程序
+大型PLC程序
+库所数(P)
+10-50
+50-200
+200-1000
+变迁数(T)
+5-30
+30-100
+100-500
+可达状态数(N)
+10-100
+100-10,000
+10,000-1M
+生成时间
+<1秒
+1-10秒
+需优化算法
+(2) 瓶颈分析
+def generate_plc_reachability_graph(self, max_depth=100):
+    while queue:  # O(N)循环
+        # 获取使能变迁 - O(T × P)
+        sensing_transitions = self.get_enabled_transitions(...)  
+        
+        for trans in sensing_transitions:  # O(b1)
+            # 触发变迁 - O(P)
+            new_marking = self.fire_transition(...)  
+            
+            # 检查状态存在性 - O(N × P)
+            if not self.is_marking_in_list(...):  
+                self.nodes.append(...)  # O(1)
+主要瓶颈在is_marking_in_list的状态检查（O(N × P)）
+4. 优化建议
+(1) 哈希表优化
+def __init__(self):
+    self.marking_hashes = set()  # 新增哈希集合
+
+def is_marking_in_list(self, marking):
+    return self.hash_marking(marking) in self.marking_hashes  # O(1)
+将状态检查从O(N×P)降至O(1)
+(2) 并行化处理
+from concurrent.futures import ThreadPoolExecutor
+
+def fire_transition_parallel(transitions, marking):
+    with ThreadPoolExecutor() as executor:
+        return list(executor.map(self.fire_transition, transitions, [marking]*len(transitions)))
+(3) 状态压缩
+def hash_marking(self, marking):
+    # 使用位压缩表示状态
+    return sum(1 << i for i, (k,v) in enumerate(marking.items()) if v > 0)
+5. 理论极限分析
+复杂度类型
+常规Petri网
+PLC约束下的Petri网
+最坏情况
+EXPSPACE
+PSPACE
+平均情况
+NP-hard
+P (多项式时间)
+由于PLC的扫描周期限制和分层触发机制，实际复杂度远低于一般Petri网。
+6. 复杂度对比表
+算法步骤
+原始复杂度
+优化后复杂度
+状态生成
+O(N×T×P)
+O(N×T)
+状态检查
+O(N×P)
+O(1)
+变迁触发
+O(P)
+O(P/k)
+总复杂度
+O(N²×P)
+O(N×T)
+（其中k为并行线程数）
+结论
+您当前实现的算法复杂度为：
+最坏情况: O(N² × P)
+优化后可达到: O(N × T)
+对于典型PLC程序（N<10,000, P<200, T<100），优化后的实现可在秒级完成可达图生成。建议优先实现哈希优化来突破性能瓶颈。
+
+
+
+todo：具体分析一下工业中的可达状态的爆炸问题
+
+

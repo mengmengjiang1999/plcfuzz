@@ -258,36 +258,48 @@ def example_usage():
     PLC可达图生成器使用示例
     """
     # 示例Petri网数据
-    example_petri_net = {
-        'places': [
-            {'id': 'p_I0.0_0', 'variable': 'I0.0', 'state': 0},
-            {'id': 'p_I0.0_1', 'variable': 'I0.0', 'state': 1},
-            {'id': 'p_Q0.0_0', 'variable': 'Q0.0', 'state': 0},
-            {'id': 'p_Q0.0_1', 'variable': 'Q0.0', 'state': 1}
-        ],
-        'transitions': [
-            {'id': 't_I0.0_ON_0', 'type': 'sensing'},
-            {'id': 't_I0.0_OFF_1', 'type': 'sensing'},
-            {'id': 't_Q0.0_ON_2', 'type': 'computing'},
-            {'id': 't_Q0.0_OFF_3', 'type': 'computing'}
-        ],
-        'arcs': [
-            {'id': 'arc_0', 'source': 'p_I0.0_0', 'target': 't_I0.0_ON_0', 'type': 'regular'},
-            {'id': 'arc_1', 'source': 't_I0.0_ON_0', 'target': 'p_I0.0_1', 'type': 'regular'},
-            {'id': 'arc_2', 'source': 'p_I0.0_1', 'target': 't_I0.0_OFF_1', 'type': 'regular'},
-            {'id': 'arc_3', 'source': 't_I0.0_OFF_1', 'target': 'p_I0.0_0', 'type': 'regular'},
-            {'id': 'arc_4', 'source': 'p_I0.0_1', 'target': 't_Q0.0_ON_2', 'type': 'bidirectional'},
-            {'id': 'arc_5', 'source': 't_Q0.0_ON_2', 'target': 'p_Q0.0_1', 'type': 'regular'},
-            {'id': 'arc_6', 'source': 'p_Q0.0_0', 'target': 't_Q0.0_OFF_3', 'type': 'regular'},
-            {'id': 'arc_7', 'source': 't_Q0.0_OFF_3', 'target': 'p_Q0.0_0', 'type': 'regular'}
-        ],
-        'initial_marking': {
-            'p_I0.0_0': 1,
-            'p_I0.0_1': 0,
-            'p_Q0.0_0': 1,
-            'p_Q0.0_1': 0
-        }
-    }
+    
+    import json
+
+    # 从 JSON 文件读取数据
+    with open("petri_net.json", "r", encoding="utf-8") as f:
+        example_petri_net = json.load(f)
+
+    # 打印字典内容
+    print("读取的字典数据：")
+    print(example_petri_net)
+    print(f"数据类型：{type(example_petri_net)}")  
+    # 输出: <class 'dict'>
+    # example_petri_net = {
+    #     'places': [
+    #         {'id': 'p_I0.0_0', 'variable': 'I0.0', 'state': 0},
+    #         {'id': 'p_I0.0_1', 'variable': 'I0.0', 'state': 1},
+    #         {'id': 'p_Q0.0_0', 'variable': 'Q0.0', 'state': 0},
+    #         {'id': 'p_Q0.0_1', 'variable': 'Q0.0', 'state': 1}
+    #     ],
+    #     'transitions': [
+    #         {'id': 't_I0.0_ON_0', 'type': 'sensing'},
+    #         {'id': 't_I0.0_OFF_1', 'type': 'sensing'},
+    #         {'id': 't_Q0.0_ON_2', 'type': 'computing'},
+    #         {'id': 't_Q0.0_OFF_3', 'type': 'computing'}
+    #     ],
+    #     'arcs': [
+    #         {'id': 'arc_0', 'source': 'p_I0.0_0', 'target': 't_I0.0_ON_0', 'type': 'regular'},
+    #         {'id': 'arc_1', 'source': 't_I0.0_ON_0', 'target': 'p_I0.0_1', 'type': 'regular'},
+    #         {'id': 'arc_2', 'source': 'p_I0.0_1', 'target': 't_I0.0_OFF_1', 'type': 'regular'},
+    #         {'id': 'arc_3', 'source': 't_I0.0_OFF_1', 'target': 'p_I0.0_0', 'type': 'regular'},
+    #         {'id': 'arc_4', 'source': 'p_I0.0_1', 'target': 't_Q0.0_ON_2', 'type': 'bidirectional'},
+    #         {'id': 'arc_5', 'source': 't_Q0.0_ON_2', 'target': 'p_Q0.0_1', 'type': 'regular'},
+    #         {'id': 'arc_6', 'source': 'p_Q0.0_0', 'target': 't_Q0.0_OFF_3', 'type': 'regular'},
+    #         {'id': 'arc_7', 'source': 't_Q0.0_OFF_3', 'target': 'p_Q0.0_0', 'type': 'regular'}
+    #     ],
+    #     'initial_marking': {
+    #         'p_I0.0_0': 1,
+    #         'p_I0.0_1': 0,
+    #         'p_Q0.0_0': 1,
+    #         'p_Q0.0_1': 0
+    #     }
+    # }
     
     print("🔧 创建PLC可达图生成器实例...")
     reachability_generator = PLCReachabilityGraph(example_petri_net)
