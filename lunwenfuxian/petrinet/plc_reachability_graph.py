@@ -258,18 +258,7 @@ def example_usage():
     PLC可达图生成器使用示例
     """
     # 示例Petri网数据
-    
-    import json
 
-    # 从 JSON 文件读取数据
-    with open("petri_net.json", "r", encoding="utf-8") as f:
-        example_petri_net = json.load(f)
-
-    # 打印字典内容
-    print("读取的字典数据：")
-    print(example_petri_net)
-    print(f"数据类型：{type(example_petri_net)}")  
-    # 输出: <class 'dict'>
     # example_petri_net = {
     #     'places': [
     #         {'id': 'p_I0.0_0', 'variable': 'I0.0', 'state': 0},
@@ -300,6 +289,39 @@ def example_usage():
     #         'p_Q0.0_1': 0
     #     }
     # }
+
+
+    plc_ladder_diagram_logic = [
+        # Rung 1: 简单串联 - I0.0 控制 Q0.0
+        [
+            ('I0.0', 'NO'),
+            ('Q0.0', 'COIL')
+        ],
+        
+        # Rung 2: 复杂逻辑 - I0.1 串联 (I0.2 并联 M1) 串联 Q0.1
+        [
+            ('I0.1', 'NO'),
+            {  # 并联逻辑
+                (('I0.2', 'NC'),),  # 路径1
+                (('M1', 'NO'),)     # 路径2
+            },
+            ('Q0.1', 'COIL')
+        ],
+        
+        # Rung 3: 自保持电路 - I0.3 并联 Q0.2 串联 Q0.2
+        [
+            ('I0.3', 'NO'),
+            {  # 并联逻辑（自保持）
+                (('I0.3', 'NO'),),
+                (('Q0.2', 'NO'),)
+            },
+            ('Q0.2', 'COIL')
+        ]
+    ]
+
+    from ladder_to_pn import LadderDiagramToPetriNetConverter
+    converter = LadderDiagramToPetriNetConverter()
+    example_petri_net = converter.convert(plc_ladder_diagram_logic)
     
     print("🔧 创建PLC可达图生成器实例...")
     reachability_generator = PLCReachabilityGraph(example_petri_net)
@@ -315,22 +337,21 @@ def example_usage():
     print("\n📋 前3个状态示例:")
     for i, node in enumerate(reachability_graph['nodes'][:3]):
         print(f"状态 {i}: {node}")
+        
+    # for i, node in enumerate(reachability_graph['nodes']):
+    #     print(f"状态 {i}: {node}")
+        
+    # print(reachability_graph)
     
     return reachability_graph
 
 
-def test_methods():
+def test_methods(test_net):
     """
     测试所有修复的方法是否正常工作
     """
     # 简单测试数据
-    test_net = {
-        'places': [{'id': 'p1', 'variable': 'I0.0', 'state': 0}],
-        'transitions': [{'id': 't1', 'type': 'sensing'}],
-        'arcs': [{'id': 'a1', 'source': 'p1', 'target': 't1', 'type': 'regular'}],
-        'initial_marking': {'p1': 1}
-    }
-    
+
     generator = PLCReachabilityGraph(test_net)
     
     # 测试方法存在性
@@ -361,8 +382,15 @@ if __name__ == "__main__":
     print("🏭 PLC可达图生成器测试")
     print("=" * 60)
     
+    test_net = {
+        'places': [{'id': 'p1', 'variable': 'I0.0', 'state': 0}],
+        'transitions': [{'id': 't1', 'type': 'sensing'}],
+        'arcs': [{'id': 'a1', 'source': 'p1', 'target': 't1', 'type': 'regular'}],
+        'initial_marking': {'p1': 1}
+    }
+    
     # 运行方法测试
-    test_methods()
+    test_methods(test_net)
     
     print("\n" + "=" * 60)
     print("🚀 开始生成可达图示例")

@@ -44,6 +44,8 @@ def example_usage():
     
     #  得到了petri_net
     
+    print(petri_net)
+    
     # 创建可达图生成器并执行生成
     reachability_generator = PLCReachabilityGraph(petri_net)
     reachability_graph = reachability_generator.generate_plc_reachability_graph(max_depth=50)

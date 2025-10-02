@@ -259,7 +259,7 @@ def print_full_petri_net(petri_net):
     
     # import json
     
-    # print(petri_net)
+    print(petri_net)
     
     #     # 将字典写入 JSON 文件
     # with open("petri_net.json", "w", encoding="utf-8") as f:

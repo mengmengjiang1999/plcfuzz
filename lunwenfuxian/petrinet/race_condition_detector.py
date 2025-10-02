@@ -1,5 +1,7 @@
 from plc_reachability_graph import PLCReachabilityGraph
 
+from ladder_to_pn import LadderDiagramToPetriNetConverter
+
 class RaceConditionDetector:
     """
     Petri网竞争条件检测器
@@ -63,75 +65,148 @@ class RaceConditionDetector:
         
         return self.racing_nodes
     
+    # def find_race_paths(self):
+    #     """查找竞争路径（只包含虚线边的回路）"""
+    #     self.race_paths = []
+        
+    #     def state_to_key(state_dict):
+    #         """将状态字典转换为可哈希的键（排序后的元组）"""
+    #         return tuple(sorted(state_dict.items()))
+        
+    #     def dfs_find_cycles(current_state, path, visited):
+    #         current_key = state_to_key(current_state)
+            
+    #         # 检查是否形成回路（当前状态与路径起始状态相同）
+    #         if len(path) > 1 and current_key == state_to_key(path[0]['from']):
+    #             if all(edge['type'] == 'dashed' for edge in path):
+    #                 self.race_paths.append(path.copy())
+    #             return
+            
+    #         if current_key in visited:
+    #             return
+            
+    #         visited.add(current_key)
+            
+    #         for edge in self.plc_reachability_graph['edges']:
+    #             # 比较状态是否相同（通过转换后的键）
+    #             if state_to_key(edge['from']) == current_key and edge['type'] == 'dashed':
+    #                 path.append(edge)
+    #                 dfs_find_cycles(edge['to'], path, visited)
+    #                 path.pop()
+            
+    #         visited.remove(current_key)
+        
+    #     for racing_node in self.racing_nodes:
+    #         dfs_find_cycles(racing_node, [], set())
+        
+    #     return self.race_paths
+    
     def find_race_paths(self):
-        """查找竞争路径（只包含虚线边的回路）"""
+        """优化后的竞争路径查找"""
         self.race_paths = []
+        print()
         
+        # 使用更高效的状态表示
         def state_to_key(state_dict):
-            """将状态字典转换为可哈希的键（排序后的元组）"""
-            return tuple(sorted(state_dict.items()))
+            return frozenset(state_dict.items())  # 使用frozenset代替tuple
         
-        def dfs_find_cycles(current_state, path, visited):
-            current_key = state_to_key(current_state)
-            
-            # 检查是否形成回路（当前状态与路径起始状态相同）
-            if len(path) > 1 and current_key == state_to_key(path[0]['from']):
-                if all(edge['type'] == 'dashed' for edge in path):
-                    self.race_paths.append(path.copy())
-                return
-            
-            if current_key in visited:
-                return
-            
-            visited.add(current_key)
-            
-            for edge in self.plc_reachability_graph['edges']:
-                # 比较状态是否相同（通过转换后的键）
-                if state_to_key(edge['from']) == current_key and edge['type'] == 'dashed':
-                    path.append(edge)
-                    dfs_find_cycles(edge['to'], path, visited)
-                    path.pop()
-            
-            visited.remove(current_key)
+        visited_paths = set()  # 记录已访问的路径
         
         for racing_node in self.racing_nodes:
-            dfs_find_cycles(racing_node, [], set())
+            stack = [(racing_node, [])]
+            
+            while stack:
+                print("stack:", len(stack))
+                current_state, path = stack.pop()
+                current_key = state_to_key(current_state)
+                
+                # 检查回路
+                if len(path) > 1 and state_to_key(path[0]['from']) == current_key:
+                    if all(edge['type'] == 'dashed' for edge in path):
+                        path_key = frozenset(state_to_key(edge['from']) for edge in path)
+                        if path_key not in visited_paths:
+                            self.race_paths.append(path.copy())
+                            visited_paths.add(path_key)
+                    continue
+                
+                # 限制搜索深度
+                if len(path) > 10:  # 设置合理的深度限制
+                    continue
+                    
+                for edge in self.plc_reachability_graph['edges']:
+                    if (state_to_key(edge['from']) == current_key and 
+                        edge['type'] == 'dashed' and 
+                        edge not in path):  # 避免重复边
+                        new_path = path + [edge]
+                        stack.append((edge['to'], new_path))
         
         return self.race_paths
-    
+        
 def example_usage():
     """示例用法"""
-    # 示例Petri网数据
-    example_petri_net = {
-        'places': [
-            {'id': 'p_I0.0_0', 'variable': 'I0.0', 'state': 0},
-            {'id': 'p_I0.0_1', 'variable': 'I0.0', 'state': 1},
-            {'id': 'p_Q0.0_0', 'variable': 'Q0.0', 'state': 0},
-            {'id': 'p_Q0.0_1', 'variable': 'Q0.0', 'state': 1}
+    
+     # 定义LD程序（按照您提供的格式）
+    plc_ladder_diagram_logic = [
+        # Rung 1: 简单串联 - I0.0 控制 Q0.0
+        [
+            ('I0.0', 'NO'),
+            ('Q0.0', 'COIL')
         ],
-        'transitions': [
-            {'id': 't_I0.0_ON_0', 'type': 'sensing'},
-            {'id': 't_I0.0_OFF_1', 'type': 'sensing'},
-            {'id': 't_Q0.0_ON_2', 'type': 'computing'},
-            {'id': 't_Q0.0_OFF_3', 'type': 'computing'}
+        
+        # Rung 2: 复杂逻辑 - I0.1 串联 (I0.2 并联 M1) 串联 Q0.1
+        [
+            ('I0.1', 'NO'),
+            {  # 并联逻辑
+                (('I0.2', 'NC'),),  # 路径1
+                (('M1', 'NO'),)     # 路径2
+            },
+            ('Q0.1', 'COIL')
         ],
-        'arcs': [
-            {'id': 'arc_0', 'source': 'p_I0.0_0', 'target': 't_I0.0_ON_0', 'type': 'regular'},
-            {'id': 'arc_1', 'source': 't_I0.0_ON_0', 'target': 'p_I0.0_1', 'type': 'regular'},
-            {'id': 'arc_2', 'source': 'p_I0.0_1', 'target': 't_I0.0_OFF_1', 'type': 'regular'},
-            {'id': 'arc_3', 'source': 't_I0.0_OFF_1', 'target': 'p_I0.0_0', 'type': 'regular'},
-            {'id': 'arc_4', 'source': 'p_I0.0_1', 'target': 't_Q0.0_ON_2', 'type': 'bidirectional'},
-            {'id': 'arc_5', 'source': 't_Q0.0_ON_2', 'target': 'p_Q0.0_1', 'type': 'regular'},
-            {'id': 'arc_6', 'source': 'p_Q0.0_0', 'target': 't_Q0.0_OFF_3', 'type': 'regular'},
-            {'id': 'arc_7', 'source': 't_Q0.0_OFF_3', 'target': 'p_Q0.0_0', 'type': 'regular'}
-        ],
-        'initial_marking': {
-            'p_I0.0_0': 1,
-            'p_I0.0_1': 0,
-            'p_Q0.0_0': 1,
-            'p_Q0.0_1': 0
-        }
-    }
+        
+        # Rung 3: 自保持电路 - I0.3 并联 Q0.2 串联 Q0.2
+        [
+            ('I0.3', 'NO'),
+            {  # 并联逻辑（自保持）
+                (('I0.3', 'NO'),),
+                (('Q0.2', 'NO'),)
+            },
+            ('Q0.2', 'COIL')
+        ]
+    ]
+    
+    example_petri_net = LadderDiagramToPetriNetConverter().convert(plc_ladder_diagram_logic)
+    
+    # # 示例Petri网数据
+    # example_petri_net = {
+    #     'places': [
+    #         {'id': 'p_I0.0_0', 'variable': 'I0.0', 'state': 0},
+    #         {'id': 'p_I0.0_1', 'variable': 'I0.0', 'state': 1},
+    #         {'id': 'p_Q0.0_0', 'variable': 'Q0.0', 'state': 0},
+    #         {'id': 'p_Q0.0_1', 'variable': 'Q0.0', 'state': 1}
+    #     ],
+    #     'transitions': [
+    #         {'id': 't_I0.0_ON_0', 'type': 'sensing'},
+    #         {'id': 't_I0.0_OFF_1', 'type': 'sensing'},
+    #         {'id': 't_Q0.0_ON_2', 'type': 'computing'},
+    #         {'id': 't_Q0.0_OFF_3', 'type': 'computing'}
+    #     ],
+    #     'arcs': [
+    #         {'id': 'arc_0', 'source': 'p_I0.0_0', 'target': 't_I0.0_ON_0', 'type': 'regular'},
+    #         {'id': 'arc_1', 'source': 't_I0.0_ON_0', 'target': 'p_I0.0_1', 'type': 'regular'},
+    #         {'id': 'arc_2', 'source': 'p_I0.0_1', 'target': 't_I0.0_OFF_1', 'type': 'regular'},
+    #         {'id': 'arc_3', 'source': 't_I0.0_OFF_1', 'target': 'p_I0.0_0', 'type': 'regular'},
+    #         {'id': 'arc_4', 'source': 'p_I0.0_1', 'target': 't_Q0.0_ON_2', 'type': 'bidirectional'},
+    #         {'id': 'arc_5', 'source': 't_Q0.0_ON_2', 'target': 'p_Q0.0_1', 'type': 'regular'},
+    #         {'id': 'arc_6', 'source': 'p_Q0.0_0', 'target': 't_Q0.0_OFF_3', 'type': 'regular'},
+    #         {'id': 'arc_7', 'source': 't_Q0.0_OFF_3', 'target': 'p_Q0.0_0', 'type': 'regular'}
+    #     ],
+    #     'initial_marking': {
+    #         'p_I0.0_0': 1,
+    #         'p_I0.0_1': 0,
+    #         'p_Q0.0_0': 1,
+    #         'p_Q0.0_1': 0
+    #     }
+    # }
     # 1. 生成PLC可达图
     # 正确：先创建实例，再调用实例方法
     generator = PLCReachabilityGraph(example_petri_net)
