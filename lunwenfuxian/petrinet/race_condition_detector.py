@@ -116,6 +116,9 @@ class RaceConditionDetector:
             stack = [(racing_node, [])]
             
             while stack:
+                if(self.race_paths != []) :
+                    print("find race path!")
+                    break
                 print("stack:", len(stack))
                 current_state, path = stack.pop()
                 current_key = state_to_key(current_state)
@@ -126,6 +129,7 @@ class RaceConditionDetector:
                         path_key = frozenset(state_to_key(edge['from']) for edge in path)
                         if path_key not in visited_paths:
                             self.race_paths.append(path.copy())
+                            print("find race path!")
                             visited_paths.add(path_key)
                     continue
                 
@@ -176,37 +180,7 @@ def example_usage():
     
     example_petri_net = LadderDiagramToPetriNetConverter().convert(plc_ladder_diagram_logic)
     
-    # # 示例Petri网数据
-    # example_petri_net = {
-    #     'places': [
-    #         {'id': 'p_I0.0_0', 'variable': 'I0.0', 'state': 0},
-    #         {'id': 'p_I0.0_1', 'variable': 'I0.0', 'state': 1},
-    #         {'id': 'p_Q0.0_0', 'variable': 'Q0.0', 'state': 0},
-    #         {'id': 'p_Q0.0_1', 'variable': 'Q0.0', 'state': 1}
-    #     ],
-    #     'transitions': [
-    #         {'id': 't_I0.0_ON_0', 'type': 'sensing'},
-    #         {'id': 't_I0.0_OFF_1', 'type': 'sensing'},
-    #         {'id': 't_Q0.0_ON_2', 'type': 'computing'},
-    #         {'id': 't_Q0.0_OFF_3', 'type': 'computing'}
-    #     ],
-    #     'arcs': [
-    #         {'id': 'arc_0', 'source': 'p_I0.0_0', 'target': 't_I0.0_ON_0', 'type': 'regular'},
-    #         {'id': 'arc_1', 'source': 't_I0.0_ON_0', 'target': 'p_I0.0_1', 'type': 'regular'},
-    #         {'id': 'arc_2', 'source': 'p_I0.0_1', 'target': 't_I0.0_OFF_1', 'type': 'regular'},
-    #         {'id': 'arc_3', 'source': 't_I0.0_OFF_1', 'target': 'p_I0.0_0', 'type': 'regular'},
-    #         {'id': 'arc_4', 'source': 'p_I0.0_1', 'target': 't_Q0.0_ON_2', 'type': 'bidirectional'},
-    #         {'id': 'arc_5', 'source': 't_Q0.0_ON_2', 'target': 'p_Q0.0_1', 'type': 'regular'},
-    #         {'id': 'arc_6', 'source': 'p_Q0.0_0', 'target': 't_Q0.0_OFF_3', 'type': 'regular'},
-    #         {'id': 'arc_7', 'source': 't_Q0.0_OFF_3', 'target': 'p_Q0.0_0', 'type': 'regular'}
-    #     ],
-    #     'initial_marking': {
-    #         'p_I0.0_0': 1,
-    #         'p_I0.0_1': 0,
-    #         'p_Q0.0_0': 1,
-    #         'p_Q0.0_1': 0
-    #     }
-    # }
+ 
     # 1. 生成PLC可达图
     # 正确：先创建实例，再调用实例方法
     generator = PLCReachabilityGraph(example_petri_net)
@@ -252,5 +226,39 @@ def example_usage():
     for i, node in enumerate(racing_nodes, 1):
         print(f"  节点{i}: {node}")
     print("="*60)
+
+# 示例Petri网数据，用来测试。但是梯形图生成的代码没这么小
+example_petri_net = {
+    'places': [
+        {'id': 'p_I0.0_0', 'variable': 'I0.0', 'state': 0},
+        {'id': 'p_I0.0_1', 'variable': 'I0.0', 'state': 1},
+        {'id': 'p_Q0.0_0', 'variable': 'Q0.0', 'state': 0},
+        {'id': 'p_Q0.0_1', 'variable': 'Q0.0', 'state': 1}
+    ],
+    'transitions': [
+        {'id': 't_I0.0_ON_0', 'type': 'sensing'},
+        {'id': 't_I0.0_OFF_1', 'type': 'sensing'},
+        {'id': 't_Q0.0_ON_2', 'type': 'computing'},
+        {'id': 't_Q0.0_OFF_3', 'type': 'computing'}
+    ],
+    'arcs': [
+        {'id': 'arc_0', 'source': 'p_I0.0_0', 'target': 't_I0.0_ON_0', 'type': 'regular'},
+        {'id': 'arc_1', 'source': 't_I0.0_ON_0', 'target': 'p_I0.0_1', 'type': 'regular'},
+        {'id': 'arc_2', 'source': 'p_I0.0_1', 'target': 't_I0.0_OFF_1', 'type': 'regular'},
+        {'id': 'arc_3', 'source': 't_I0.0_OFF_1', 'target': 'p_I0.0_0', 'type': 'regular'},
+        {'id': 'arc_4', 'source': 'p_I0.0_1', 'target': 't_Q0.0_ON_2', 'type': 'bidirectional'},
+        {'id': 'arc_5', 'source': 't_Q0.0_ON_2', 'target': 'p_Q0.0_1', 'type': 'regular'},
+        {'id': 'arc_6', 'source': 'p_Q0.0_0', 'target': 't_Q0.0_OFF_3', 'type': 'regular'},
+        {'id': 'arc_7', 'source': 't_Q0.0_OFF_3', 'target': 'p_Q0.0_0', 'type': 'regular'}
+    ],
+    'initial_marking': {
+        'p_I0.0_0': 1,
+        'p_I0.0_1': 0,
+        'p_Q0.0_0': 1,
+        'p_Q0.0_1': 0
+    }
+}
+
+
 if __name__ == "__main__":
     example_usage()

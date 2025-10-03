@@ -1,4 +1,12 @@
+class LDGraph:
+    def __init__(self):
+        self.vertices = []  # 实现(s₁,s₂,s₃)三元组
+        self.edges = []     # 连接关系
+        self.rungs = []     # 梯级定义
+
 class LadderDiagramToPetriNetConverter:
+    
+
     """
     将梯形图(LD)转换为普通Petri网(PN)的转换器
     基于论文《Modeling and Race Detection of Ladder Diagrams via Ordinary Petri Nets》的算法
@@ -11,6 +19,7 @@ class LadderDiagramToPetriNetConverter:
         self.initial_marking = {} # 初始标识: {place_id: token_count}
         self.variable_counter = 0
         self.transition_counter = 0
+
     
     def create_place(self, variable_name, state):
         """创建库所"""
@@ -257,14 +266,6 @@ def print_full_petri_net(petri_net):
     
     print("="*80 + "\n")
     
-    # import json
-    
-    print(petri_net)
-    
-    #     # 将字典写入 JSON 文件
-    # with open("petri_net.json", "w", encoding="utf-8") as f:
-    #     json.dump(petri_net, f, ensure_ascii=False, indent=4)
-    
     return petri_net
 
 
@@ -303,22 +304,6 @@ def example_usage():
     # 创建转换器并执行转换
     converter = LadderDiagramToPetriNetConverter()
     petri_net = converter.convert(plc_ladder_diagram_logic)
-    
-    # # 输出转换结果摘要
-    # print("\n=== 转换结果摘要 ===")
-    # print(f"库所数量: {len(petri_net['places'])}")
-    # print(f"变迁数量: {len(petri_net['transitions'])}")
-    # print(f"弧数量: {len(petri_net['arcs'])}")
-    
-    # print("\n=== 前5个库所 ===")
-    # for place in petri_net['places'][:5]:  # 直接切片列表
-    #     print(f"  {place['id']} (变量: {place['variable']}, 状态: {place['state']})")
-
-    
-    # print("\n=== 前5个变迁 ===")
-    # for transition in list(petri_net['transitions'])[:5]:
-    #     print(f"  {transition['id']} (类型: {transition['type']})")
-    
         
     # 打印完整的Petri网结构
     print_full_petri_net(petri_net)
