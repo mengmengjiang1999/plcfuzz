@@ -1,0 +1,27 @@
+TYPE
+  LOGLEVEL : (CRITICAL, WARNING, INFO, DEBUG) := INFO;
+END_TYPE
+
+
+PROGRAM program0
+  VAR
+    Test1 AT %IX0.0 : BOOL;
+    Test2 AT %IX0.1 : BOOL;
+    LED AT %QX0.0 : BOOL;
+  END_VAR
+
+  LED := Test2 AND Test1;
+END_PROGRAM
+
+
+CONFIGURATION Config0
+
+  RESOURCE Res0 ON PLC
+    VAR_GLOBAL
+      Test1 : BOOL;
+      Test2 : BOOL;
+    END_VAR
+    TASK task0(INTERVAL := T#20ms,PRIORITY := 0);
+    PROGRAM instance0 WITH task0 : program0;
+  END_RESOURCE
+END_CONFIGURATION

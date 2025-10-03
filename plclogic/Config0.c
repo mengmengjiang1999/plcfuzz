@@ -10,13 +10,16 @@
 #include "POUS.h"
 
 // CONFIGURATION CONFIG0
+__DECLARE_GLOBAL_LOCATION(BOOL,__IX0_0)
+__DECLARE_GLOBAL_LOCATED(BOOL,CONFIG0,PB1)
 
 void RES0_init__(void);
 
 void config_init__(void) {
   BOOL retain;
   retain = 0;
-  
+  __INIT_GLOBAL_LOCATED(CONFIG0,PB1,__IX0_0,retain)
+  __INIT_GLOBAL(BOOL,PB1,__INITIAL_VALUE(__BOOL_LITERAL(FALSE)),retain)
   RES0_init__();
 }
 
