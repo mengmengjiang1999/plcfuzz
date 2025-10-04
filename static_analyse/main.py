@@ -116,7 +116,7 @@ def save_to_csv(variables, output_file):
 
 # 使用示例
 if __name__ == "__main__":
-    variables = extract_all_glue_variables("../src/glueVars.cpp")
+    variables = extract_all_glue_variables("./src/glueVars.cpp")
     print_variable_summary(variables)
     
     # 保存到CSV以便后续分析

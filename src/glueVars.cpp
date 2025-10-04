@@ -69,6 +69,7 @@ IEC_ULINT *special_functions[BUFFER_SIZE];
 
 void glueVars()
 {
+	bool_input[0][0] = (IEC_BOOL *)__IX0_0;
 }
 
 void updateTime()

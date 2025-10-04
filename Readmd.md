@@ -63,11 +63,11 @@ python3 ./static_analyse/main.py 分析plc代码，生成配置文件。
 
 2. 运行./build_plc_to_c.sh脚本，将plc代码编译成C代码。
 
-3. python3 ./static_analyse/main.py 分析plc代码，生成配置文件。
+3. 运行./build.sh脚本，编译未插桩的可执行文件，生成glueVars.cpp文件
 
-4. 运行./build_shared_library.sh脚本，编译共享库。
+4. python3 ./static_analyse/main.py 分析plc代码，生成配置文件。
 
-5. 运行./build.sh脚本，编译未插桩的可执行文件。
+5. 运行./build_shared_library.sh脚本，编译共享库。
 
 6. 运行./buildfuzz.sh脚本，编译插桩过后的可执行文件。
 
