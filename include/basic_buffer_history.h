@@ -97,8 +97,8 @@ class BasicBufferHistory<T, 2> : public SuperBasicBufferHistory {
         index = (index + 1) % MAX_RESULTS;
     }
     bool check_change() {
-        // this->print_history();
-        // std::cout<<"bool check_change() called"<<std::endl;
+        this->print_history();
+        std::cout << "bool check_change() called" << std::endl;
         int change_count = 0;
         for (size_t i = 1; i < MAX_RESULTS; i++) {
             bool is_crash = false;

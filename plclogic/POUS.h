@@ -15,9 +15,11 @@ __DECLARE_ENUMERATED_TYPE(LOGLEVEL,
 typedef struct {
   // PROGRAM Interface - IN, OUT, IN_OUT variables
   __DECLARE_VAR(BOOL,PB1)
+  __DECLARE_VAR(BOOL,LED)
+  __DECLARE_VAR(BOOL,LED2)
 
   // PROGRAM private variables - TEMP, private and located variables
-  __DECLARE_VAR(INT,CURRENT_STATE)
+  __DECLARE_VAR(LINT,CSTATE92)
 
 } PROGRAM0;
 

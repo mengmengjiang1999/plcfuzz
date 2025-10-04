@@ -3,7 +3,7 @@
 # 定义各步骤的执行函数
 build_plcfiles() {
     echo "Building PLC files..."
-    ./build_scripts/build_plcfiles.sh ./testcases/state_test.st
+    ./build_scripts/build_plcfiles.sh ./testcases/auto_generate.st
 }
 
 build_c() {
