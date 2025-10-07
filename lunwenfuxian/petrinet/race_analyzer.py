@@ -148,6 +148,7 @@ class RaceConditionAnalyzer:
         return racing_nodes
     
     def find_race_paths(self, racing_nodes: Set[Tuple]) -> List[List[Tuple]]:
+        print("开始查找竞态路径...")
         """
         查找竞态路径（基于定义9）
         
@@ -223,6 +224,7 @@ class RaceConditionAnalyzer:
         """
         查找包含竞态节点的循环路径
         """
+        print("开始查找循环路径...")
         cycles = []
         visited = set()
         stack = [(start_node, [start_node])]

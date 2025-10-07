@@ -17,6 +17,7 @@ class LDGraphToPetriNetConverter:
         self.ld_graph = None
         
     def convert(self, ld_graph: Dict) -> Dict:
+        print("开始转换LD Graph到Petri网...")
         """主转换函数"""
         self.ld_graph = ld_graph
         vertices = ld_graph['vertices']

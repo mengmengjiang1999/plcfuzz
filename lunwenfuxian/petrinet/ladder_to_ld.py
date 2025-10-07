@@ -7,6 +7,7 @@ class LDGraphConverter:
         self.rung_count = 0
         
     def convert_to_ld_graph(self, ladder_diagram):
+        print("Converting ladder diagram to LD Graph...")
         """
         将梯形图转换为LD Graph
         """
