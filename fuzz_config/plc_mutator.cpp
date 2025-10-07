@@ -258,8 +258,6 @@ void mutate_dint_block(BasicInputBlock<IEC_DINT, 1> &block, MutatorState *state)
 void mutate_lint_block(BasicInputBlock<IEC_LINT, 1> &block, MutatorState *state) {
     for (const auto &mapping : plc_variable_mappings) {
         if (mapping.var_type == "lint_inputs") {
-            // for (int i = 0; i < BUFFER_SIZE; ++i) {
-            //     if (state->should_mutate("lint_inputs", i) && random() % 100 < state->mutation_rate()) {
             if (random() % 100 < state->mutation_rate()) {
                 switch (random() % 6) {
                     case 0:
