@@ -4,7 +4,8 @@
 build_plcfiles() {
     echo "Building PLC files..."
     # ./build_scripts/build_plcfiles.sh ./testcases/converted_plc_code.st
-    ./build_scripts/build_plcfiles.sh ./testcases/hello_ld_convert.st
+    # ./build_scripts/build_plcfiles.sh ./testcases/hello_ld_convert.st
+    ./build_scripts/build_plcfiles.sh ./testcases/light.st
 }
 
 build_c() {

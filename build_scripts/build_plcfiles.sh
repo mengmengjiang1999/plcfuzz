@@ -9,6 +9,7 @@ rm -rf *
 cd ..
 
 ls -lh ./tools/iec2c
+ls -lh ./tools/iec2iec
 
 # 3. 将PLC逻辑代码编译成C语言代码
 ./tools/iec2c -T ./plclogic $1
