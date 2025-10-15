@@ -1,17 +1,24 @@
 void PROGRAM0_init__(PROGRAM0 *data__, BOOL retain) {
-  __INIT_LOCATED(BOOL,__IX0_0,data__->PB1,retain)
-  __INIT_LOCATED_VALUE(data__->PB1,__BOOL_LITERAL(FALSE))
-  __INIT_LOCATED(BOOL,__IX0_1,data__->PB2,retain)
-  __INIT_LOCATED_VALUE(data__->PB2,__BOOL_LITERAL(FALSE))
-  __INIT_LOCATED(BOOL,__QX0_0,data__->LED,retain)
-  __INIT_LOCATED_VALUE(data__->LED,__BOOL_LITERAL(FALSE))
+  __INIT_VAR(data__->PB1,__BOOL_LITERAL(FALSE),retain)
+  __INIT_VAR(data__->CURRENT_STATE,0,retain)
 }
 
 // Code part
 void PROGRAM0_body__(PROGRAM0 *data__) {
   // Initialise TEMP variables
 
-  __SET_LOCATED(data__->,LED,,(!(__GET_LOCATED(data__->PB2,)) && (__GET_LOCATED(data__->LED,) || __GET_LOCATED(data__->PB1,))));
+  {
+    INT __case_expression = __GET_VAR(data__->CURRENT_STATE,);
+    if ((__case_expression == 0)) {
+      __SET_VAR(data__->,CURRENT_STATE,,1);
+    }
+    else if ((__case_expression == 1)) {
+      __SET_VAR(data__->,CURRENT_STATE,,2);
+    }
+    else if ((__case_expression == 2)) {
+      __SET_VAR(data__->,CURRENT_STATE,,0);
+    }
+  };
 
   goto __end;
 

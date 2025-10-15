@@ -3,9 +3,15 @@
 # 定义各步骤的执行函数
 build_plcfiles() {
     echo "Building PLC files..."
-    # ./build_scripts/build_plcfiles.sh ./testcases/converted_plc_code.st
-    # ./build_scripts/build_plcfiles.sh ./testcases/hello_ld_convert.st
-    ./build_scripts/build_plcfiles.sh ./testcases/light.st
+    # ./build_scripts/build_plcfiles.sh ./testcases/race_bug_tests/converted_plc_code.st
+    # ./build_scripts/build_plcfiles.sh ./testcases/race_bug_tests/auto_generate.st
+    # ./build_scripts/build_plcfiles.sh ./testcases/race_bug_tests/light.st
+    # ./build_scripts/build_plcfiles.sh ./testcases/race_bug_tests/no_race_bug.st
+    # ./build_scripts/build_plcfiles.sh ./testcases/race_bug_tests/race_bug.st
+    # ./build_scripts/build_plcfiles.sh ./testcases/race_bug_tests/plc.st
+    # ./build_scripts/build_plcfiles.sh ./testcases/race_bug_tests/race_example_in_petrinet.st
+    # ./build_scripts/build_plcfiles.sh ./testcases/race_bug_tests/2333.st
+    ./build_scripts/build_plcfiles.sh ./testcases/race_bug_tests/state_test.st
 }
 
 build_c() {
