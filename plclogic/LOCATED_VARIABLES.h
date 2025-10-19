@@ -1,1 +1,0 @@
-__LOCATED_VAR(BOOL,__IX0_0,I,X,0,0)

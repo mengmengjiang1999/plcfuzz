@@ -11,7 +11,8 @@ build_plcfiles() {
     # ./build_scripts/build_plcfiles.sh ./testcases/race_bug_tests/plc.st
     # ./build_scripts/build_plcfiles.sh ./testcases/race_bug_tests/race_example_in_petrinet.st
     # ./build_scripts/build_plcfiles.sh ./testcases/race_bug_tests/2333.st
-    ./build_scripts/build_plcfiles.sh ./testcases/race_bug_tests/state_test.st
+    # ./build_scripts/build_plcfiles.sh ./testcases/race_bug_tests/state_test.st
+    ./build_scripts/build_plcfiles.sh ./testcases/ctc_osr.st
 }
 
 build_c() {
