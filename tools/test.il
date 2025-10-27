@@ -1,0 +1,13 @@
+PROGRAM IL_TEST
+VAR
+    X : INT := 15;
+    Z : BOOL := TRUE;
+    Y : BOOL;
+END_VAR
+
+LD X
+GT 10
+LD Z
+AND
+ST Y
+END_PROGRAM
