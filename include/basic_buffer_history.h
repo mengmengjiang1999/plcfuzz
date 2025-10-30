@@ -8,7 +8,9 @@ static const int MAX_RESULTS = 10;
 class SuperBasicBufferHistory {
    protected:
     int index;
-    SuperBasicBufferHistory() { index = 0; }
+    SuperBasicBufferHistory() {
+        index = 0;
+    }
 };
 
 template <typename T, int Dim = 1>
@@ -18,16 +20,16 @@ class BasicBufferHistory : public SuperBasicBufferHistory {
     T buffer_output[BUFFER_SIZE][MAX_RESULTS];
     BasicBufferHistory() {
         // std::cout << "BasicBufferHistory<T, " << Dim << ">::BasicBufferHistory() called." << std::endl;
-        for (int i = 0; i < BUFFER_SIZE; i++) {
-            for (int j = 0; j < MAX_RESULTS; j++) {
+        for(int i = 0; i < BUFFER_SIZE; i++) {
+            for(int j = 0; j < MAX_RESULTS; j++) {
                 buffer_input[i][j] = 0;
                 buffer_output[i][j] = 0;
             }
         }
     }
-    void update_history(T *input[BUFFER_SIZE], T *output[BUFFER_SIZE]) {
+    void update_history(T* input[BUFFER_SIZE], T* output[BUFFER_SIZE]) {
         // std::cout << "BasicBufferHistory<T, " << Dim << ">::update_history() called." << std::endl;
-        for (int i = 0; i < BUFFER_SIZE; i++) {
+        for(int i = 0; i < BUFFER_SIZE; i++) {
             buffer_input[i][index] = *input[i];
             buffer_output[i][index] = *output[i];
         }
@@ -36,31 +38,31 @@ class BasicBufferHistory : public SuperBasicBufferHistory {
     bool check_change() {
         // std::cout << "BasicBufferHistory<T, Dim>::check_change() called." << std::endl;
         int change_count = 0;
-        for (size_t i = 1; i < MAX_RESULTS; i++) {
+        for(size_t i = 1; i < MAX_RESULTS; i++) {
             bool is_crash = false;
-            for (size_t k = 0; k < BUFFER_SIZE; k++) {
-                if (buffer_output[k][i] != buffer_output[k][i - 1]) {
+            for(size_t k = 0; k < BUFFER_SIZE; k++) {
+                if(buffer_output[k][i] != buffer_output[k][i - 1]) {
                     is_crash = true;
                     break;
                 }
             }
-            if (is_crash) {
+            if(is_crash) {
                 break;
             }
 
-            if (is_crash) {
+            if(is_crash) {
                 change_count++;
             }
         }
-        if (change_count > 0) {
+        if(change_count > 0) {
             return true;
         }
         return false;
     }
     void print_history() {
-        for (int j = 0; j < MAX_RESULTS; j++) {
+        for(int j = 0; j < MAX_RESULTS; j++) {
             std::cout << "index: " << j << std::endl;
-            for (int i = 0; i < BUFFER_SIZE; i++) {
+            for(int i = 0; i < BUFFER_SIZE; i++) {
                 std::cout << "input[" << i << "]=" << static_cast<uint32_t>(buffer_input[i][j]) << std::endl;
                 std::cout << "output[" << i << "]= " << static_cast<uint32_t>(buffer_output[i][j]) << std::endl;
             }
@@ -75,9 +77,9 @@ class BasicBufferHistory<T, 2> : public SuperBasicBufferHistory {
     T buffer_output[BUFFER_SIZE][8][MAX_RESULTS];
     BasicBufferHistory() {
         // std::cout << "BasicBufferHistory<T, 2>::BasicBufferHistory() called." << std::endl;
-        for (int i = 0; i < BUFFER_SIZE; i++) {
-            for (int j = 0; j < 8; j++) {
-                for (int k = 0; k < MAX_RESULTS; k++) {
+        for(int i = 0; i < BUFFER_SIZE; i++) {
+            for(int j = 0; j < 8; j++) {
+                for(int k = 0; k < MAX_RESULTS; k++) {
                     buffer_input[i][j][k] = 0;
                     buffer_output[i][j][k] = 0;
                 }
@@ -85,11 +87,11 @@ class BasicBufferHistory<T, 2> : public SuperBasicBufferHistory {
         }
         // this->print_history();
     }
-    void update_history(T *bool_input[BUFFER_SIZE][8], T *bool_output[BUFFER_SIZE][8]) {
+    void update_history(T* bool_input[BUFFER_SIZE][8], T* bool_output[BUFFER_SIZE][8]) {
         buffer_input[0][0][index] = 60;
         buffer_output[0][0][index] = 60;
-        for (int i = 0; i < BUFFER_SIZE; i++) {
-            for (int j = 0; j < 8; j++) {
+        for(int i = 0; i < BUFFER_SIZE; i++) {
+            for(int j = 0; j < 8; j++) {
                 buffer_input[i][j][index] = *bool_input[i][j];
                 buffer_output[i][j][index] = *bool_output[i][j];
             }
@@ -97,32 +99,33 @@ class BasicBufferHistory<T, 2> : public SuperBasicBufferHistory {
         index = (index + 1) % MAX_RESULTS;
     }
     bool check_change() {
-        this->print_history();
-        std::cout << "bool check_change() called" << std::endl;
+        // this->print_history();
+        // std::cout << "bool check_change() called" << std::endl;
         int change_count = 0;
-        for (size_t i = 1; i < MAX_RESULTS; i++) {
+        for(size_t i = 1; i < MAX_RESULTS; i++) {
             bool is_crash = false;
-            for (size_t j = 0; j < 8; j++) {
-                for (size_t k = 0; k < BUFFER_SIZE; k++) {
-                    if (buffer_output[k][j][i] != buffer_output[k][j][i - 1]) {
-                        std::cout << "i=" << i << " j=" << j << " k=" << k
-                                  << " buffer_output[k][j][i] != buffer_output[k][j][i - 1]" << std::endl;
-                        std::cout << "buffer_output[k][j][i] = " << static_cast<uint32_t>(buffer_output[k][j][i])
-                                  << ",buffer_output[k][j][i - 1] = " << static_cast<uint32_t>(buffer_output[k][j][i - 1]) << ","
-                                  << std::endl;
+            for(size_t j = 0; j < 8; j++) {
+                for(size_t k = 0; k < BUFFER_SIZE; k++) {
+                    if(buffer_output[k][j][i] != buffer_output[k][j][i - 1]) {
+                        // std::cout << "i=" << i << " j=" << j << " k=" << k
+                        //           << " buffer_output[k][j][i] != buffer_output[k][j][i - 1]" << std::endl;
+                        // std::cout << "buffer_output[k][j][i] = " << static_cast<uint32_t>(buffer_output[k][j][i])
+                        //           << ",buffer_output[k][j][i - 1] = " << static_cast<uint32_t>(buffer_output[k][j][i - 1]) <<
+                        //           ","
+                        //           << std::endl;
                         is_crash = true;
                         break;
                     }
                 }
-                if (is_crash) {
+                if(is_crash) {
                     break;
                 }
             }
-            if (is_crash) {
+            if(is_crash) {
                 change_count++;
             }
         }
-        if (change_count > 0) {
+        if(change_count > 0) {
             return true;
         }
         return false;
@@ -130,24 +133,20 @@ class BasicBufferHistory<T, 2> : public SuperBasicBufferHistory {
     void print_history() {
         std::cout << "bool print_history() called" << std::endl;
         std::cout << "input" << std::endl;
-        for (int k = 0; k < MAX_RESULTS; k++) {
+        for(int k = 0; k < MAX_RESULTS; k++) {
             std::cout << "index: " << k << std::endl;
-            for (int i = 0; i < BUFFER_SIZE; i++) {
-                for (int j = 0; j < 8; j++) {
+            for(int i = 0; i < BUFFER_SIZE; i++) {
+                for(int j = 0; j < 8; j++) {
                     std::cout << static_cast<uint32_t>(buffer_input[i][j][k]) << " ";
-                    // std::cout << "input[" << i << "][" << j << "]= " << static_cast<uint32_t>(buffer_input[i][j][k]) <<
-                    // std::endl; std::cout << "output[" << i << "][" << j << "]= " <<
-                    // static_cast<uint32_t>(buffer_output[i][j][k])
-                    //   << std::endl;
                 }
                 std::cout << std::endl;
             }
         }
         std::cout << "output" << std::endl;
-        for (int k = 0; k < MAX_RESULTS; k++) {
+        for(int k = 0; k < MAX_RESULTS; k++) {
             std::cout << "index: " << k << std::endl;
-            for (int i = 0; i < BUFFER_SIZE; i++) {
-                for (int j = 0; j < 8; j++) {
+            for(int i = 0; i < BUFFER_SIZE; i++) {
+                for(int j = 0; j < 8; j++) {
                     std::cout << static_cast<uint32_t>(buffer_output[i][j][k]) << " ";
                 }
                 std::cout << std::endl;

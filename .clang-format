@@ -9,3 +9,32 @@ ColumnLimit: 130      # 单行最大长度
 # 函数之间的空行控制（需 clang-format 12+）
 BraceWrapping:
   AfterFunction: true       # 函数结束后换行
+
+# ============= 新增的函数注释相关配置 =============
+
+# 注释对齐和格式化
+AlignTrailingComments: true      # 对齐行尾注释
+ReflowComments: true            # 重新格式化注释
+CommentPragmas: '^FunctionComment$'  # 识别函数注释的正则表达式
+
+# 函数声明和定义的空格控制
+SpaceBeforeParens: false        # 函数名和括号之间加空格
+SpaceInEmptyParentheses: false   # 空括号内不加空格
+AllowShortFunctionsOnASingleLine: None  # 不允许单行函数声明
+
+# 多行字符串处理（影响多行注释）
+AlwaysBreakBeforeMultilineStrings: true  # 多行字符串前换行
+
+# 函数参数换行风格（与BinPackParameters配合）
+BinPackArguments: false  # 函数调用
+BinPackParameters: false  # 函数声明
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+
+# 函数返回类型处理
+AlwaysBreakAfterReturnType: None
+AlwaysBreakAfterDefinitionReturnType: None
+
+# 模板声明处理
+AlwaysBreakTemplateDeclarations: Yes
+SpaceAfterTemplateKeyword: true

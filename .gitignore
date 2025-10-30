@@ -17,3 +17,4 @@ openplc
 !**/CMakeLists.txt
 findings/
 findings_back/
+plclogic/
