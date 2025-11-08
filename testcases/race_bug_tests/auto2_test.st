@@ -2,20 +2,23 @@ TYPE
   LOGLEVEL : (CRITICAL, WARNING, INFO, DEBUG) := INFO;
 END_TYPE
 
+
 PROGRAM program0
-   (* Variable definition *)
-   VAR
-    pb1 AT %IX0.0 : BOOL;
-    pb2 AT %IX0.1 : BOOL;
-    pb3 AT %IX0.2 : BOOL;
-    led AT %QX0.0 : BOOL;
-    led2 AT %QX0.1 : BOOL;
-    led3 AT %QX0.2 : BOOL;
-    led4 AT %QX0.3 : BOOL;
-    cstate44 AT %QW1 : INT := 0;
+   VAR_INPUT
+    pb1 : BOOL;
+    pb2 : BOOL;
+    pb3 : BOOL;
+   END_VAR
+    VAR_OUTPUT
+    led : BOOL;
+    led2 : BOOL;
+    led3 : BOOL;
+    led4 : BOOL;
+ END_VAR
+    VAR
+    cstate44 : INT := 0;
    END_VAR
 
-   (* Control logic *)
 CASE cstate44 OF
 0:
     IF (( TRUE )) THEN 
@@ -46,8 +49,17 @@ END_CASE;
 END_PROGRAM
 
 CONFIGURATION Config0
+  VAR_GLOBAL
+    INPUT00 AT %IX0.0 : BOOL;
+    INPUT01 AT %IX0.1 : BOOL;
+    INPUT02 AT %IX0.2 : BOOL;
+    OUTPUT00 AT %QX0.0 : BOOL;
+    OUTPUT01 AT %QX0.1 : BOOL;
+    OUTPUT02 AT %QX0.2 : BOOL;
+    OUTPUT03 AT %QX0.3 : BOOL;
+  END_VAR
   RESOURCE Res0 ON PLC
-    TASK task0(INTERVAL := T#50ms, PRIORITY := 0);
-    PROGRAM instance0 WITH task0 : program0;
+    task0(INTERVAL := T#50ms, PRIORITY := 0);
+    PROGRAM instance0 WITH task0 : program0(pb1 := INPUT00, pb2 := INPUT01, pb3 := INPUT02, led := OUTPUT00, led2 := OUTPUT01, led3 := OUTPUT02, led4 := OUTPUT03);
   END_RESOURCE
 END_CONFIGURATION
