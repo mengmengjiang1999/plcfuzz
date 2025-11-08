@@ -1,12 +1,5 @@
-# 编译器设置，支持AFL模式
-AFL ?= 0
-ifeq ($(AFL),1)
-    CC  = afl-clang-fast
-    CXX = afl-clang-fast++
-else
-    CC  = gcc
-    CXX = g++
-endif
+CC  = gcc
+CXX = g++
 
 # 目录和文件路径
 BUILD_DIR     := build
