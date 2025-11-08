@@ -51,4 +51,5 @@ all() {
 # 参数解析
 all $filename
 ./runfuzz.sh
-cp ./findings/default/fuzzer_stats ./results/fuzzer_stats_$filename.txt
+cp ./findings/default/fuzzer_stats ./results/fuzzer_stats_$filename
+cp ./findings/default/plot_data ./results/plot_data_$filename
