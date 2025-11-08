@@ -3,12 +3,10 @@ TYPE
 END_TYPE
 
 PROGRAM program0
-  VAR_INPUT
-    PB1 : BOOL;
-  END_VAR
-  VAR_OUTPUT
-    LED : BOOL;
-    LED2: BOOL;
+  VAR
+    PB1 AT %IX0.0 : BOOL;
+    LED2 AT %QX0.0 : BOOL;
+    LED AT %QX0.1 : BOOL;
   END_VAR
 
   LED2 := LED AND PB1;

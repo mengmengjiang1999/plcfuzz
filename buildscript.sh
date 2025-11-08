@@ -4,13 +4,16 @@
 build_plcfiles() {
     echo "Building PLC files..."
     # ./build_scripts/build_plcfiles.sh ./testcases/race_bug_tests/auto2_new.st  #success
-    # ./build_scripts/build_plcfiles.sh ./testcases/race_bug_tests/auto2_test.st 
-    ./build_scripts/build_plcfiles.sh ./testcases/race_test.st
+    ./build_scripts/build_plcfiles.sh ./testcases/auto_race/auto3.st 
+    # ./build_scripts/build_plcfiles.sh ./testcases/race_function_test.st
+    # ./build_scripts/build_plcfiles.sh ./testcases/race_test.st
+    # ./build_scripts/build_plcfiles.sh ./testcases/race_test_success.st
 }
 
 build_c() {
     echo "Building C code..."
-    ./build_scripts/build.sh
+    # ./build_scripts/build.sh
+    make
 }
 
 static_analyse() {

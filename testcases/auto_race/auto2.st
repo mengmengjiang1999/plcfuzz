@@ -6,20 +6,15 @@ END_TYPE
 PROGRAM program0
 
    (* Variable definition *)
-   VAR_INPUT
-      pb1	: BOOL;
-      pb2	: BOOL;
-      pb3	: BOOL;
-   END_VAR
-   VAR_OUTPUT
-      led	: BOOL;
-      led2	: BOOL;
-      led3	: BOOL;
-      led4	: BOOL;
-   END_VAR
    VAR
-   (* The total number of states equals to 5 *)
-      cstate44	: LINT := 0;
+      pb1   AT %IX0.0: BOOL;
+      pb2	AT %IX0.1: BOOL;
+      pb3	AT %IX0.2: BOOL;
+      led	AT %QX0.0: BOOL;
+      led2	AT %QX0.1: BOOL;
+      led3	AT %QX0.2: BOOL;
+      led4	AT %QX0.3: BOOL;
+      cstate44	AT %QW1 : INT := 0;
    END_VAR
 
    (* Control logic *)
@@ -53,15 +48,6 @@ END_CASE;
 END_PROGRAM
 
 CONFIGURATION Config0
-  VAR_GLOBAL
-    pb1 AT %IX0.0 : BOOL;
-    pb2 AT %IX0.1 : BOOL;
-    pb3 AT %IX0.2 : BOOL;
-    led AT %QX0.0 : BOOL;
-    led2 AT %QX0.1 : BOOL;
-    led3 AT %QX0.2 : BOOL;
-    led4 AT %QX0.3 : BOOL;
-  END_VAR
   RESOURCE Res0 ON PLC
     TASK task0(INTERVAL := T#50ms, PRIORITY := 0);
     PROGRAM instance0 WITH task0 : program0;

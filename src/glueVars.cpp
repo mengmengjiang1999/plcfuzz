@@ -70,8 +70,27 @@ IEC_ULINT *special_functions[BUFFER_SIZE];
 void glueVars()
 {
 	bool_input[0][0] = (IEC_BOOL *)__IX0_0;
+	bool_input[0][1] = (IEC_BOOL *)__IX0_1;
+	bool_input[0][2] = (IEC_BOOL *)__IX0_2;
+	bool_input[0][3] = (IEC_BOOL *)__IX0_3;
+	bool_input[0][4] = (IEC_BOOL *)__IX0_4;
+	bool_input[0][5] = (IEC_BOOL *)__IX0_5;
+	bool_input[0][6] = (IEC_BOOL *)__IX0_6;
+	bool_input[0][7] = (IEC_BOOL *)__IX0_7;
+	bool_input[1][0] = (IEC_BOOL *)__IX1_0;
+	bool_input[1][1] = (IEC_BOOL *)__IX1_1;
+	bool_input[1][2] = (IEC_BOOL *)__IX1_2;
+	bool_input[1][3] = (IEC_BOOL *)__IX1_3;
 	bool_output[0][0] = (IEC_BOOL *)__QX0_0;
 	bool_output[0][1] = (IEC_BOOL *)__QX0_1;
+	bool_output[0][2] = (IEC_BOOL *)__QX0_2;
+	bool_output[0][3] = (IEC_BOOL *)__QX0_3;
+	bool_output[0][4] = (IEC_BOOL *)__QX0_4;
+	bool_output[0][5] = (IEC_BOOL *)__QX0_5;
+	bool_output[0][6] = (IEC_BOOL *)__QX0_6;
+	bool_output[0][7] = (IEC_BOOL *)__QX0_7;
+	bool_output[1][0] = (IEC_BOOL *)__QX1_0;
+	int_output[1] = (IEC_UINT *)__QW1;
 }
 
 void updateTime()
