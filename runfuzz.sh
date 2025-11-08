@@ -14,7 +14,7 @@ rm program_output.log
 cat /tmp/program_output > program_output.log &
 # AFL_NO_FORKSRV=1 AFL_DONT_OPTIMIZE=1 
 export AFL_AUTORESUME=1
-afl-fuzz -t 10000 -i seeds/ -o findings/ -g ~/Project/fuzzbuild/plcfuzz/fuzz_config/plc.grammar -- ./openplc_fuzz  @@
+afl-fuzz -V 3600 -t 10000 -i seeds/ -o findings/ -g ~/Project/fuzzbuild/plcfuzz/fuzz_config/plc.grammar -- ./openplc_fuzz  @@
 
 # # 运行模糊测试
 # afl-fuzz -i in -o out -x plc.dict -g plc.grammar ./plc_program
