@@ -81,48 +81,51 @@ def integrated_test_with_ld_graph():
     """与LD Graph转换器集成的完整测试"""
     
     # 1. 创建梯形图程序
-    # ladder_program = [
-    #     # 梯级1: 简单逻辑
-    #     [('I0.0', 'NO'), ('Q0.0', 'COIL')],
-        
-    #     # 梯级2: 包含相互触发的复杂逻辑
-    #     [
-    #         ('I0.1', 'NO'),
-    #         {   # 并联逻辑
-    #             'path1': [('I0.2', 'NC')],
-    #             'path2': [('Q0.0', 'NO')]  # 相互触发
-    #         },
-    #         ('Q0.1', 'COIL')
-    #     ],
-        
-    #     # 梯级3: 自保持电路
-    #     [
-    #         ('I0.3', 'NO'),
-    #         {   # 自保持
-    #             'path1': [('I0.3', 'NO')],
-    #             'path2': [('Q0.1', 'NO')]
-    #         },
-    #         ('Q0.1', 'COIL')
-    #     ]
-    # ]
     ladder_program = [
         # 梯级1: 简单逻辑
-        [{'path1': [('I0.0', 'NO')],
-                'path2': [('Q0.4', 'NO')]}, ('I0.1', 'NC'),('I0.4','NO') ],
-        [('Q0.4','NO'),('I0.1', 'NO'),('Q0.0', 'NO')],
-        [('I0.4','NO'),('Q0.0', 'NO')],
-        [('Q0.0','NO'),('I0.3', 'NO'),('Q0.1', 'NO')],
-        [('Q0.4','NO'),('Q0.1', 'NO'),('Q0.3', 'NC'),('Q0.2', 'NO')],
-        [('Q0.4','NO'),('I0.2', 'NO'),('Q0.2', 'NO'),('Q0.3', 'NO')],
+        [('I0.0', 'NO'), ('Q0.0', 'COIL')],
+        
+        # 梯级2: 包含相互触发的复杂逻辑
+        [
+            ('I0.1', 'NO'),
+            {   # 并联逻辑
+                'path1': [('I0.2', 'NC')],
+                'path2': [('Q0.0', 'NO')]  # 相互触发
+            },
+            ('Q0.1', 'COIL')
+        ],
+        
+        # 梯级3: 自保持电路
+        [
+            ('I0.3', 'NO'),
+            {   # 自保持
+                'path1': [('I0.3', 'NO')],
+                'path2': [('Q0.1', 'NO')]
+            },
+            ('Q0.1', 'COIL')
+        ]
     ]
+    # ladder_program = [
+    #     [{'path1': [('I0.0', 'NO')],
+    #             'path2': [('Q0.4', 'NO')]}, ('I0.1', 'NC'),('I0.4','NO') ],
+    #     [('Q0.4','NO'),('I0.1', 'NO'),('Q0.0', 'NO')],
+    #     [('I0.4','NO'),('Q0.0', 'NO')],
+    #     [('Q0.0','NO'),('I0.3', 'NO'),('Q0.1', 'NO')],
+    #     [('Q0.4','NO'),('Q0.1', 'NO'),('Q0.3', 'NC'),('Q0.2', 'NO')],
+    #     [('Q0.4','NO'),('I0.2', 'NO'),('Q0.2', 'NO'),('Q0.3', 'NO')],
+    # ]
     
     # 2. 转换为LD Graph
     ld_converter = LDGraphConverter()
     ld_graph = ld_converter.convert_to_ld_graph(ladder_program)
     
+    # print(ld_graph)
+    
     # 3. 转换为Petri网
     petri_converter = LDGraphToPetriNetConverter()
     petri_net = petri_converter.convert(ld_graph)
+    
+    # print(petri_net)
     
     # 4. 竞态检测
     analyzer = RaceConditionAnalyzer(petri_net)
