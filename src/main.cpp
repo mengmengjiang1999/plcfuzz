@@ -31,6 +31,7 @@
 #include <unistd.h>
 
 #include <chrono>
+#include <fstream>
 #include <iostream>
 #include <numeric>  // 需要包含这个头文件
 #include <sstream>
@@ -252,6 +253,33 @@ void print_cycle_time_latency() {
     auto latency_everage = record_latency_time[record_latency_time.size() - 1] / record_latency_time.size();
     std::cout << "cycle_time_everage: " << cycle_everage << std::endl;
     std::cout << "latency_time_everage: " << latency_everage << std::endl;
+}
+
+/**
+ * 将cycle_time和latency的记录写入CSV文件
+ */
+void write_cycle_time_latency_to_csv(const std::string& filename) {
+    // 创建并打开CSV文件
+    std::ofstream csv_file(filename);
+
+    // 检查文件是否成功打开
+    if(!csv_file.is_open()) {
+        std::cerr << "无法打开文件: " << filename << std::endl;
+        return;
+    }
+
+    // 写入CSV头部
+    csv_file << "index,cycle_time,latency_time\n";
+
+    // 写入每条记录
+    for(int i = 0; i < record_cycle_time.size(); i++) {
+        csv_file << i << "," << record_cycle_time[i] << "," << record_latency_time[i] << "\n";
+    }
+
+    // 关闭文件
+    csv_file.close();
+
+    std::cout << "数据已成功写入文件: " << filename << std::endl;
 }
 
 // pointers to IO *array[const][const] from cpp to c and back again don't work as expected, so instead callbacks
@@ -522,7 +550,7 @@ int main(int argc, char** argv) {
         cycle_total = cycle_total + cycle_time.tv_nsec;
 
         unsigned long long common_test_ticktime__ = 50ULL * 1ULL; /*ns*/
-        sleep_until(&timer_start, common_test_ticktime__);
+        sleep_until(&cycle_start, common_test_ticktime__);
 
         // Get the sleep end point which is also the start time/point of the next cycle
         clock_gettime(CLOCK_MONOTONIC, &timer_end);
@@ -560,6 +588,8 @@ int main(int argc, char** argv) {
     std::cout << "latency_total = " << latency_total << std::endl;
 
     print_cycle_time_latency();
+
+    write_cycle_time_latency_to_csv("test.csv");
 //======================================================
 //             SHUTTING DOWN OPENPLC RUNTIME
 //======================================================
