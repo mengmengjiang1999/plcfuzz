@@ -32,6 +32,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <numeric>  // 需要包含这个头文件
 #include <sstream>
 #include <stdexcept>  // 包含标准异常类
 
@@ -66,10 +67,10 @@ int log_counter = 0;
 // Helper function - Makes the running thread sleep for the ammount of time
 // in milliseconds
 //-----------------------------------------------------------------------------
-void sleep_until(struct timespec *ts, long long delay) {
+void sleep_until(struct timespec* ts, long long delay) {
     ts->tv_sec += delay / (1000 * 1000 * 1000);
     ts->tv_nsec += delay % (1000 * 1000 * 1000);
-    if (ts->tv_nsec >= 1000 * 1000 * 1000) {
+    if(ts->tv_nsec >= 1000 * 1000 * 1000) {
         ts->tv_nsec -= 1000 * 1000 * 1000;
         ts->tv_sec++;
     }
@@ -94,10 +95,10 @@ void sleepms(int milliseconds) {
  * @param b the subtrahend
  * @param result a - b
  */
-static inline void timespec_diff(struct timespec *a, struct timespec *b, struct timespec *result) {
+static inline void timespec_diff(struct timespec* a, struct timespec* b, struct timespec* result) {
     result->tv_sec = a->tv_sec - b->tv_sec;
     result->tv_nsec = a->tv_nsec - b->tv_nsec;
-    if (result->tv_nsec < 0) {
+    if(result->tv_nsec < 0) {
         --result->tv_sec;
         result->tv_nsec += 1000000000L;
     }
@@ -106,17 +107,17 @@ static inline void timespec_diff(struct timespec *a, struct timespec *b, struct 
 //-----------------------------------------------------------------------------
 // Helper function - Logs messages and print them on the console
 //-----------------------------------------------------------------------------
-void log(char *logmsg) {
+void log(char* logmsg) {
     pthread_mutex_lock(&logLock);  // lock mutex
     printf("%s", logmsg);
-    for (int i = 0; logmsg[i] != '\0'; i++) {
+    for(int i = 0; logmsg[i] != '\0'; i++) {
         log_buffer[log_index] = (unsigned char)logmsg[i];
         log_index++;
         log_buffer[log_index] = '\0';
     }
 
     log_counter++;
-    if (log_counter >= 1000) {
+    if(log_counter >= 1000) {
         /*Store current log on a file*/
         log_counter = 0;
         log_index = 0;
@@ -133,9 +134,9 @@ void log(char *logmsg) {
 //-----------------------------------------------------------------------------
 // Verify if pin is present in one of the ignored vectors
 //-----------------------------------------------------------------------------
-bool pinNotPresent(int *ignored_vector, int vector_size, int pinNumber) {
-    for (int i = 0; i < vector_size; i++) {
-        if (ignored_vector[i] == pinNumber)
+bool pinNotPresent(int* ignored_vector, int vector_size, int pinNumber) {
+    for(int i = 0; i < vector_size; i++) {
+        if(ignored_vector[i] == pinNumber)
             return false;
     }
 
@@ -147,22 +148,22 @@ bool pinNotPresent(int *ignored_vector, int vector_size, int pinNumber) {
 //-----------------------------------------------------------------------------
 void disableOutputs() {
     // Disable digital outputs
-    for (int i = 0; i < BUFFER_SIZE; i++) {
-        for (int j = 0; j < 8; j++) {
-            if (bool_output[i][j] != NULL)
+    for(int i = 0; i < BUFFER_SIZE; i++) {
+        for(int j = 0; j < 8; j++) {
+            if(bool_output[i][j] != NULL)
                 *bool_output[i][j] = 0;
         }
     }
 
     // Disable byte outputs
-    for (int i = 0; i < BUFFER_SIZE; i++) {
-        if (byte_output[i] != NULL)
+    for(int i = 0; i < BUFFER_SIZE; i++) {
+        if(byte_output[i] != NULL)
             *byte_output[i] = 0;
     }
 
     // Disable analog outputs
-    for (int i = 0; i < BUFFER_SIZE; i++) {
-        if (int_output[i] != NULL)
+    for(int i = 0; i < BUFFER_SIZE; i++) {
+        if(int_output[i] != NULL)
             *int_output[i] = 0;
     }
 }
@@ -172,26 +173,26 @@ void disableOutputs() {
 //-----------------------------------------------------------------------------
 void handleSpecialFunctions() {
     // current time [%ML1024]
-    struct tm *current_time;
+    struct tm* current_time;
     time_t rawtime;
 
     time(&rawtime);
     // store the UTC clock in [%ML1027]
-    if (special_functions[3] != NULL)
+    if(special_functions[3] != NULL)
         *special_functions[3] = rawtime;
 
     current_time = localtime(&rawtime);
 
     rawtime = rawtime - timezone;
-    if (current_time->tm_isdst > 0)
+    if(current_time->tm_isdst > 0)
         rawtime = rawtime + 3600;
 
-    if (special_functions[0] != NULL)
+    if(special_functions[0] != NULL)
         *special_functions[0] = rawtime;
 
     // number of cycles [%ML1025]
     cycle_counter++;
-    if (special_functions[1] != NULL)
+    if(special_functions[1] != NULL)
         *special_functions[1] = cycle_counter;
 
     // comm error counter [%ML1026]
@@ -204,30 +205,95 @@ void handleSpecialFunctions() {
 // Using special_functions to store REAL-TIME variables
 //-----------------------------------------------------------------------------
 void RecordCycletimeLatency(long cycle_time, long sleep_latency) {
-    if (special_functions[4] != NULL)
+    if(special_functions[4] != NULL)
         *special_functions[4] = cycle_time;
-    if (special_functions[5] != NULL)
+    if(special_functions[5] != NULL)
         *special_functions[5] = sleep_latency;
 }
 
+/**
+ * 记录每一个周期的cycle_time和latency
+ * index: cycle的周期下标
+ * cycle_time：这个cycle用了多长时间
+ * sleep_latency：睡着之后过了多久被唤醒
+ * 使用一个数组进行记录
+ */
+
+// 单位是微妙
+std::vector<long> record_cycle_time;
+std::vector<long> record_latency_time;
+void record_cycle_time_latency(long cycle_time, long sleep_latency) {
+    record_cycle_time.push_back(cycle_time);
+    record_latency_time.push_back(sleep_latency);
+}
+
+void calculate_latency_max_min_avg(long& latency_max, long& latency_min, long& latency_avg) {
+    latency_max = record_latency_time[0];
+    latency_min = record_latency_time[0];
+    latency_avg = 0;
+    for(int i = 1; i < record_latency_time.size(); i++) {
+        if(latency_max < record_latency_time[i] - record_latency_time[i - 1]) {
+            latency_max = record_latency_time[i] - record_latency_time[i - 1];
+        }
+        if(latency_min > record_latency_time[i] - record_latency_time[i - 1]) {
+            latency_min = record_latency_time[i] - record_latency_time[i - 1];
+        }
+        std::cout << "latency_max = " << latency_max << " latency_min = " << latency_min << std::endl;
+    }
+}
+/**
+ * 打印cycle_time和latency的记录
+ */
+void print_cycle_time_latency() {
+    for(int i = 0; i < record_cycle_time.size(); i++) {
+        std::cout << i << "," << record_cycle_time[i] << "," << record_latency_time[i] << std::endl;
+    }
+    auto cycle_everage = accumulate(record_cycle_time.begin(), record_cycle_time.end(), 0.0) / record_cycle_time.size();
+    auto latency_everage = record_latency_time[record_latency_time.size() - 1] / record_latency_time.size();
+    std::cout << "cycle_time_everage: " << cycle_everage << std::endl;
+    std::cout << "latency_time_everage: " << latency_everage << std::endl;
+}
+
 // pointers to IO *array[const][const] from cpp to c and back again don't work as expected, so instead callbacks
-u_int8_t *bool_input_call_back(int a, int b) { return bool_input[a][b]; }
-u_int8_t *bool_output_call_back(int a, int b) { return bool_output[a][b]; }
-u_int8_t *byte_input_call_back(int a) { return byte_input[a]; }
-u_int8_t *byte_output_call_back(int a) { return byte_output[a]; }
-u_int16_t *int_input_call_back(int a) { return int_input[a]; }
-u_int16_t *int_output_call_back(int a) { return int_output[a]; }
-u_int32_t *dint_input_call_back(int a) { return dint_input[a]; }
-u_int32_t *dint_output_call_back(int a) { return dint_output[a]; }
-u_int64_t *lint_input_call_back(int a) { return lint_input[a]; }
-u_int64_t *lint_output_call_back(int a) { return lint_output[a]; }
-void logger_callback(char *msg) { log(msg); }
+u_int8_t* bool_input_call_back(int a, int b) {
+    return bool_input[a][b];
+}
+u_int8_t* bool_output_call_back(int a, int b) {
+    return bool_output[a][b];
+}
+u_int8_t* byte_input_call_back(int a) {
+    return byte_input[a];
+}
+u_int8_t* byte_output_call_back(int a) {
+    return byte_output[a];
+}
+u_int16_t* int_input_call_back(int a) {
+    return int_input[a];
+}
+u_int16_t* int_output_call_back(int a) {
+    return int_output[a];
+}
+u_int32_t* dint_input_call_back(int a) {
+    return dint_input[a];
+}
+u_int32_t* dint_output_call_back(int a) {
+    return dint_output[a];
+}
+u_int64_t* lint_input_call_back(int a) {
+    return lint_input[a];
+}
+u_int64_t* lint_output_call_back(int a) {
+    return lint_output[a];
+}
+void logger_callback(char* msg) {
+    log(msg);
+}
 
 PLCInputSimulator INPUT_PLC_DATA;
 
 #define BUFFER_SIZE (1 << 20)  // 1MB = 1024 * 1024 bytes
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
     // 禁用缓冲（确保数据立即刷新）
     setvbuf(stdin, NULL, _IONBF, 0);
     setvbuf(stdout, NULL, _IONBF, 0);
@@ -247,21 +313,21 @@ int main(int argc, char **argv) {
     sprintf(log_msg, "OpenPLC Runtime starting...\n");
     log(log_msg);
 
-    if (argc < 2) {
+    if(argc < 2) {
         printf("Usage: %s <input_file>\n", argv[0]);
         return 1;
     }
 
     // 从文件读取输入
-    FILE *file = fopen(argv[1], "rb");
-    if (!file) {
+    FILE* file = fopen(argv[1], "rb");
+    if(!file) {
         printf("Failed to open input file!\n");
         return 1;
     }
 
     // 分配 1MB 缓冲区并初始化为 0
-    unsigned char *buffer = (unsigned char *)malloc(BUFFER_SIZE);
-    if (!buffer) {
+    unsigned char* buffer = (unsigned char*)malloc(BUFFER_SIZE);
+    if(!buffer) {
         fprintf(stderr, "Failed to allocate memory!\n");
         fclose(file);
         return 1;
@@ -272,21 +338,18 @@ int main(int argc, char **argv) {
     size_t bytes_read = fread(buffer, 1, BUFFER_SIZE, file);
     fclose(file);  // 立即关闭文件
 
-    if (bytes_read == 0) {
+    if(bytes_read == 0) {
         fprintf(stderr, "No data read from file!\n");
         free(buffer);
         return 1;
     }
 
     // 将字节数据转换为字符串流
-    std::string input_str(reinterpret_cast<char *>(buffer), bytes_read);
+    std::string input_str(reinterpret_cast<char*>(buffer), bytes_read);
 
     free(buffer);  // 释放缓冲区
 
-    // std::cout << input_str << std::endl;
     std::istringstream input_stream(input_str);
-
-    // std::cout << "out" << std::endl;
 
     PLCInputBlock input_plc_block;
 
@@ -298,7 +361,7 @@ int main(int argc, char **argv) {
     // input_plc_block.print();
     INPUT_PLC_DATA.add_block(input_plc_block);
 
-    while (input_stream >> input_plc_block) {
+    while(input_stream >> input_plc_block) {
         cnt_blocks++;
         INPUT_PLC_DATA.add_block(input_plc_block);
     }
@@ -325,7 +388,7 @@ int main(int argc, char **argv) {
     //======================================================
     //               MUTEX INITIALIZATION
     //======================================================
-    if (pthread_mutex_init(&bufferLock, NULL) != 0) {
+    if(pthread_mutex_init(&bufferLock, NULL) != 0) {
         printf("Mutex init failed\n");
         exit(1);
     }
@@ -365,17 +428,17 @@ int main(int argc, char **argv) {
     //======================================================
     // Set our thread to real time priority
     struct sched_param sp;
-    sp.sched_priority = 30;
+    sp.sched_priority = 50;
     printf("Setting main thread priority to RT\n");
     int ret = pthread_setschedparam(pthread_self(), SCHED_FIFO, &sp);
-    if (ret != 0) {
+    if(ret != 0) {
         printf("pthread_setschedparam failed: %d\n", ret);
         printf("WARNING: Failed to set main thread to real-time priority\n");
     }
 
     // Lock memory to ensure no swapping is done.
     printf("Locking main thread memory\n");
-    if (mlockall(MCL_FUTURE | MCL_CURRENT)) {
+    if(mlockall(MCL_FUTURE | MCL_CURRENT)) {
         printf("WARNING: Failed to lock memory\n");
     }
 #endif
@@ -392,7 +455,7 @@ int main(int argc, char **argv) {
     //                    MAIN LOOP
     //======================================================
     // while(run_openplc)
-    for (int i = 0; i < 100; i++) {
+    for(int i = 0; i < 100; i++) {
         // printf("Main loop iteration %d\n", i);
         // Get the start time for the running cycle
         // printf("Getting current time...main loop\n");
@@ -420,9 +483,17 @@ int main(int argc, char **argv) {
         pthread_mutex_lock(&bufferLock);  // lock mutex
 
 #ifdef _ethercat_src
-        if (ethercat_callcyclic(BUFFER_SIZE, bool_input_callback, bool_output_callback, byte_input_callback, byte_output_callback,
-                                int_input_callback, int_output_callback, dint_input_call_back, dint_output_call_back,
-                                lint_input_call_back, lint_output_call_back)) {
+        if(ethercat_callcyclic(BUFFER_SIZE,
+                               bool_input_callback,
+                               bool_output_callback,
+                               byte_input_callback,
+                               byte_output_callback,
+                               int_input_callback,
+                               int_output_callback,
+                               dint_input_call_back,
+                               dint_output_call_back,
+                               lint_input_call_back,
+                               lint_output_call_back)) {
             printf("EtherCAT cyclic failed\n");
             break;
         }
@@ -443,9 +514,10 @@ int main(int argc, char **argv) {
         clock_gettime(CLOCK_MONOTONIC, &cycle_end);
         // Compute the time usage in one cycle and do max/min/total comparison/recording
         timespec_diff(&cycle_end, &cycle_start, &cycle_time);
-        if (cycle_time.tv_nsec > cycle_max)
+
+        if(cycle_time.tv_nsec > cycle_max)
             cycle_max = cycle_time.tv_nsec;
-        if (cycle_time.tv_nsec < cycle_min)
+        if(cycle_time.tv_nsec < cycle_min)
             cycle_min = cycle_time.tv_nsec;
         cycle_total = cycle_total + cycle_time.tv_nsec;
 
@@ -456,11 +528,11 @@ int main(int argc, char **argv) {
         clock_gettime(CLOCK_MONOTONIC, &timer_end);
         // Compute the time latency of the next cycle(caused by sleep) and do max/min/total comparison/recording
         timespec_diff(&timer_end, &timer_start, &sleep_latency);
-        if (sleep_latency.tv_nsec > latency_max)
-            latency_max = sleep_latency.tv_nsec;
-        if (sleep_latency.tv_nsec < latency_min)
-            latency_min = sleep_latency.tv_nsec;
-        latency_total = latency_total + sleep_latency.tv_nsec;
+
+        // latency_total = latency_total + sleep_latency.tv_nsec;
+        latency_total = sleep_latency.tv_nsec;
+
+        record_cycle_time_latency((long)cycle_time.tv_nsec, (long)sleep_latency.tv_nsec);
 
         // Store the cycle_time/sleep_latency in microsecond, so it can be displayed in the webpage
         RecordCycletimeLatency((long)cycle_time.tv_nsec / 1000, (long)sleep_latency.tv_nsec / 1000);
@@ -469,11 +541,25 @@ int main(int argc, char **argv) {
     // Compute/print the max/min/avg cycle time and latency
     cycle_avg = (long)cycle_total / __tick;
     latency_avg = (long)latency_total / __tick;
-    printf("###Summary: The maximum/minimum/average cycle time in microsecond is %ld/%ld/%ld\n", cycle_max / 1000,
-           cycle_min / 1000, cycle_avg / 1000);
-    printf("###Summary: The maximum/minimum/average latency in microsecond is %ld/%ld/%ld\n", latency_max / 1000,
-           latency_min / 1000, latency_avg / 1000);
 
+    printf("###Summary: The maximum/minimum/average cycle time in microsecond is %ld/%ld/%ld\n",
+           cycle_max / 1000,
+           cycle_min / 1000,
+           cycle_avg / 1000);
+
+    calculate_latency_max_min_avg(latency_max, latency_min, latency_avg);
+
+    printf("###Summary: The maximum/minimum/average latency in microsecond is %ld/%ld/%ld\n",
+           latency_max / 1000,
+           latency_min / 1000,
+           latency_avg / 1000);
+
+    std::cout << "cycle_average = " << cycle_avg << std::endl;
+    std::cout << "latency_average = " << latency_avg << std::endl;
+    std::cout << "cycle_total = " << cycle_total << std::endl;
+    std::cout << "latency_total = " << latency_total << std::endl;
+
+    print_cycle_time_latency();
 //======================================================
 //             SHUTTING DOWN OPENPLC RUNTIME
 //======================================================
@@ -482,12 +568,12 @@ int main(int argc, char **argv) {
     ethercat_terminate_src();
 #endif
 
-    if (checkOutputChange()) {
+    if(checkOutputChange()) {
         // todo:最后一次执行updateBufferOut的时候，会将outputBuffer的值清空。所以在做比较的时候不应该计入最后一次。
         std::cout << "Racing bug detected, shutting down OpenPLC Runtime...\n" << std::endl;
 
         // 这里是手动指定了一个会crash的点来使得其产生crash
-        char *crash = NULL;
+        char* crash = NULL;
         crash[0] = 1;
     } else {
         printf("No racing bug detected, shutting down OpenPLC Runtime...\n");

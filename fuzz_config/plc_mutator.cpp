@@ -312,8 +312,6 @@ void mutate_dint_mem_block(BasicInputBlock<IEC_UDINT, 1> &block, MutatorState *s
     // 类似int_mem_block但针对32位
     for (const auto &mapping : plc_variable_mappings) {
         if (mapping.var_type == "dint_mem_inputs") {
-            // for (int i = 0; i < BUFFER_SIZE; ++i) {
-            //     if (state->should_mutate("dint_mem_inputs", i) && random() % 100 < state->mutation_rate()) {
             if (random() % 100 < state->mutation_rate()) {
                 switch (random() % 5) {
                     case 0:
