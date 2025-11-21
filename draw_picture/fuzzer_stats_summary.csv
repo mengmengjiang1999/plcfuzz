@@ -1,0 +1,13 @@
+group,file_name,afl_banner,run_time,execs_done,execs_per_sec,run_time_seconds
+auto1,fuzzer_stats_auto1,./openplc_fuzz,4621,511396,11067.0,516017
+auto2,fuzzer_stats_auto2,./openplc_fuzz,8221,509510,6198.0,517731
+auto3,fuzzer_stats_auto3,./openplc_fuzz,11821,513664,4345.0,525485
+auto4,fuzzer_stats_auto4,./openplc_fuzz,15421,514219,3335.0,529640
+auto5,fuzzer_stats_auto5,./openplc_fuzz,19021,512402,2694.0,531423
+auto6,fuzzer_stats_auto6,./openplc_fuzz,22621,504438,2230.0,527059
+auto7,fuzzer_stats_auto7,./openplc_fuzz,26221,513083,1957.0,539304
+auto8,fuzzer_stats_auto8,./openplc_fuzz,29821,512183,1718.0,542004
+auto9,fuzzer_stats_auto9,./openplc_fuzz,33421,515555,1543.0,548976
+auto10,fuzzer_stats_auto10,./openplc_fuzz,37021,509167,1375.0,546188
+auto11,fuzzer_stats_auto11,./openplc_fuzz,40621,514641,1267.0,555262
+auto12,fuzzer_stats_auto12,./openplc_fuzz,44221,510179,1154.0,554400
