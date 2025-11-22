@@ -1,0 +1,24 @@
+        AFL ++4.10c {default} (./openplc_fuzz-industrial-13) [explore]%      │
+┌─ process timing ────────────────────────────────────┬─ overall results ────┐
+│        run time : 0 days, 0 hrs, 30 min, 30 sec     │  cycles done : 0     │tage 1/7
+│   last new find : 0 days, 0 hrs, 0 min, 10 sec      │ corpus count : 380   │
+│last saved crash : none seen yet                     │saved crashes : 0     │
+│ last saved hang : none seen yet                     │  saved hangs : 0     │
+├─ cycle progress ─────────────────────┬─ map coverage┴──────────────────────┤
+│  now processing : 269.3 (70.8%)      │    map density : 3.00% / 7.42%      │
+│  runs timed out : 0 (0.00%)          │ count coverage : 2.27 bits/tuple    │
+├─ stage progress ─────────────────────┼─ findings in depth ─────────────────┤tage 1/7
+│  now trying : havoc                  │ favored items : 73 (19.21%)         │
+│ stage execs : 3890/6400 (60.78%)     │  new edges on : 102 (26.84%)        │
+│ total execs : 158k                   │ total crashes : 0 (0 saved)         │
+│  exec speed : 175.7/sec              │  total tmouts : 0 (0 saved)         │
+├─ fuzzing strategy yields ────────────┴─────────────┬─ item geometry ───────┤
+│   bit flips : disabled (default, enable with -D)   │    levels : 11        │
+│  byte flips : disabled (default, enable with -D)   │   pending : 282       │tage 1/7
+│ arithmetics : disabled (default, enable with -D)   │  pend fav : 0         │
+│  known ints : disabled (default, enable with -D)   │ own finds : 376       │
+│  dictionary : n/a                                  │  imported : 0         │
+│havoc/splice : 176/67.4k, 192/46.4k                 │ stability : 99.70%    │
+│py/custom/rq : unused, unused, unused, unused       ├───────────────────────┘
+│    trim/eff : 8.24%/36.0k, disabled                │          [cpu000: 62%]
+└─ strategy: explore ────────── state: in progress ──┘^C

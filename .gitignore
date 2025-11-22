@@ -19,3 +19,4 @@ findings/
 findings_back/
 plclogic/
 image/
+!draw_picture/G4LTL-industrial/**

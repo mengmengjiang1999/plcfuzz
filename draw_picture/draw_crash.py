@@ -20,7 +20,7 @@ def plot_afl_analysis(csv_file="afl_crash_data.csv"):
     x = np.arange(len(df['filename']))
     
     # 第一个子图：时间分布柱状图
-    bars1 = ax1.bar(x, df['time_sec'], color='skyblue', alpha=0.7, edgecolor='navy')
+    bars1 = ax1.bar(x, df['time_diff_sec'], color='skyblue', alpha=0.7, edgecolor='navy')
     ax1.set_xlabel('Test Case')
     ax1.set_ylabel('Time (seconds)')
     ax1.set_title('Discovery Time Distribution by Test Case')
@@ -71,7 +71,7 @@ def plot_combined_chart(csv_file="afl_crash_data.csv"):
     width = 0.35
     
     # Plot time_sec bar chart
-    bars1 = ax1.bar(x - width/2, df['time_sec'], width, 
+    bars1 = ax1.bar(x - width/2, df['time_diff_sec'], width, 
                     label='Time (seconds)', color='skyblue', alpha=0.8)
     ax1.set_xlabel('Test Case')
     ax1.set_ylabel('Time (seconds)', color='blue')
@@ -117,7 +117,7 @@ def plot_line_trend(csv_file="afl_crash_data.csv"):
     plt.figure(figsize=(12, 6))
     
     # 绘制折线图
-    plt.plot(df['filename'], df['time_sec'], marker='o', linewidth=2, 
+    plt.plot(df['filename'], df['time_diff_sec'], marker='o', linewidth=2, 
              label='Discovery Time (seconds)', color='blue', markersize=6)
     plt.plot(df['filename'], df['execs'], marker='s', linewidth=2, 
              label='Execution Count', color='red', markersize=6)
@@ -141,12 +141,12 @@ def plot_line_trend(csv_file="afl_crash_data.csv"):
 if __name__ == "__main__":
     
     import os
-    os.system("mkdir ./crash_data_without_static")
+    os.system("mkdir ./crash_data")
     # 绘制分离柱状图
-    plot_afl_analysis("./crash_data_without_static.csv")
+    plot_afl_analysis("./crash_data.csv")
     
     # 绘制双Y轴组合图
-    plot_combined_chart("./crash_data_without_static.csv")
+    plot_combined_chart("./crash_data.csv")
     
     # 绘制趋势折线图
-    plot_line_trend("./crash_data_without_static.csv")
+    plot_line_trend("./crash_data.csv")

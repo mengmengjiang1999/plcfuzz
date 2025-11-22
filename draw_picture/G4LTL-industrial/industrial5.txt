@@ -1,0 +1,24 @@
+  american fuzzy lop ++4.10c {default} (./openplc_fuzz) [explore]4%    │
+┌─ process timing ────────────────────────────────────┬─ overall results ────┐
+│        run time : 0 days, 0 hrs, 30 min, 0 sec      │  cycles done : 2     │tage 1/7
+│   last new find : 0 days, 0 hrs, 0 min, 2 sec       │ corpus count : 417   │
+│last saved crash : 0 days, 0 hrs, 0 min, 1 sec       │saved crashes : 3     │
+│ last saved hang : none seen yet                     │  saved hangs : 0     │
+├─ cycle progress ─────────────────────┬─ map coverage┴──────────────────────┤
+│  now processing : 53.146 (12.7%)     │    map density : 27.04% / 38.24%    │
+│  runs timed out : 0 (0.00%)          │ count coverage : 3.43 bits/tuple    │
+├─ stage progress ─────────────────────┼─ findings in depth ─────────────────┤tage 1/7
+│  now trying : splice 14              │ favored items : 36 (8.63%)          │
+│ stage execs : 1253/1536 (81.58%)     │  new edges on : 47 (11.27%)         │
+│ total execs : 391k                   │ total crashes : 7 (3 saved)         │
+│  exec speed : 0.00/sec (zzzz...)     │  total tmouts : 0 (0 saved)         │
+├─ fuzzing strategy yields ────────────┴─────────────┬─ item geometry ───────┤
+│   bit flips : disabled (default, enable with -D)   │    levels : 10        │
+│  byte flips : disabled (default, enable with -D)   │   pending : 341       │tage 1/7
+│ arithmetics : disabled (default, enable with -D)   │  pend fav : 0         │
+│  known ints : disabled (default, enable with -D)   │ own finds : 413       │
+│  dictionary : n/a                                  │  imported : 0         │
+│havoc/splice : 211/184k, 190/172k                   │ stability : 99.33%    │
+│py/custom/rq : unused, unused, unused, unused       ├───────────────────────┘
+│    trim/eff : 6.90%/28.7k, disabled                │          [cpu000: 62%]
+└─ strategy: explore ────────── state: in progress ──┘

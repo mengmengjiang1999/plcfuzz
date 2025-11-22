@@ -1,0 +1,29 @@
+   american fuzzy lop ++4.10c {default} (./openplc_fuzz) [explore]2%    │
+┌─ process timing ────────────────────────────────────┬─ overall results ────┐
+│        run time : 0 days, 0 hrs, 30 min, 0 sec      │  cycles done : 8     │tage 1/7
+│   last new find : 0 days, 0 hrs, 0 min, 32 sec      │ corpus count : 235   │
+│last saved crash : none seen yet                     │saved crashes : 0     │
+│ last saved hang : none seen yet                     │  saved hangs : 0     │
+├─ cycle progress ─────────────────────┬─ map coverage┴──────────────────────┤
+│  now processing : 3.597 (1.3%)       │    map density : 31.09% / 34.92%    │
+│  runs timed out : 0 (0.00%)          │ count coverage : 2.97 bits/tuple    │
+├─ stage progress ─────────────────────┼─ findings in depth ─────────────────┤tage 1/7
+│  now trying : splice 1               │ favored items : 13 (5.53%)          │
+│ stage execs : 0/12 (0.00%)           │  new edges on : 19 (8.09%)          │
+│ total execs : 325k                   │ total crashes : 0 (0 saved)         │
+│  exec speed : 324.7/sec              │  total tmouts : 0 (0 saved)         │
+├─ fuzzing strategy yields ────────────┴─────────────┬─ item geometry ───────┤
+│   bit flips : disabled (default, enable with -D)   │    levels : 4         │
+│  byte flips : disabled (default, enable with -D)   │   pending : 158       │tage 1/7
+│ arithmetics : disabled (default, enable with -D)   │  pend fav : 0         │
+│  known ints : disabled (default, enable with -D)   │ own finds : 231       │
+│  dictionary : n/a                                  │  imported : 0         │
+│havoc/splice : 83/147k, 148/141k                    │ stability : 99.27%    │
+│py/custom/rq : unused, unused, unused, unused       ├───────────────────────┘
+│    trim/eff : 14.49%/33.5k, disabled               │          [cpu000: 75%]
+└─ strategy: explore ────────── state: in progress ──┘
+[D] DEBUG: calibration stage 8/12
++++ Testing aborted programmatically +++
+[!] Time limit was reachedge 10/12
+[+] We're done here. Have a nice day!
+[D] DEBUG: calibration stage 12/12
