@@ -109,6 +109,38 @@ void glueVars()
 	bool_input[0][2] = (IEC_BOOL *)__IX0_2;
 	bool_input[0][3] = (IEC_BOOL *)__IX0_3;
 	bool_input[0][4] = (IEC_BOOL *)__IX0_4;
+	bool_input[0][5] = (IEC_BOOL *)__IX0_5;
+	bool_input[0][6] = (IEC_BOOL *)__IX0_6;
+	bool_input[0][7] = (IEC_BOOL *)__IX0_7;
+	bool_input[0][8] = (IEC_BOOL *)__IX0_8;
+	bool_input[0][9] = (IEC_BOOL *)__IX0_9;
+	bool_input[0][10] = (IEC_BOOL *)__IX0_10;
+	bool_input[0][11] = (IEC_BOOL *)__IX0_11;
+	bool_input[0][12] = (IEC_BOOL *)__IX0_12;
+	bool_input[0][13] = (IEC_BOOL *)__IX0_13;
+	bool_input[0][14] = (IEC_BOOL *)__IX0_14;
+	bool_input[0][15] = (IEC_BOOL *)__IX0_15;
+	bool_input[0][16] = (IEC_BOOL *)__IX0_16;
+	bool_input[0][17] = (IEC_BOOL *)__IX0_17;
+	bool_input[0][18] = (IEC_BOOL *)__IX0_18;
+	bool_input[0][19] = (IEC_BOOL *)__IX0_19;
+	bool_input[0][20] = (IEC_BOOL *)__IX0_20;
+	bool_input[0][21] = (IEC_BOOL *)__IX0_21;
+	bool_input[0][22] = (IEC_BOOL *)__IX0_22;
+	bool_input[0][23] = (IEC_BOOL *)__IX0_23;
+	bool_input[0][24] = (IEC_BOOL *)__IX0_24;
+	bool_input[0][25] = (IEC_BOOL *)__IX0_25;
+	bool_input[0][26] = (IEC_BOOL *)__IX0_26;
+	bool_input[0][27] = (IEC_BOOL *)__IX0_27;
+	bool_input[0][28] = (IEC_BOOL *)__IX0_28;
+	bool_input[0][29] = (IEC_BOOL *)__IX0_29;
+	bool_input[0][30] = (IEC_BOOL *)__IX0_30;
+	bool_input[0][31] = (IEC_BOOL *)__IX0_31;
+	bool_input[0][32] = (IEC_BOOL *)__IX0_32;
+	bool_input[0][33] = (IEC_BOOL *)__IX0_33;
+	bool_input[0][34] = (IEC_BOOL *)__IX0_34;
+	bool_input[0][35] = (IEC_BOOL *)__IX0_35;
+	bool_input[0][36] = (IEC_BOOL *)__IX0_36;
 }
 
 void updateTime()

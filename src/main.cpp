@@ -389,7 +389,7 @@ int main(int argc, char** argv) {
     // input_plc_block.print();
     INPUT_PLC_DATA.add_block(input_plc_block);
 
-    while(input_stream >> input_plc_block) {
+    if(input_stream >> input_plc_block) {
         cnt_blocks++;
         INPUT_PLC_DATA.add_block(input_plc_block);
     }
