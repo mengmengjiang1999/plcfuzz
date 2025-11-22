@@ -156,6 +156,8 @@ def main():
     converter = LDGraphConverter()
     ld_graph = converter.convert_to_ld_graph(plc_ladder_diagram_logic)
     
+    print(ld_graph)
+    
     # 输出结果
     print("LD Graph转换结果:")
     print("=" * 50)

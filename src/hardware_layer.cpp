@@ -52,7 +52,7 @@ extern PLCInputSimulator INPUT_PLC_DATA;
 
 void initializeHardware() {
     // initialize bool input and output buffers
-    printf("Initializing hardware layer...\n");
+    // printf("Initializing hardware layer...\n");
     for (int i = 0; i < BUFFER_SIZE; i++) {
         byte_input[i] = new IEC_BYTE;
         int_input[i] = new IEC_UINT;
@@ -102,7 +102,7 @@ void initializeHardware() {
         *lint_output[i] = 0;
     }
 
-    std::cout << "Initializing hardware layer done." << std::endl;
+    // std::cout << "Initializing hardware layer done." << std::endl;
 
     // std::cout<<"bool_input"<<std::endl;
     // for (int i = 0; i < BUFFER_SIZE; i++) {
@@ -217,6 +217,6 @@ void updateBuffersOut() {
 }
 
 bool checkOutputChange() {
-    std::cout << "Checking output change" << std::endl;
+    // std::cout << "Checking output change" << std::endl;
     return io_history.checkChange();
 }

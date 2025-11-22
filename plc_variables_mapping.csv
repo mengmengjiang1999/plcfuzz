@@ -2,11 +2,5 @@
 bool_inputs,0,0,__IX0_0
 bool_inputs,0,1,__IX0_1
 bool_inputs,0,2,__IX0_2
-bool_inputs,0,3,__IX0_3
-bool_inputs,0,4,__IX0_4
-bool_inputs,0,5,__IX0_5
-bool_inputs,0,6,__IX0_6
-bool_inputs,0,7,__IX0_7
-bool_inputs,0,8,__IX0_8
 bool_outputs,0,0,__QX0_0
 bool_outputs,0,1,__QX0_1

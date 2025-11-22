@@ -7,7 +7,9 @@ build_plcfiles() {
     # ./build_scripts/build_plcfiles.sh ./testcases/aircraft_flight_control.st
     # ./build_scripts/build_plcfiles.sh ./testcases/auto_race/auto1.st
     # ./build_scripts/build_plcfiles.sh ./testcases/auto_38.st
-    ./build_scripts/build_plcfiles.sh ./testcases/race_function_test.st
+    # ./build_scripts/build_plcfiles.sh ./testcases/race_function_test.st
+    # ./build_scripts/build_plcfiles.sh ./testcases/G4LTL-ST/st1.st
+    ./build_scripts/build_plcfiles.sh ./testcases/G4LTL-ST/industrial15.st
 }
 
 build_c() {

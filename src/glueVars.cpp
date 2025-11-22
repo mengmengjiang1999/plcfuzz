@@ -72,12 +72,6 @@ void glueVars()
 	bool_input[0][0] = (IEC_BOOL *)__IX0_0;
 	bool_input[0][1] = (IEC_BOOL *)__IX0_1;
 	bool_input[0][2] = (IEC_BOOL *)__IX0_2;
-	bool_input[0][3] = (IEC_BOOL *)__IX0_3;
-	bool_input[0][4] = (IEC_BOOL *)__IX0_4;
-	bool_input[0][5] = (IEC_BOOL *)__IX0_5;
-	bool_input[0][6] = (IEC_BOOL *)__IX0_6;
-	bool_input[0][7] = (IEC_BOOL *)__IX0_7;
-	bool_input[0][8] = (IEC_BOOL *)__IX0_8;
 	bool_output[0][0] = (IEC_BOOL *)__QX0_0;
 	bool_output[0][1] = (IEC_BOOL *)__QX0_1;
 }

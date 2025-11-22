@@ -64,6 +64,11 @@ unsigned char log_buffer[1000000];  // A very large buffer to store all logs
 int log_index = 0;
 int log_counter = 0;
 
+// 输出log文件
+
+std::string log_filename = "log.txt";
+std::ofstream log_file(log_filename);
+
 //-----------------------------------------------------------------------------
 // Helper function - Makes the running thread sleep for the ammount of time
 // in milliseconds
@@ -110,7 +115,8 @@ static inline void timespec_diff(struct timespec* a, struct timespec* b, struct 
 //-----------------------------------------------------------------------------
 void log(char* logmsg) {
     pthread_mutex_lock(&logLock);  // lock mutex
-    printf("%s", logmsg);
+    // printf("%s", logmsg);
+    log_file << logmsg << std::endl;
     for(int i = 0; logmsg[i] != '\0'; i++) {
         log_buffer[log_index] = (unsigned char)logmsg[i];
         log_index++;
@@ -239,7 +245,7 @@ void calculate_latency_max_min_avg(long& latency_max, long& latency_min, long& l
         if(latency_min > record_latency_time[i] - record_latency_time[i - 1]) {
             latency_min = record_latency_time[i] - record_latency_time[i - 1];
         }
-        // std::cout << "latency_max = " << latency_max << " latency_min = " << latency_min << std::endl;
+        // log_file << "latency_max = " << latency_max << " latency_min = " << latency_min << std::endl;
     }
 }
 /**
@@ -247,12 +253,12 @@ void calculate_latency_max_min_avg(long& latency_max, long& latency_min, long& l
  */
 void print_cycle_time_latency() {
     for(int i = 0; i < record_cycle_time.size(); i++) {
-        std::cout << i << "," << record_cycle_time[i] << "," << record_latency_time[i] << std::endl;
+        log_file << i << "," << record_cycle_time[i] << "," << record_latency_time[i] << std::endl;
     }
     auto cycle_everage = accumulate(record_cycle_time.begin(), record_cycle_time.end(), 0.0) / record_cycle_time.size();
     auto latency_everage = record_latency_time[record_latency_time.size() - 1] / record_latency_time.size();
-    std::cout << "cycle_time_everage: " << cycle_everage << std::endl;
-    std::cout << "latency_time_everage: " << latency_everage << std::endl;
+    log_file << "cycle_time_everage: " << cycle_everage << std::endl;
+    log_file << "latency_time_everage: " << latency_everage << std::endl;
 }
 
 /**
@@ -279,7 +285,7 @@ void write_cycle_time_latency_to_csv(const std::string& filename) {
     // 关闭文件
     csv_file.close();
 
-    std::cout << "数据已成功写入文件: " << filename << std::endl;
+    log_file << "数据已成功写入文件: " << filename << std::endl;
 }
 
 // pointers to IO *array[const][const] from cpp to c and back again don't work as expected, so instead callbacks
@@ -326,8 +332,13 @@ int main(int argc, char** argv) {
     setvbuf(stdin, NULL, _IONBF, 0);
     setvbuf(stdout, NULL, _IONBF, 0);
 
+    if(!log_file.is_open()) {
+        std::cerr << "Failed to open log file: " << log_filename << std::endl;
+        return 1;
+    }
+
     // Define the max/min/avg/total cycle and latency variables used in REAL-TIME computation(in nanoseconds)
-    printf("Initializing variables for REAL-TIME computation\n");
+    log_file << "Initializing variables for REAL-TIME computation" << std::endl;
     long cycle_avg, cycle_max, cycle_min, cycle_total;
     long latency_avg, latency_max, latency_min, latency_total;
     cycle_max = 0;
@@ -349,7 +360,7 @@ int main(int argc, char** argv) {
     // 从文件读取输入
     FILE* file = fopen(argv[1], "rb");
     if(!file) {
-        printf("Failed to open input file!\n");
+        log_file << "Failed to open input file!" << std::endl;
         return 1;
     }
 
@@ -386,20 +397,19 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    printf("Block 1: \n");
+    log_file << "Block 1: \n";
     cnt_blocks++;
     // input_plc_block.print();
     INPUT_PLC_DATA.add_block(input_plc_block);
 
-    if(input_stream >> input_plc_block) {
+    while(input_stream >> input_plc_block) {
         cnt_blocks++;
         INPUT_PLC_DATA.add_block(input_plc_block);
     }
 
-    std::cout << "Read end. Total blocks: %d\n" << cnt_blocks << std::endl;
+    log_file << "Read end. Total blocks: %d\n" << cnt_blocks << std::endl;
 
-    printf("Total blocks: %d\n", cnt_blocks);
-    // return 0;
+    log_file << "Total blocks: " << cnt_blocks << std::endl;
 
     //======================================================
     //                 PLC INITIALIZATION
@@ -459,17 +469,17 @@ int main(int argc, char** argv) {
     // Set our thread to real time priority
     struct sched_param sp;
     sp.sched_priority = 50;
-    printf("Setting main thread priority to RT\n");
+    log_file << "Setting main thread priority to RT\n";
     int ret = pthread_setschedparam(pthread_self(), SCHED_FIFO, &sp);
     if(ret != 0) {
-        printf("pthread_setschedparam failed: %d\n", ret);
-        printf("WARNING: Failed to set main thread to real-time priority\n");
+        log_file << "pthread_setschedparam failed: " << ret << std::endl;
+        log_file << "WARNING: Failed to set main thread to real-time priority" << std::endl;
     }
 
     // Lock memory to ensure no swapping is done.
-    printf("Locking main thread memory\n");
+    log_file << "Locking main thread memory\n";
     if(mlockall(MCL_FUTURE | MCL_CURRENT)) {
-        printf("WARNING: Failed to lock memory\n");
+        log_file << "WARNING: Failed to lock memory\n";
     }
 #endif
 
@@ -478,7 +488,7 @@ int main(int argc, char** argv) {
     struct timespec timer_start, timer_end, sleep_latency;
 
     // gets the starting point for the clock
-    printf("Getting current time\n");
+    log_file << "Getting current time\n";
     clock_gettime(CLOCK_MONOTONIC, &timer_start);
 
     //======================================================
@@ -572,22 +582,20 @@ int main(int argc, char** argv) {
     cycle_avg = (long)cycle_total / __tick;
     latency_avg = (long)latency_total / __tick;
 
-    printf("###Summary: The maximum/minimum/average cycle time in microsecond is %ld/%ld/%ld\n",
-           cycle_max / 1000,
-           cycle_min / 1000,
-           cycle_avg / 1000);
+    log_file << "###Summary: The maximum/minimum/average cycle time in microsecond is " << cycle_max / 1000 << "/"
+             << cycle_min / 1000 << "/" << cycle_avg / 1000 << std::endl;
 
     calculate_latency_max_min_avg(latency_max, latency_min, latency_avg);
 
-    printf("###Summary: The maximum/minimum/average latency in microsecond is %ld/%ld/%ld\n",
-           latency_max / 1000,
-           latency_min / 1000,
-           latency_avg / 1000);
+    log_file << "###Summary: The maximum/minimum/average latency in microsecond is" << latency_max / 1000 << "/"
+             << latency_min / 1000 << "/" << latency_avg / 1000 << std::endl;
 
-    std::cout << "cycle_average = " << cycle_avg << std::endl;
-    std::cout << "latency_average = " << latency_avg << std::endl;
-    std::cout << "cycle_total = " << cycle_total << std::endl;
-    std::cout << "latency_total = " << latency_total << std::endl;
+    // print_cycle_time_latency();
+
+    log_file << "cycle_average = " << cycle_avg << std::endl;
+    log_file << "latency_average = " << latency_avg << std::endl;
+    log_file << "cycle_total = " << cycle_total << std::endl;
+    log_file << "latency_total = " << latency_total << std::endl;
 
     // print_cycle_time_latency();
 
@@ -602,22 +610,22 @@ int main(int argc, char** argv) {
 
     if(checkOutputChange()) {
         // todo:最后一次执行updateBufferOut的时候，会将outputBuffer的值清空。所以在做比较的时候不应该计入最后一次。
-        std::cout << "Racing bug detected, shutting down OpenPLC Runtime...\n" << std::endl;
+        log_file << "Racing bug detected, shutting down OpenPLC Runtime...\n" << std::endl;
 
         // 这里是手动指定了一个会crash的点来使得其产生crash
         char* crash = NULL;
         crash[0] = 1;
     } else {
-        printf("No racing bug detected, shutting down OpenPLC Runtime...\n");
+        log_file << "No racing bug detected, shutting down OpenPLC Runtime...\n";
     }
 
-    printf("Disabling outputs\n");
+    log_file << "Disabling outputs\n";
     disableOutputs();
     updateCustomOut();
     updateBuffersOut();
 
     finalizeHardware();
-    printf("Shutting down OpenPLC Runtime...\n");
+    log_file << "Shutting down OpenPLC Runtime...\n";
     // exit(0);
     return 0;
 }

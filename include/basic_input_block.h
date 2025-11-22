@@ -25,13 +25,13 @@ class BasicInputBlock : public SuperBasicInputBlock {
         for(int i = 0; i < BUFFER_SIZE; i++) {
             uint64_t tmp;
             is >> tmp;
-            // 数据范围检查
-            if(tmp < std::numeric_limits<T>::min() || tmp > std::numeric_limits<T>::max()) {
-                is.setstate(std::ios::failbit);  // 设置流错误状态
-                std::cerr << "错误：输入值 " << tmp << " 超出类型 T 的范围 [" << std::numeric_limits<T>::min() << ", "
-                          << std::numeric_limits<T>::max() << "]" << std::endl;
-                return is;  // 立即返回，不再继续读取
-            }
+            // // 数据范围检查
+            // if(tmp < std::numeric_limits<T>::min() || tmp > std::numeric_limits<T>::max()) {
+            //     is.setstate(std::ios::failbit);  // 设置流错误状态
+            //     std::cerr << "错误：输入值 " << tmp << " 超出类型 T 的范围 [" << std::numeric_limits<T>::min() << ", "
+            //               << std::numeric_limits<T>::max() << "]" << std::endl;
+            //     return is;  // 立即返回，不再继续读取
+            // }
             obj.input[i] = static_cast<T>(tmp);  // 使用 static_cast 更安全
         }
         return is;
