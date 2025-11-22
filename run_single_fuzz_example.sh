@@ -1,1 +1,1 @@
-./openplc_fuzz findings/default/queue/id:000000,time:0,execs:0,orig:seed_3 > output_0.txtls
+./openplc_fuzz ./findings/default/crashes/id:000000,sig:11,src:000002,time:72782,execs:1830,op:havoc,rep:2 > output_0.txt

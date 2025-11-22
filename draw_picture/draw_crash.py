@@ -139,11 +139,14 @@ def plot_line_trend(csv_file="afl_crash_data.csv"):
 
 # 主程序
 if __name__ == "__main__":
+    
+    import os
+    os.system("mkdir ./crash_data_without_static")
     # 绘制分离柱状图
-    plot_afl_analysis("crash_data.csv")
+    plot_afl_analysis("./crash_data_without_static.csv")
     
     # 绘制双Y轴组合图
-    plot_combined_chart("crash_data.csv")
+    plot_combined_chart("./crash_data_without_static.csv")
     
     # 绘制趋势折线图
-    plot_line_trend("crash_data.csv")
+    plot_line_trend("./crash_data_without_static.csv")

@@ -239,7 +239,7 @@ void calculate_latency_max_min_avg(long& latency_max, long& latency_min, long& l
         if(latency_min > record_latency_time[i] - record_latency_time[i - 1]) {
             latency_min = record_latency_time[i] - record_latency_time[i - 1];
         }
-        std::cout << "latency_max = " << latency_max << " latency_min = " << latency_min << std::endl;
+        // std::cout << "latency_max = " << latency_max << " latency_min = " << latency_min << std::endl;
     }
 }
 /**
@@ -587,9 +587,9 @@ int main(int argc, char** argv) {
     std::cout << "cycle_total = " << cycle_total << std::endl;
     std::cout << "latency_total = " << latency_total << std::endl;
 
-    print_cycle_time_latency();
+    // print_cycle_time_latency();
 
-    write_cycle_time_latency_to_csv("test.csv");
+    // write_cycle_time_latency_to_csv("test.csv");
 //======================================================
 //             SHUTTING DOWN OPENPLC RUNTIME
 //======================================================

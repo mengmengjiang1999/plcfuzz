@@ -17,28 +17,21 @@ def parse_afl_to_csv(input_text, output_file="afl_crash_data.csv"):
     parsed_data = []
     
     for i,line in enumerate(lines):
-        line = line.strip()
+        line = line.strip().split(',')
         if not line:
             continue
-            
-        # 使用正则表达式提取字段
-        pattern = r"id:(\d+),sig:(\d+),src:(\d+),time:(\d+),execs:(\d+),op:(\w+),rep:(\d+)"
-        match = re.match(pattern, line)
         
-        if match:
-            parsed_data.append({
+        parsed_data.append({
                 'filename': f'auto{i+1}',  # 新增文件名列：auto1, auto2, ..., auto12
-                'id': match.group(1),
-                'sig': match.group(2),
-                'src': match.group(3),
-                'time_ms': match.group(4),
-                'time_sec': str(int(match.group(4)) // 1000),  # 转换为秒
-                'execs': match.group(5),
-                'op': match.group(6),
-                'rep': match.group(7)
-            })
-        else:
-            print(f"警告: 无法解析行: {line}")
+                'id': line[0].strip()[3:],
+                'sig': line[1].strip()[4:],
+                'src': line[2].strip()[4:],
+                'time_ms': line[3].strip()[5:],
+                'time_sec': str(int(line[3].strip()[5:]) // 1000),  # 转换为秒
+                'execs': line[4].strip()[6:],
+                'op': line[5].strip()[3:],
+                'rep': line[6].strip()[4:]
+        })
     
     if not parsed_data:
         print("没有解析到有效数据")
@@ -50,6 +43,9 @@ def parse_afl_to_csv(input_text, output_file="afl_crash_data.csv"):
     # 重新排列列的顺序，将filename放在第一列
     columns_order = ['filename'] + [col for col in df.columns if col != 'filename']
     df = df[columns_order]
+    
+    
+    df['time_diff_sec'] = df['time_sec'].astype(int).diff()
     
     # 保存为CSV
     df.to_csv(output_file, index=False, encoding='utf-8')
@@ -74,4 +70,6 @@ def parse_from_txt_file(input_file, output_file="afl_crash_data.csv"):
     return parse_afl_to_csv(input_text, output_file)
 
 # 使用方法（如果文本保存在文件中）：
-parse_from_txt_file("alf_crash_filename.txt", "crash_data.csv")
+# parse_from_txt_file("afl_crash_without_static.txt", "crash_data_without_static.csv")
+
+parse_from_txt_file("afl_crash_filename.txt", "crash_data.csv")
