@@ -1,6 +1,9 @@
 #pragma once
 
+#include <ios>  // 用于 std::ios::failbit
 #include <iostream>
+#include <iostream>  // 用于 std::cerr 和 std::endl
+#include <limits>    // 必须包含这个头文件
 
 #include "ladder.h"
 
@@ -13,24 +16,30 @@ class BasicInputBlock : public SuperBasicInputBlock {
     T input[BUFFER_SIZE];
     BasicInputBlock() {
         cycles = 0;
-        for (int i = 0; i < BUFFER_SIZE; i++) {
+        for(int i = 0; i < BUFFER_SIZE; i++) {
             input[i] = 0;
         }
     }
     friend std::istream& operator>>(std::istream& is, BasicInputBlock<T, Dim>& obj) {
         is >> obj.cycles;
-
-        for (int i = 0; i < BUFFER_SIZE; i++) {
+        for(int i = 0; i < BUFFER_SIZE; i++) {
             uint64_t tmp;
             is >> tmp;
-            obj.input[i] = (T)tmp;
+            // 数据范围检查
+            if(tmp < std::numeric_limits<T>::min() || tmp > std::numeric_limits<T>::max()) {
+                is.setstate(std::ios::failbit);  // 设置流错误状态
+                std::cerr << "错误：输入值 " << tmp << " 超出类型 T 的范围 [" << std::numeric_limits<T>::min() << ", "
+                          << std::numeric_limits<T>::max() << "]" << std::endl;
+                return is;  // 立即返回，不再继续读取
+            }
+            obj.input[i] = static_cast<T>(tmp);  // 使用 static_cast 更安全
         }
         return is;
     }
     virtual void print() {
         std::cout << "BasicInputBlock<" << typeid(T).name() << ", " << Dim << ">" << std::endl;
         std::cout << "cycles: " << cycles << std::endl;
-        for (int i = 0; i < BUFFER_SIZE; i++) {
+        for(int i = 0; i < BUFFER_SIZE; i++) {
             std::cout << input[i] << " ";
         }
         std::cout << std::endl;
@@ -38,7 +47,7 @@ class BasicInputBlock : public SuperBasicInputBlock {
     virtual std::string serialize_data() const {
         std::string buffer;
         buffer += std::to_string(this->cycles);
-        for (int i = 0; i < BUFFER_SIZE; i++) {
+        for(int i = 0; i < BUFFER_SIZE; i++) {
             buffer += std::to_string(this->input[i]);
         }
         return buffer;
@@ -57,22 +66,19 @@ class BasicInputBlock<T, 2> {
     T input[BUFFER_SIZE][8];
     BasicInputBlock() {
         cycles = 0;
-        for (int i = 0; i < BUFFER_SIZE; i++) {
-            for (int j = 0; j < 8; j++) {
+        for(int i = 0; i < BUFFER_SIZE; i++) {
+            for(int j = 0; j < 8; j++) {
                 input[i][j] = 0;
             }
         }
     }
     friend std::istream& operator>>(std::istream& is, BasicInputBlock<T, 2>& obj) {
         is >> obj.cycles;
-        // std::cout << "cycles=" << obj.cycles << std::endl;
-        for (int i = 0; i < BUFFER_SIZE; i++) {
-            for (int j = 0; j < 8; j++) {
+        for(int i = 0; i < BUFFER_SIZE; i++) {
+            for(int j = 0; j < 8; j++) {
                 uint64_t tmp;
                 is >> tmp;
-                // std::cout << "i=" << i << " j=" << j << " tmp=" << tmp << std::endl;
                 obj.input[i][j] = (T)tmp;
-                // std::cout << "i=" << i << " j=" << j << " input=" << obj.input[i][j] << std::endl;
             }
         }
         return is;
@@ -80,8 +86,8 @@ class BasicInputBlock<T, 2> {
     virtual void print() {
         std::cout << "BasicInputBlock<" << typeid(T).name() << ">" << std::endl;
         std::cout << "cycles: " << cycles << std::endl;
-        for (int i = 0; i < BUFFER_SIZE; i++) {
-            for (int j = 0; j < 8; j++) {
+        for(int i = 0; i < BUFFER_SIZE; i++) {
+            for(int j = 0; j < 8; j++) {
                 std::cout << (uint64_t)input[i][j] << " ";
             }
             std::cout << std::endl;
@@ -92,8 +98,8 @@ class BasicInputBlock<T, 2> {
     virtual std::string serialize_data() const {
         std::string buffer;
         buffer += std::to_string(this->cycles);
-        for (int i = 0; i < BUFFER_SIZE; i++) {
-            for (int j = 0; j < 8; j++) {
+        for(int i = 0; i < BUFFER_SIZE; i++) {
+            for(int j = 0; j < 8; j++) {
                 buffer += std::to_string(this->input[i][j]);
             }
         }

@@ -382,7 +382,9 @@ int main(int argc, char** argv) {
     PLCInputBlock input_plc_block;
 
     int cnt_blocks = 0;
-    input_stream >> input_plc_block;
+    if(!(input_stream >> input_plc_block)) {
+        return 0;
+    }
 
     printf("Block 1: \n");
     cnt_blocks++;
