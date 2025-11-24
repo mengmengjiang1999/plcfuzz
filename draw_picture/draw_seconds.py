@@ -10,7 +10,7 @@ sns.set_style("whitegrid")
 df = pd.read_csv('./fuzzer_stats_summary.csv')
 
 # 创建条形图
-plt.figure(figsize=(14, 8))
+plt.figure(figsize=(14, 9))
 bars = plt.bar(df['group'], df['execs_per_sec'], color=sns.color_palette("viridis", len(df)))
 
 # 在条形顶端显示数值

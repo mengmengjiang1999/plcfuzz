@@ -14,7 +14,7 @@ def plot_afl_analysis(csv_file="afl_crash_data.csv"):
     plt.rcParams['axes.unicode_minus'] = False
     
     # 创建图形
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 8))
     
     # 设置x轴位置
     x = np.arange(len(df['filename']))

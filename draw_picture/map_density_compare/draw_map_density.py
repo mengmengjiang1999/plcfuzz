@@ -54,8 +54,8 @@ def plot_coverage_symplc_comparison(csv_file_path,symplc_file_path):
     ax1.set_xticklabels(df['filename'], rotation=45, ha='right')
     
     # 设置Y轴范围
-    ax1.set_ylim(0, 100)
-    ax2.set_ylim(0, 100)
+    ax1.set_ylim(0, 110)
+    ax2.set_ylim(0, 110)
     
     # 添加数值标签
     for bar in bars1:
