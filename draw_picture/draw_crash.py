@@ -64,11 +64,21 @@ def plot_combined_chart(csv_file="afl_crash_data.csv"):
     df = pd.read_csv(csv_file)
     
     # 创建图形和主Y轴
-    fig, ax1 = plt.subplots(figsize=(12, 6))
+    fig, ax1 = plt.subplots(figsize=(16, 8))
     
     # 设置x轴位置
     x = np.arange(len(df['filename']))
     width = 0.35
+    
+    margin_ratio = 0.1
+    
+     # 计算Y轴范围（最大值增加一定比例作为上边距）
+    time_max = df['time_diff_sec'].max()
+    execs_max = df['execs'].max()
+    
+    # 设置Y轴范围，在最大值基础上增加 margin_ratio 的比例
+    time_ylim = (0, time_max * (1 + margin_ratio))
+    execs_ylim = (0, execs_max * (1 + margin_ratio))
     
     # Plot time_sec bar chart
     bars1 = ax1.bar(x - width/2, df['time_diff_sec'], width, 
@@ -76,6 +86,9 @@ def plot_combined_chart(csv_file="afl_crash_data.csv"):
     ax1.set_xlabel('Test Case')
     ax1.set_ylabel('Time (seconds)', color='blue')
     ax1.tick_params(axis='y', labelcolor='blue')
+    ax1.set_ylim(time_ylim)  # 设置第一个Y轴范围[1,5](@ref)
+    
+    
     
     # 创建第二个Y轴
     ax2 = ax1.twinx()
@@ -85,6 +98,7 @@ def plot_combined_chart(csv_file="afl_crash_data.csv"):
                     label='Execution Count', color='lightcoral', alpha=0.8)
     ax2.set_ylabel('Execution Count', color='red')
     ax2.tick_params(axis='y', labelcolor='red')
+    ax2.set_ylim(execs_ylim)  # 设置第二个Y轴范围[1,5](@ref)
     
     # 设置x轴标签
     ax1.set_xticks(x)
