@@ -70,10 +70,7 @@ IEC_ULINT *special_functions[BUFFER_SIZE];
 void glueVars()
 {
 	bool_input[0][1] = (IEC_BOOL *)__IX0_1;
-	bool_input[0][2] = (IEC_BOOL *)__IX0_2;
 	bool_output[0][0] = (IEC_BOOL *)__QX0_0;
-	bool_output[0][1] = (IEC_BOOL *)__QX0_1;
-	bool_output[0][2] = (IEC_BOOL *)__QX0_2;
 }
 
 void updateTime()

@@ -9,7 +9,8 @@ build_plcfiles() {
     # ./build_scripts/build_plcfiles.sh ./testcases/auto_38.st
     # ./build_scripts/build_plcfiles.sh ./testcases/race_function_test.st
     # ./build_scripts/build_plcfiles.sh ./testcases/G4LTL-ST/st1.st
-    ./build_scripts/build_plcfiles.sh ./testcases/G4LTL-ST/industrial11.st
+    # ./build_scripts/build_plcfiles.sh ./testcases/G4LTL-ST/G4LTL-ST1.st
+    ./build_scripts/build_plcfiles.sh ./testcases/G4LTL-industrial/industrial1.st
 }
 
 build_c() {

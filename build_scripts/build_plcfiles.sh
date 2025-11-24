@@ -2,11 +2,12 @@
 
 echo "build_plcfiles.sh"
 
-# 1. plclogic文件夹下面存储的就是PLC逻辑代码编译成的C++文件
-cd ./plclogic
-# 2. 清除旧的构建文件，重新编译
-rm -rf *
-cd ..
+
+# 删掉plclogic文件夹
+rm -rf ./plclogic
+
+# 重建一个plclogic
+mkdir -p ./plclogic
 
 ls -lh ./tools/iec2c
 ls -lh ./tools/iec2iec
