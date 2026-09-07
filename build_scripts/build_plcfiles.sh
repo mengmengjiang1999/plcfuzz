@@ -1,15 +1,40 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-echo "build_plcfiles.sh"
+if [[ $# -ne 1 ]]; then
+    echo "Usage: $0 <program.st>" >&2
+    exit 2
+fi
 
-# 1. plclogic文件夹下面存储的就是PLC逻辑代码编译成的C++文件
-cd ./plclogic
-# 2. 清除旧的构建文件，重新编译
-rm -rf *
-cd ..
+repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+input_file=$1
+output_dir=${PLCLOGIC_DIR:-"$repo_root/plclogic"}
+iec2c=${MATIEC_IEC2C:-"$repo_root/tools/iec2c"}
 
-ls -lh ./tools/iec2c
-ls -lh ./tools/iec2iec
+if [[ $input_file != /* ]]; then
+    input_file="$repo_root/${input_file#./}"
+fi
 
-# 3. 将PLC逻辑代码编译成C语言代码
-./tools/iec2c -T ./plclogic $1
+if [[ ! -f $input_file ]]; then
+    echo "PLC source not found: $input_file" >&2
+    exit 1
+fi
+
+if [[ ! -x $iec2c ]]; then
+    echo "MatIEC compiler is not executable: $iec2c" >&2
+    exit 1
+fi
+
+mkdir -p "$output_dir"
+find "$output_dir" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+
+matiec_args=()
+if [[ -n ${MATIEC_INCLUDE_DIR:-} ]]; then
+    matiec_args+=("-I" "$MATIEC_INCLUDE_DIR")
+fi
+if [[ -n ${MATIEC_STD:-} ]]; then
+    matiec_args+=("--std=$MATIEC_STD")
+fi
+
+echo "Compiling $input_file with $iec2c"
+"$iec2c" "${matiec_args[@]}" -T "$output_dir" "$input_file"

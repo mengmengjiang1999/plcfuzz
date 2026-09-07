@@ -1,0 +1,58 @@
+FROM public.ecr.aws/ubuntu/ubuntu:22.04@sha256:23bda685bd84a4d3b9caf2086a4c35f368bb7acd57ef38090b7a45ac92216ccf
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG OPENPLC_COMMIT=091524e1d80120cbe6b2c130822e91369f12eccd
+ARG AFLPP_TAG=v4.10c
+
+RUN sed -i \
+        -e 's|archive.ubuntu.com/ubuntu|mirrors.aliyun.com/ubuntu|g' \
+        -e 's|security.ubuntu.com/ubuntu|mirrors.aliyun.com/ubuntu|g' \
+        /etc/apt/sources.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        autoconf \
+        automake \
+        bison \
+        build-essential \
+        ca-certificates \
+        clang \
+        cmake \
+        flex \
+        git \
+        libtool \
+        llvm-dev \
+        lld \
+        pkg-config \
+        python3 \
+        strace \
+    && rm -rf /var/lib/apt/lists/*
+
+# Keep the exact upstream source trees in the image. Besides making rebuilds
+# auditable, this preserves the corresponding source and license texts for the
+# GPL/LGPL components installed below.
+RUN git clone https://github.com/thiagoralves/OpenPLC_v3.git /opt/upstream/OpenPLC_v3 \
+    && git -C /opt/upstream/OpenPLC_v3 checkout "${OPENPLC_COMMIT}" \
+    && cmake -S /opt/upstream/OpenPLC_v3/utils/dnp3_src \
+             -B /opt/upstream/OpenPLC_v3/utils/dnp3_src/build \
+    && cmake --build /opt/upstream/OpenPLC_v3/utils/dnp3_src/build --parallel \
+    && cmake --install /opt/upstream/OpenPLC_v3/utils/dnp3_src/build \
+    && cd /opt/upstream/OpenPLC_v3/utils/libmodbus_src \
+    && ./autogen.sh \
+    && ./configure \
+    && make -j"$(nproc)" \
+    && make install \
+    && ldconfig
+
+RUN git clone --branch "${AFLPP_TAG}" --depth 1 \
+        https://github.com/AFLplusplus/AFLplusplus.git /opt/upstream/AFLplusplus \
+    && make -C /opt/upstream/AFLplusplus source-only -j"$(nproc)" \
+    && make -C /opt/upstream/AFLplusplus install
+
+COPY . /workspace/plcfuzz
+WORKDIR /workspace/plcfuzz
+
+RUN ./scripts/verify_preserved_artifacts.sh \
+    && afl-fuzz --version \
+    && test -x ./tools/iec2c
+
+CMD ["/bin/bash"]
