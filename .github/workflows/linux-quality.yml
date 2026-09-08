@@ -18,6 +18,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 45
     env:
+      AFL_BUILD_JOBS: "1"
       BUILD_JOBS: "2"
       MATIEC_BUILD_JOBS: "1"
     steps:
@@ -72,7 +73,7 @@ jobs:
           git clone --branch v5.03c --depth 1 \
             https://github.com/AFLplusplus/AFLplusplus.git \
             "$RUNNER_TEMP/AFLplusplus"
-          make -C "$RUNNER_TEMP/AFLplusplus" source-only -j"$BUILD_JOBS"
+          make -C "$RUNNER_TEMP/AFLplusplus" source-only -j"$AFL_BUILD_JOBS"
           "$RUNNER_TEMP/AFLplusplus/afl-clang-fast++" --version
 
       - name: Build instrumented runtime

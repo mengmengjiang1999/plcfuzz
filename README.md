@@ -99,6 +99,8 @@ MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
 
 MatIEC 默认使用单作业构建，以避开其递归 Makefile 的共享目标顺序问题。需要自行评估并行构建时可设置 `MATIEC_BUILD_JOBS`；它与项目其他步骤使用的 `BUILD_JOBS` 相互独立。
 
+固定版本 AFL++ 的外层源码构建也使用单作业，避免其主构建与 LLVM 子构建同时写入编译包装器；项目自身的独立构建步骤仍可并行。
+
 ### 2. 验证 ST 测试用例
 
 ```bash

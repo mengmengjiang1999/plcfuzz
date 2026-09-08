@@ -34,3 +34,10 @@ The workflow SHALL verify that the normal runtime, mapping CSV, custom-mutator l
 #### Scenario: Build command exits without its expected output
 - **WHEN** an expected artifact is absent
 - **THEN** the workflow fails explicitly
+
+### Requirement: Deterministic AFL++ build order
+The workflow and reproducibility container SHALL build the fixed AFL++ source with one outer make job.
+
+#### Scenario: AFL++ main and LLVM targets share a compiler output
+- **WHEN** the fixed source release is built
+- **THEN** the targets do not write `afl-cc` concurrently

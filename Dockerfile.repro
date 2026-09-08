@@ -44,7 +44,7 @@ RUN git clone https://github.com/thiagoralves/OpenPLC_v3.git /opt/upstream/OpenP
 
 RUN git clone --branch "${AFLPP_TAG}" --depth 1 \
         https://github.com/AFLplusplus/AFLplusplus.git /opt/upstream/AFLplusplus \
-    && make -C /opt/upstream/AFLplusplus source-only -j"$(nproc)" \
+    && make -C /opt/upstream/AFLplusplus source-only -j1 \
     && make -C /opt/upstream/AFLplusplus install
 
 COPY . /workspace/plcfuzz
