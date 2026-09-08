@@ -73,6 +73,8 @@ Dockerfile 固定 OpenPLC 和 AFL++ 上游版本，并在镜像的 `/opt/upstrea
 
 `buildscript.sh` 默认把 `testcases/race_test_success.st` 转为 C，然后依次构建普通运行目标、生成变量映射、构建自定义变异器和 AFL++ 插桩目标。
 
+当前输入回放语义规定每个 OpenPLC 周期只推进每种输入类型一次。修复前的运行时会在同一周期重复推进 simulator，且把 UINT 输入误接到 UDINT 数据；因此修复前后的 findings 不能直接作为同一运行时基线比较，实验记录必须包含仓库 commit。
+
 只验证 ST 到 C：
 
 ```sh

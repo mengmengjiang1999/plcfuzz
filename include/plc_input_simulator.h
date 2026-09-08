@@ -14,6 +14,6 @@ class PLCInputSimulator {
     InputDataSimulator<DIntMemoryBlock> INPUT_DINT_MEM_DATA;
 
     PLCInputSimulator() = default;
-    void add_block(PLCInputBlock block);
+    void add_block(const PLCInputBlock& block);
     PLCInputBlock get_current_block();
 };

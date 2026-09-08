@@ -1,6 +1,6 @@
 #include "plc_input_simulator.h"
 
-void PLCInputSimulator::add_block(PLCInputBlock block) {
+void PLCInputSimulator::add_block(const PLCInputBlock& block) {
     INPUT_BOOL_DATA.add_block(block.input_bool_block);
     INPUT_BYTE_DATA.add_block(block.input_byte_block);
     INPUT_INT_DATA.add_block(block.input_int_block);

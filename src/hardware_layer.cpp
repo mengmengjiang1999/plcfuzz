@@ -37,6 +37,7 @@
 #include "buffer_history.h"
 #include "custom_layer.h"
 #include "ladder.h"
+#include "plc_input_apply.h"
 #include "plc_input_simulator.h"
 
 static BufferHistory io_history;
@@ -128,8 +129,6 @@ void finalizeHardware() {}
 // must be used to protect access to the buffers on a threaded environment.
 //-----------------------------------------------------------------------------
 
-// 写输入数据，从标准输入中模拟
-
 void showInput() {
     std::cout << "Input values:\n";
     for (int i = 0; i < BUFFER_SIZE; i++) {
@@ -140,59 +139,14 @@ void showInput() {
     }
 }
 
-// 旧版的updateBuffersIn，从标准输入中读取数据，并写入到bool_input中
-void updateBuffersIn(int t) {
-    // printf("Get input values:\n");
-    pthread_mutex_lock(&bufferLock);  // lock mutex
-
-    /*********READING AND WRITING TO I/O**************
-
-    *bool_input[0][0] = read_digital_input(0);
-    write_digital_output(0, *bool_output[0][0]);
-
-    *int_input[0] = read_analog_input(0);
-    write_analog_output(0, *int_output[0]);
-
-    **************************************************/
-
-    for (int i = 0; i < BUFFER_SIZE; i++) {
-        for (int j = 0; j < 8; j++) {
-            IEC_BOOL value;
-            // std::cin>>value;
-            if (scanf("%hhu", &value) != 1) {
-            } else {
-                printf("Input buffer: %d,%d, %hhu\n", i, j, value);
-                *bool_input[i][j] = value;
-            }
-        }
-    }
-
-    pthread_mutex_unlock(&bufferLock);  // unlock mutex
-}
-
-// 新版本的update
 void updateBuffersIn() {
     // printf("Get input values:\n");
     pthread_mutex_lock(&bufferLock);  // lock mutex
 
-    // 总之就是获得下一个cycle的模拟版的输入数据，并且将其写入到bool_input，模拟这是通过外设输入的数据
-    BoolBlock boolblock = INPUT_PLC_DATA.get_current_block().input_bool_block;
-    ByteBlock byteblock = INPUT_PLC_DATA.get_current_block().input_byte_block;
-    DIntBlock intblock = INPUT_PLC_DATA.get_current_block().input_dint_block;
-    LIntBlock lintblock = INPUT_PLC_DATA.get_current_block().input_lint_block;
-    IntMemoryBlock intmemblock = INPUT_PLC_DATA.get_current_block().input_int_mem_block;
-    DIntMemoryBlock dintmemblock = INPUT_PLC_DATA.get_current_block().input_dint_mem_block;
-    for (int i = 0; i < BUFFER_SIZE; i++) {
-        for (int j = 0; j < 8; j++) {
-            *bool_input[i][j] = (IEC_BOOL)boolblock.input[i][j];
-        }
-        *byte_input[i] = (IEC_BYTE)byteblock.input[i];
-        *int_input[i] = (IEC_UINT)intblock.input[i];
-        *dint_input[i] = (IEC_UDINT)intblock.input[i];
-        *lint_input[i] = (IEC_ULINT)lintblock.input[i];
-        *int_memory[i] = (IEC_UINT)intmemblock.input[i];
-        *dint_memory[i] = (IEC_UDINT)dintmemblock.input[i];
-    }
+    // Advance every independently timed input stream exactly once per PLC cycle,
+    // then apply the resulting composite snapshot to the OpenPLC buffers.
+    const PLCInputBlock block = INPUT_PLC_DATA.get_current_block();
+    applyPLCInputBlock(block, bool_input, byte_input, int_input, dint_input, lint_input, int_memory, dint_memory);
 
     pthread_mutex_unlock(&bufferLock);  // unlock mutex
 }

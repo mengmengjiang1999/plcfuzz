@@ -1,5 +1,7 @@
 #pragma once
+#include <cstddef>
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 
 #include "basic_input_block.h"
@@ -8,13 +10,13 @@
 template <typename T>
 class InputDataSimulator {
     std::vector<T> input_blocks;
-    int current_block_index;
+    std::size_t current_block_index;
     int current_block_cycle;
 
    public:
     InputDataSimulator();
     void print();
-    void add_block(T block);
+    void add_block(const T& block);
     T get_current_block();
 };
 
@@ -26,13 +28,13 @@ InputDataSimulator<T>::InputDataSimulator() {
 
 template <typename T>
 void InputDataSimulator<T>::print() {
-    for (int i = 0; i < this->input_blocks.size(); i++) {
+    for (std::size_t i = 0; i < this->input_blocks.size(); ++i) {
         this->input_blocks[i].print();
     }
 }
 
 template <typename T>
-void InputDataSimulator<T>::add_block(T block) {
+void InputDataSimulator<T>::add_block(const T& block) {
     this->input_blocks.push_back(block);
 }
 
@@ -40,6 +42,10 @@ template <typename T>
 T InputDataSimulator<T>::get_current_block() {
     // std::cout << "InputDataSimulator::get_current_block(): " << this->current_block_index
     //           << ", size=" << this->input_blocks.size() << std::endl;
+    if (this->input_blocks.empty()) {
+        throw std::out_of_range("PLC input playback is empty");
+    }
+
     T block = this->input_blocks[this->current_block_index];
     // 如果cycle不够这个block的持续cycle的数量那么
     if (this->current_block_cycle < block.cycles) {
@@ -50,8 +56,8 @@ T InputDataSimulator<T>::get_current_block() {
         this->current_block_cycle = 0;
         // std::cout << "Switch to next block" << std::endl;
         // 如果已经到了最后一个block的数据，那么就不切换了
-        if (this->current_block_index < this->input_blocks.size() - 1) {
-            this->current_block_index++;
+        if (this->current_block_index + 1 < this->input_blocks.size()) {
+            ++this->current_block_index;
         }
     }
     return block;
