@@ -64,6 +64,8 @@ Dockerfile 固定 OpenPLC 和 AFL++ 上游版本，并在镜像的 `/opt/upstrea
 
 ## 当前编译流程
 
+`.github/workflows/linux-quality.yml` 在 Ubuntu 22.04 上按本节顺序执行完整验证，并从源码构建固定的 AFL++ 4.10c。它对 `main` 的推送和目标为 `main` 的 pull request 运行，只申请仓库只读权限。
+
 ```sh
 ./scripts/verify_preserved_artifacts.sh
 ./scripts/check_source_layout.sh
@@ -131,7 +133,7 @@ FINDINGS_DIR=output/reproduction ./runfuzz.sh
 - Ubuntu APT 软件包尚未按包哈希封存；论文归档还应记录成功构建后的最终镜像 digest。
 - 13 个不能通过当前 MatIEC profile 的历史 ST 文件已原样归档到 `testcases/archive/incompatible-matiec/`，不计入活动语料或新增合法用例套件。
 - 历史统计和笔记中可能包含原实验机绝对路径；这些只是元数据，不再被当前脚本使用。
-- 当前没有远端 CI，完整 OpenPLC/AFL++ 构建仍以 x86-64 Linux 为权威环境。
+- 完整 OpenPLC/AFL++ 构建仍以 x86-64 Linux 为权威环境；远端 CI 使用 Ubuntu 22.04 覆盖该流程。
 
 ## 记录一次实验
 

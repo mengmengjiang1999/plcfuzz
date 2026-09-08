@@ -1,6 +1,6 @@
 # PLCFuzz 改进路线图
 
-本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **6 个主题完成**，另有 **8 个主题待处理**。每个待处理主题都应作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并在单独提交推送后更新本页状态。
+本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **7 个主题完成**，另有 **7 个主题待处理**。每个待处理主题都应作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并在单独提交推送后更新本页状态。
 
 ## 已完成
 
@@ -40,13 +40,13 @@ OpenSpec：[`catalog-test-corpus`](../openspec/changes/archive/2026-09-08-catalo
 
 OpenSpec：[`generate-structured-variable-map`](../openspec/changes/archive/2026-09-08-generate-structured-variable-map/)
 
+### Linux 持续集成
+
+GitHub Actions 现在在 Ubuntu 22.04 上验证固定 MatIEC、项目测试、普通运行目标、结构化变量映射、自定义变异器和固定 AFL++ 4.10c 插桩目标，并使用仓库只读权限。
+
+OpenSpec：[`add-linux-ci`](../openspec/changes/archive/2026-09-08-add-linux-ci/)
+
 ## P1：自动化与结果分析
-
-### 4. 建立 Linux CI
-
-建议 change：`add-linux-ci`
-
-Linux CI 应执行 submodule 初始化、MatIEC 构建与测试、合法用例验证、PLCFuzz 单元测试、普通目标构建、自定义变异器构建以及 AFL++ 插桩目标构建。缓存只用于加速依赖，不应绕过固定 commit 检查。
 
 ### 5. 增加运行诊断配置与异常样本整理流程
 

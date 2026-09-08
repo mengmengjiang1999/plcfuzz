@@ -245,6 +245,9 @@ python3 ./scripts/check_testcase_manifest.py --verify-compiler
 # 学术范围和维护用语检查
 ./scripts/check_project_wording.sh
 
+# Linux CI 工作流结构
+bash ./scripts/check_ci_workflow.sh
+
 # 活动源码、归档与生成快照一致性
 ./scripts/check_source_layout.sh
 
@@ -314,7 +317,7 @@ cp plclogic/LOCATED_VARIABLES.h tests/fixtures/reference_LOCATED_VARIABLES.h
 - 竞争问题的判定目前基于最近输出变化，是实验性启发式，不等价于严格的数据竞争检测。
 - 13 个不满足新版 MatIEC 要求的历史 ST 文件已移至 `testcases/archive/incompatible-matiec/`，程序逻辑保持不变且不纳入活动语料。
 - 默认自动化测试输入格式是固定顺序的文本数值块，grammar、解析器和变异器需要同步演进。
-- 当前没有远端 CI；完整 OpenPLC/AFL++ 链仍需在 Linux 环境验证。
+- Linux CI 会验证完整 OpenPLC/AFL++ 构建链；本地非 Linux 环境仍可能只覆盖轻量检查。
 - 仓库已提供顶层 GPLv3 `LICENSE`；收集的第三方测试语料和实验数据仍需逐项核对来源与再分发权。
 
 更完整的技术债与优先级见 [docs/IMPROVEMENTS.md](docs/IMPROVEMENTS.md)。

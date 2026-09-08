@@ -1,0 +1,80 @@
+name: Linux quality checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: linux-quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    env:
+      BUILD_JOBS: "2"
+    steps:
+      - name: Check out pinned sources
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            autoconf automake bison build-essential clang cmake flex git \
+            libtool lld llvm-dev pkg-config python3
+
+      - name: Verify repository inputs
+        shell: bash
+        run: |
+          if git submodule status --recursive | grep -E '^[+-U]'; then
+            echo "Submodule checkout does not match the recorded revision." >&2
+            exit 1
+          fi
+          bash scripts/check_ci_workflow.sh
+          ./scripts/verify_preserved_artifacts.sh
+
+      - name: Build and test MatIEC
+        run: MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
+
+      - name: Run project checks
+        run: |
+          ./scripts/check_project_wording.sh
+          ./scripts/check_source_layout.sh
+          ./scripts/test_unit.sh
+          python3 scripts/check_testcase_manifest.py --verify-compiler
+          ./scripts/validate_testcases.sh
+
+      - name: Build normal runtime and mapping
+        run: |
+          ./buildscript.sh plc testcases/race_test_success.st
+          ./buildscript.sh runtime
+          ./buildscript.sh analyze
+          test -x openplc
+          test -s plc_variables_mapping.csv
+
+      - name: Build custom mutator
+        run: |
+          ./buildscript.sh mutator
+          test -f build/mutator/libplc_mutator.so
+
+      - name: Build pinned AFL++ compiler
+        run: |
+          git clone --branch v4.10c --depth 1 \
+            https://github.com/AFLplusplus/AFLplusplus.git \
+            "$RUNNER_TEMP/AFLplusplus"
+          make -C "$RUNNER_TEMP/AFLplusplus" source-only -j"$BUILD_JOBS"
+          "$RUNNER_TEMP/AFLplusplus/afl-clang-fast++" --version
+
+      - name: Build instrumented runtime
+        run: |
+          AFL_CXX="$RUNNER_TEMP/AFLplusplus/afl-clang-fast++" ./buildscript.sh fuzz
+          test -x openplc_fuzz
