@@ -47,3 +47,6 @@ compile_and_run \
 rg --quiet '^start[[:space:]]*=[[:space:]]*format_header bigblocks$' "$repo_root/fuzz_config/plc.grammar"
 rg --quiet '^format_header[[:space:]]*=[[:space:]]*"PLCFUZZ_INPUT_V1"$' "$repo_root/fuzz_config/plc.grammar"
 echo "PASS plc_input_grammar_test"
+
+PYTHONDONTWRITEBYTECODE=1 python3 "$repo_root/tests/testcase_manifest_test.py"
+echo "PASS testcase_manifest_test"

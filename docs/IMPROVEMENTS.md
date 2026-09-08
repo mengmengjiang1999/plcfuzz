@@ -1,6 +1,6 @@
 # PLCFuzz 改进路线图
 
-本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **4 个主题完成**，另有 **10 个主题待处理**。每个待处理主题都应作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并在单独提交推送后更新本页状态。
+本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **5 个主题完成**，另有 **9 个主题待处理**。每个待处理主题都应作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并在单独提交推送后更新本页状态。
 
 ## 已完成
 
@@ -28,13 +28,11 @@ OpenSpec：[`make-mutator-deterministic`](../openspec/changes/archive/2026-09-08
 
 OpenSpec：[`version-plc-input-format`](../openspec/changes/archive/2026-09-08-version-plc-input-format/)
 
-## P0：研究结论可靠性
+### 测试语料机器可读清单
 
-### 2. 为历史测试语料建立机器可读清单
+`testcases/manifest.tsv` 现在覆盖全部 40 个 ST 和 31 个 LD 文件，记录路径、profile、预期结果、来源与许可核对状态和研究用途。校验器会检查 Git 文件覆盖，并可使用固定 MatIEC 核对全部 ST 预期结果。
 
-建议 change：`catalog-test-corpus`
-
-新版 MatIEC 扫描中有 23 个历史 ST 文件通过、13 个文件已移至 `testcases/archive/incompatible-matiec/`。应增加机器可读 manifest，记录原路径、预期 profile、预期结果、来源、许可和研究用途，并用脚本检查清单与文件树一致。
+OpenSpec：[`catalog-test-corpus`](../openspec/changes/archive/2026-09-08-catalog-test-corpus/)
 
 ## P1：自动化与结果分析
 

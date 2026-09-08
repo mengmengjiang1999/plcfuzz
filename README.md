@@ -236,6 +236,12 @@ MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
 # PLCFuzz 新增的 MatIEC 合法用例
 ./scripts/validate_testcases.sh
 
+# 全部 ST/LD 清单结构与文件覆盖
+python3 ./scripts/check_testcase_manifest.py
+
+# 使用固定 MatIEC 核对全部 ST 预期结果
+python3 ./scripts/check_testcase_manifest.py --verify-compiler
+
 # 学术范围和维护用语检查
 ./scripts/check_project_wording.sh
 
@@ -249,7 +255,7 @@ MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
 ./scripts/verify_preserved_artifacts.sh
 ```
 
-测试用例说明见 [testcases/matiec/README.md](testcases/matiec/README.md)。
+测试用例总清单见 [testcases/README.md](testcases/README.md)，重点 MatIEC 兼容用例说明见 [testcases/matiec/README.md](testcases/matiec/README.md)。
 
 ## 目录
 

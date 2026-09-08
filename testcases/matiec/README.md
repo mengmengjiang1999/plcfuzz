@@ -12,3 +12,5 @@ Run all cases from the repository root:
 ```
 
 The validator generates output in a temporary directory and does not overwrite `plclogic/`.
+
+The repository-wide testcase inventory and metadata schema are documented in [`testcases/README.md`](../README.md). The validator checks that manifest before compiling this focused suite.
