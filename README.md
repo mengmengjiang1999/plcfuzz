@@ -274,10 +274,10 @@ MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
 ## 当前限制
 
 - 竞争问题的判定目前基于最近输出变化，是实验性启发式，不等价于严格的数据竞争检测。
-- 13 个不满足新版 MatIEC 要求的历史 ST 文件已移至 `testcases/archive/incompatible-matiec/`，原始内容保持不变且不纳入活动语料。
+- 13 个不满足新版 MatIEC 要求的历史 ST 文件已移至 `testcases/archive/incompatible-matiec/`，程序逻辑保持不变且不纳入活动语料。
 - 默认 fuzz 输入格式是固定顺序的文本数值块，grammar、解析器和变异器需要同步演进。
 - 当前没有远端 CI；完整 OpenPLC/AFL++ 链仍需在 Linux 环境验证。
-- 仓库尚未提供顶层 `LICENSE`，原创代码和实验数据的再分发权限尚未明确。
+- 仓库已提供顶层 GPLv3 `LICENSE`；收集的第三方测试语料和实验数据仍需逐项核对来源与再分发权。
 
 更完整的技术债与优先级见 [docs/IMPROVEMENTS.md](docs/IMPROVEMENTS.md)。
 

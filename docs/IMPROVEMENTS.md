@@ -44,7 +44,7 @@ Linux CI 至少应执行：submodule 初始化、MatIEC 构建和 `make check`�
 
 ## P2：改善发布与长期维护
 
-- 确定原创代码和数据的许可证，添加顶层 `LICENSE` 和完整 `LICENSES/` 文本。
+- 为原创文件补充版权和 SPDX 标识，并添加第三方组件所需的完整 `LICENSES/` 文本。
 - 核对第三方测试用例的来源与再分发权。
 - 将 `buildscript_new.sh` 等历史入口逐步迁移为语义明确的 `scripts/` 命令，并保留带弃用提示的兼容包装器。
 - 继续用 RAII、明确所有权和强类型地址替代裸指针、整数索引与全局状态；特别检查 history buffer 的空指针和越界行为。

@@ -42,13 +42,13 @@ AFL++ 来源为 <https://github.com/AFLplusplus/AFLplusplus/tree/v4.10c>。OpenD
 
 MatIEC 历史二进制是 GPL 覆盖的目标代码。对外分发时需要满足 GPL 对完整许可文本、版权通知和对应源码的要求；当前尚不能从二进制可靠确定它们对应的精确源码 commit。当前可构建的 submodule 不能自动证明它就是这些旧二进制的对应源码。
 
-## 项目自身许可状态
+## 项目许可状态
 
-仓库当前没有顶层 `LICENSE`，因此无法从仓库本身确定原创代码、脚本、文档和实验数据的授权条款。第三方说明不会自动为这些原创材料授权。
+仓库顶层已包含 GNU GPL version 3 的完整 `LICENSE` 文本。第三方组件继续受各自许可证约束；顶层许可证也不能替代对收集测试用例和实验数据来源的核查。
 
 正式公开发布前应：
 
-1. 为原创部分选择与组合方式兼容的许可证并添加顶层 `LICENSE`。
-2. 核对 `testcases/LD-test/` 等收集用例的出处和再分发权。
-3. 将 GPL-3.0、LGPL-2.0、LGPL-2.1、LGPL-3.0 和 Apache-2.0 的完整文本放入 `LICENSES/`。
+1. 为原创文件补充清晰的版权和 SPDX 标识，确认 GPLv3 的适用范围。
+2. 核对 `testcases/LD-test/` 等收集用例和实验数据的出处及再分发权。
+3. 将 LGPL-2.0、LGPL-2.1、LGPL-3.0 和 Apache-2.0 等第三方许可证完整文本放入 `LICENSES/`。
 4. 保留所有原始文件头、作者归属、submodule commit 和修改记录。
