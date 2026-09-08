@@ -19,6 +19,7 @@ jobs:
     timeout-minutes: 45
     env:
       BUILD_JOBS: "2"
+      MATIEC_BUILD_JOBS: "1"
     steps:
       - name: Check out pinned sources
         uses: actions/checkout@v4

@@ -3,7 +3,7 @@ set -euo pipefail
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 matiec_dir="$repo_root/third_party/matiec"
-jobs=${BUILD_JOBS:-2}
+jobs=${MATIEC_BUILD_JOBS:-1}
 
 if [[ -x /opt/homebrew/opt/bison/bin/bison ]]; then
     export PATH="/opt/homebrew/opt/bison/bin:$PATH"

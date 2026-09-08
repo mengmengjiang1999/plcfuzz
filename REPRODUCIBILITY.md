@@ -35,6 +35,8 @@ git submodule update --init --recursive
 MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
 ```
 
+`setup_matiec.sh` 默认使用 `MATIEC_BUILD_JOBS=1` 保证清洁构建顺序稳定。该变量专用于 MatIEC；项目其他构建步骤的 `BUILD_JOBS` 不会改变它。
+
 ## 历史实验基线
 
 原始实验在 x86-64 Ubuntu 22.04 下运行。`artifacts/legacy/matiec/iec2c` 和 `artifacts/legacy/openplc_fuzz` 中的编译器标记包含 GCC 11.4/12.3 与 Ubuntu 22.04 信息，历史 `fuzzer_stats` 记录了 AFL++ 4.10c。

@@ -95,6 +95,8 @@ macOS 可以构建和测试新版 MatIEC；Apple 自带 Bison 2.3 不满足要�
 MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
 ```
 
+MatIEC 默认使用单作业构建，以避开其递归 Makefile 的共享目标顺序问题。需要自行评估并行构建时可设置 `MATIEC_BUILD_JOBS`；它与项目其他步骤使用的 `BUILD_JOBS` 相互独立。
+
 ### 2. 验证 ST 测试用例
 
 ```bash
