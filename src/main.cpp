@@ -31,6 +31,7 @@
 #include <unistd.h>
 
 #include <chrono>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <numeric>  // 需要包含这个头文件
@@ -535,14 +536,10 @@ int main(int argc, char** argv) {
 #endif
 
     if(checkOutputChange()) {
-        // todo:最后一次执行updateBufferOut的时候，会将outputBuffer的值清空。所以在做比较的时候不应该计入最后一次。
-        std::cout << "Racing bug detected, shutting down OpenPLC Runtime...\n" << std::endl;
-
-        // 这里是手动指定了一个会crash的点来使得其产生crash
-        char* crash = NULL;
-        crash[0] = 1;
+        std::cerr << "Output-change candidate detected; aborting for AFL crash capture." << std::endl;
+        std::abort();
     } else {
-        printf("No racing bug detected, shutting down OpenPLC Runtime...\n");
+        printf("No output-change candidate detected, shutting down OpenPLC Runtime...\n");
     }
 
     printf("Disabling outputs\n");

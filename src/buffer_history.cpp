@@ -71,18 +71,22 @@ void BufferHistory::updateHistory(IEC_BOOL *bool_input[OPENPLC_BUFFER_SIZE][8],
     this->updateDintMemoryHistory(input_dint_memory, output_dint_memory);
 }
 
-bool BufferHistory::checkChange() {  // 里面有一个不稳定的就会报错
-    std::cout << "BufferHistory::checkChange()" << std::endl;
-    std::cout << "bool_history.check_change():" << this->bool_history.check_change() << std::endl;
-    std::cout << "byte_history.check_change():" << this->byte_history.check_change() << std::endl;
-    std::cout << "int_history.check_change():" << this->int_history.check_change() << std::endl;
-    std::cout << "dint_history.check_change():" << this->dint_history.check_change() << std::endl;
-    std::cout << "lint_history.check_change():" << this->lint_history.check_change() << std::endl;
-    std::cout << "int_memory_history.check_change():" << this->int_memory_history.check_change() << std::endl;
-    std::cout << "dint_memory_history.check_change():" << this->dint_memory_history.check_change() << std::endl;
-    return this->bool_history.check_change() || this->byte_history.check_change() || this->int_history.check_change() ||
-           this->dint_history.check_change() || this->lint_history.check_change() || this->int_memory_history.check_change() ||
-           this->dint_memory_history.check_change();
+bool BufferHistory::checkChange() {
+    const bool bool_changed = bool_history.check_change();
+    const bool byte_changed = byte_history.check_change();
+    const bool int_changed = int_history.check_change();
+    const bool dint_changed = dint_history.check_change();
+    const bool lint_changed = lint_history.check_change();
+    const bool int_memory_changed = int_memory_history.check_change();
+    const bool dint_memory_changed = dint_memory_history.check_change();
+
+    std::cout << "Output-change candidate by type:"
+              << " bool=" << bool_changed << " byte=" << byte_changed << " int=" << int_changed
+              << " dint=" << dint_changed << " lint=" << lint_changed << " int_memory=" << int_memory_changed
+              << " dint_memory=" << dint_memory_changed << std::endl;
+
+    return bool_changed || byte_changed || int_changed || dint_changed || lint_changed || int_memory_changed ||
+           dint_memory_changed;
 }
 
 void BufferHistory::printHistory() {

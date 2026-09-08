@@ -75,6 +75,8 @@ Dockerfile 固定 OpenPLC 和 AFL++ 上游版本，并在镜像的 `/opt/upstrea
 
 当前输入回放语义规定每个 OpenPLC 周期只推进每种输入类型一次。修复前的运行时会在同一周期重复推进 simulator，且把 UINT 输入误接到 UDINT 数据；因此修复前后的 findings 不能直接作为同一运行时基线比较，实验记录必须包含仓库 commit。
 
+当前输出变化 oracle 只比较实际记录的 history 样本，并按环形缓冲区的时间顺序处理。旧版本会把未写入的零值槽位加入比较，因此旧 findings 还可能包含初始化导致的候选；跨版本评估必须分别记录 oracle 所在的仓库 commit。输出变化仍只是候选信号，不等价于严格的数据竞争证明。
+
 只验证 ST 到 C：
 
 ```sh

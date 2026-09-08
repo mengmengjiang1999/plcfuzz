@@ -30,3 +30,7 @@ compile_and_run \
     plc_input_simulator_test \
     "$repo_root/tests/plc_input_simulator_test.cpp" \
     "$repo_root/src/plc_input_simulator.cpp"
+
+compile_and_run \
+    buffer_history_test \
+    "$repo_root/tests/buffer_history_test.cpp"
