@@ -522,7 +522,7 @@ int main(int argc, char** argv) {
 #endif
 
     if(checkOutputChange()) {
-        std::cerr << "Output-change candidate detected; aborting for AFL crash capture." << std::endl;
+        std::cerr << "Output-change candidate detected; ending this run for AFL sample collection." << std::endl;
         std::abort();
     } else {
         printf("No output-change candidate detected, shutting down OpenPLC Runtime...\n");

@@ -1,9 +1,16 @@
 # PLCFuzz
 
-PLCFuzz 是一个面向 PLC 控制逻辑的研究型模糊测试原型。它使用 MatIEC 将 IEC 61131-3 Structured Text（ST）程序转换为 C，构建基于 OpenPLC 的执行目标，提取 PLC 变量映射，再通过 AFL++ 和结构感知自定义变异器寻找崩溃、异常状态变化和潜在竞争问题。
+PLCFuzz 是一个面向 PLC 控制逻辑的学术软件鲁棒性测试原型。它使用 MatIEC 将 IEC 61131-3 Structured Text（ST）程序转换为 C，构建基于 OpenPLC 的离线执行目标，提取 PLC 变量映射，再通过 AFL++ 和结构感知的自动输入生成观察非正常终止、异常状态变化和候选并发问题。
 
-> [!WARNING]
-> 本项目用于安全研究和实验复现，不是可直接部署到生产控制系统的 OpenPLC 发行版，也不应作为功能安全判断工具。
+> [!IMPORTANT]
+> 本项目只用于经过授权的学术研究与软件质量实验。所有实验都应在隔离的仿真环境或专用实验台中进行，不得连接或控制生产 PLC、现场设备及在役工业系统。本项目不是可部署的 OpenPLC 发行版，也不提供认证、生产运行或功能安全结论。
+
+## 研究范围
+
+- 研究对象是测试用 ST 程序、编译器兼容性和仿真运行时行为；
+- 研究方法是覆盖率引导的自动输入生成、状态观测和可复现实验；
+- 输出仅表示需要进一步人工分析的候选样本，不自动证明存在确定缺陷；
+- 使用者必须拥有被测代码与实验环境的明确授权，并遵守所在机构的研究规范。
 
 ## 工作流
 
@@ -151,7 +158,7 @@ MATIEC_IEC2C=./artifacts/legacy/matiec/iec2c \
 ./build_scripts/build_plcfiles.sh ./testcases/race_test_success.st
 ```
 
-新版和历史 MatIEC 的生成结果不能默认视为等价；比较 fuzzing 数据时应记录使用的 MatIEC commit 或二进制 SHA-256。
+新版和历史 MatIEC 的生成结果不能默认视为等价；比较自动化测试数据时应记录使用的 MatIEC commit 或二进制 SHA-256。
 
 ### 普通目标与变量映射
 
@@ -178,7 +185,7 @@ python3 ./static_analyse/main.py
 - `openplc_fuzz`：AFL++ 插桩目标；
 - `build/runtime/` 与 `build/fuzz/`：互相隔离的对象文件。
 
-## 运行模糊测试
+## 运行自动化鲁棒性实验
 
 先复制保留的种子：
 
@@ -228,6 +235,9 @@ MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
 # PLCFuzz 新增的 MatIEC 合法用例
 ./scripts/validate_testcases.sh
 
+# 学术范围和维护用语检查
+./scripts/check_project_wording.sh
+
 # 自定义变异器输入的解析/序列化往返测试
 ./scripts/test_unit.sh
 
@@ -251,7 +261,7 @@ MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
 | `tests/` | PLCFuzz 单元测试 |
 | `artifacts/legacy/` | 历史 MatIEC/OpenPLC 二进制与快照 |
 | `seeds copy/` | 只读保留的历史种子 |
-| `findings/`、`findings copy/` | 历史 AFL++ 队列、崩溃和统计数据 |
+| `findings/`、`findings copy/` | 历史 AFL++ 队列、异常终止样本和统计数据 |
 | `results/` | 批量实验统计结果 |
 | `docs/` | 研究笔记、实验记录和改进建议 |
 | `lunwenfuxian/petrinet/` | 梯形图到 Petri 网及竞争分析实验 |
@@ -275,7 +285,7 @@ MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
 
 - 竞争问题的判定目前基于最近输出变化，是实验性启发式，不等价于严格的数据竞争检测。
 - 13 个不满足新版 MatIEC 要求的历史 ST 文件已移至 `testcases/archive/incompatible-matiec/`，程序逻辑保持不变且不纳入活动语料。
-- 默认 fuzz 输入格式是固定顺序的文本数值块，grammar、解析器和变异器需要同步演进。
+- 默认自动化测试输入格式是固定顺序的文本数值块，grammar、解析器和变异器需要同步演进。
 - 当前没有远端 CI；完整 OpenPLC/AFL++ 链仍需在 Linux 环境验证。
 - 仓库已提供顶层 GPLv3 `LICENSE`；收集的第三方测试语料和实验数据仍需逐项核对来源与再分发权。
 
