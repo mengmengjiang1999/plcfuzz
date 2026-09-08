@@ -1,3 +1,4 @@
+// Archived optional DNP3 service; not reachable from the PLCFuzz runtime.
 // 2017 Trevor Aron
 //
 // File contains code for DNP3

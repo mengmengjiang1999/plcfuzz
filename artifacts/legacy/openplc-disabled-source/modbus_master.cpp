@@ -1,4 +1,5 @@
 // //-----------------------------------------------------------------------------
+// Archived disabled OpenPLC module; not part of the active PLCFuzz build.
 // // Copyright 2015 Thiago Alves
 // //
 // // Based on the LDmicro software by Jonathan Westhues

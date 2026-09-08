@@ -1,4 +1,5 @@
 //-----------------------------------------------------------------------------
+// Archived optional service client; not reachable from the PLCFuzz runtime.
 // Copyright 2022 Thiago Alves
 // This file is part of the OpenPLC Software Stack.
 //

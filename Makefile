@@ -10,11 +10,16 @@ GENERATED_CPP := $(SRC_DIR)/glueVars.cpp
 LOCATED_VARS  := $(PLCLOGIC_DIR)/LOCATED_VARIABLES.h
 GLUE_GENERATOR:= $(TOOLS_DIR)/glue_generator
 
-# 源文件列表（显式列出C文件，通配符匹配CPP文件）
+# Active source manifest. Add new translation units deliberately; archived or
+# experimental files are never selected by directory wildcard.
 C_SRCS        := $(PLCLOGIC_DIR)/Config0.c $(PLCLOGIC_DIR)/Res0.c
-CPP_SRCS      := $(wildcard $(SRC_DIR)/*.cpp)
-# 过滤掉生成的glueVars.cpp以避免重复
-CPP_SRCS      := $(filter-out $(GENERATED_CPP), $(CPP_SRCS))
+CPP_SRCS      := \
+	$(SRC_DIR)/buffer_history.cpp \
+	$(SRC_DIR)/hardware_layer.cpp \
+	$(SRC_DIR)/main.cpp \
+	$(SRC_DIR)/modbus.cpp \
+	$(SRC_DIR)/plc_input_simulator.cpp \
+	$(SRC_DIR)/runtime_globals.cpp
 ALL_CPP_SRCS  := $(CPP_SRCS) $(GENERATED_CPP)
 
 # 对象文件生成规则：所有.o文件放在BUILD_DIR下
@@ -25,7 +30,7 @@ OBJS          := $(C_OBJS) $(CPP_OBJS)
 # 编译和链接标志
 CXXFLAGS      := -std=gnu++11 -I./lib -I$(PLCLOGIC_DIR) -I./include $(EXTRA_CXXFLAGS)
 LDFLAGS       := -pthread -fpermissive
-LDLIBS        := $(shell pkg-config --cflags --libs libmodbus) -lasiodnp3 -lasiopal -lopendnp3 -lopenpal
+LDLIBS        :=
 ifdef ETHERCAT_INC
     CXXFLAGS  += $(ETHERCAT_INC)
     LDFLAGS   += $(ETHERCAT_INC)

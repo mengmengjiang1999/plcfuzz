@@ -50,8 +50,6 @@
 #include "ethercat_src.h"
 #endif
 
-#define OPLC_CYCLE 50000000
-
 extern int opterr;
 // extern int common_ticktime__;
 IEC_BOOL __DEBUG;
@@ -100,23 +98,6 @@ int wait_until_deadline(const struct timespec& deadline) {
 #endif
 }
 
-// Advances an absolute deadline and sleeps until it. delay is in nanoseconds.
-void sleep_until(struct timespec* ts, long long delay) {
-    runtime_timing::add_nanoseconds(ts, static_cast<std::uint64_t>(delay));
-    wait_until_deadline(*ts);
-}
-
-//-----------------------------------------------------------------------------
-// Helper function - Makes the running thread sleep for the ammount of time
-// in milliseconds
-//-----------------------------------------------------------------------------
-void sleepms(int milliseconds) {
-    struct timespec ts;
-    ts.tv_sec = milliseconds / 1000;
-    ts.tv_nsec = (milliseconds % 1000) * 1000000;
-    nanosleep(&ts, NULL);
-}
-
 //-----------------------------------------------------------------------------
 // Helper function - Logs messages and print them on the console
 //-----------------------------------------------------------------------------
@@ -142,8 +123,6 @@ void log(char* logmsg) {
 // Interactive Server Thread. Creates the server to listen to commands on
 // localhost
 //-----------------------------------------------------------------------------
-// void *interactiveServerThread(void *arg) { startInteractiveServer(43628); }
-
 //-----------------------------------------------------------------------------
 // Verify if pin is present in one of the ignored vectors
 //-----------------------------------------------------------------------------
@@ -344,9 +323,6 @@ int main(int argc, char** argv) {
     tzset();
     time(&start_time);
 
-    // pthread_t interactive_thread;
-    // pthread_create(&interactive_thread, NULL, interactiveServerThread, NULL);
-
     config_init__();
     glueVars();
 
@@ -383,10 +359,6 @@ int main(int argc, char** argv) {
     //======================================================
     glueVars();
     mapUnusedIO();
-    // readPersistentStorage();
-    // pthread_t persistentThread;
-    // pthread_create(&persistentThread, NULL, persistentStorage, NULL);
-
     // sprintf(log_msg, "After Storage initialization ...\n");
 
 #ifdef __linux__
@@ -516,7 +488,6 @@ int main(int argc, char** argv) {
 //======================================================
 //             SHUTTING DOWN OPENPLC RUNTIME
 //======================================================
-// pthread_join(interactive_thread, NULL);
 #ifdef _ethercat_src
     ethercat_terminate_src();
 #endif

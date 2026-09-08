@@ -1,4 +1,5 @@
 
+// Archived pre-refactor custom mutator retained for experiment archaeology.
 #include <stdint.h>
 
 #include <algorithm>

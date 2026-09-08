@@ -1,4 +1,5 @@
 //-----------------------------------------------------------------------------
+// Archived optional persistence service; not reachable from the PLCFuzz runtime.
 // Copyright 2019 Thiago Alves
 // This file is part of the OpenPLC Software Stack.
 //

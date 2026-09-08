@@ -1,4 +1,5 @@
 // //-----------------------------------------------------------------------------
+// Archived disabled OpenPLC module; not part of the active PLCFuzz build.
 // // Copyright 2015 Thiago Alves
 // // This file is part of the OpenPLC Software Stack.
 // //

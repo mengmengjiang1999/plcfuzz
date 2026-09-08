@@ -125,8 +125,6 @@ extern int ignored_int_inputs[];
 extern int ignored_int_outputs[];
 
 // main.cpp
-void sleep_until(struct timespec *ts, long long delay);
-void sleepms(int milliseconds);
 void log(char *logmsg);
 bool pinNotPresent(int *ignored_vector, int vector_size, int pinNumber);
 extern uint8_t run_openplc;
@@ -134,42 +132,9 @@ extern unsigned char log_buffer[1000000];
 extern int log_index;
 void handleSpecialFunctions();
 
-// server.cpp
-void startServer(uint16_t port, int protocol_type);
-int getSO_ERROR(int fd);
-void closeSocket(int fd);
-bool SetSocketBlockingEnabled(int fd, bool blocking);
-
-// interactive_server.cpp
-void startInteractiveServer(int port);
-extern bool run_modbus;
-extern bool run_dnp3;
-extern bool run_enip;
-extern bool run_pstorage;
-extern uint16_t pstorage_polling;
+// Runtime clock state.
 extern time_t start_time;
-extern time_t end_time;
 
 // modbus.cpp
 int processModbusMessage(unsigned char *buffer, int bufferSize);
 void mapUnusedIO();
-
-// enip.cpp
-int processEnipMessage(unsigned char *buffer, int buffer_size);
-
-// pccc.cpp ADDED Ulmer
-uint16_t processPCCCMessage(unsigned char *buffer, int buffer_size);
-
-// modbus_master.cpp
-void initializeMB();
-void *querySlaveDevices(void *arg);
-void updateBuffersIn_MB();
-void updateBuffersOut_MB();
-extern uint8_t rpi_modbus_rts_pin;  // If <> 0, expect hardware RTS to be used with this pin
-
-// dnp3.cpp
-void dnp3StartServer(int port);
-
-// persistent_storage.cpp
-void startPstorage();
-int readPersistentStorage();

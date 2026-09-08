@@ -32,6 +32,7 @@ AFL++ 的产品名、ABI 符号、环境变量和目录约定必须保持原样�
 
 ```sh
 ./scripts/check_project_wording.sh
+./scripts/check_source_layout.sh
 ./scripts/test_unit.sh
 ./scripts/validate_testcases.sh
 ```

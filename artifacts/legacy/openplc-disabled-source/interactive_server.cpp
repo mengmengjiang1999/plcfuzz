@@ -1,4 +1,5 @@
 //-----------------------------------------------------------------------------
+// Archived disabled OpenPLC module; active globals moved to src/runtime_globals.cpp.
 // Copyright 2018 Thiago Alves
 // This file is part of the OpenPLC Software Stack.
 //

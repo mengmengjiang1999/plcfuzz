@@ -1,3 +1,4 @@
+# Archived tagged-block grammar; incompatible with the active plain numeric serializer.
 start         = bigblocks
 bigblocks     = bigblock | bigblocks bigblock
 bigblock      = "[BIGBLOCK]" blocks "[ENDBLOCK]"

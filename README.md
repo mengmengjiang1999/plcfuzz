@@ -76,7 +76,6 @@ git submodule update --init --recursive
 - CMake、GNU Make、pkg-config
 - Python 3
 - AFL++ 4.10c
-- OpenDNP3 与 libmodbus
 
 macOS 可以构建和测试新版 MatIEC；Apple 自带 Bison 2.3 不满足要求，`scripts/setup_matiec.sh` 会优先使用 Homebrew Bison。完整 PLCFuzz 运行时仍建议放在 Linux 容器中验证。
 
@@ -238,6 +237,9 @@ MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
 # 学术范围和维护用语检查
 ./scripts/check_project_wording.sh
 
+# 活动源码、归档与生成快照一致性
+./scripts/check_source_layout.sh
+
 # 自定义变异器输入的解析/序列化往返测试
 ./scripts/test_unit.sh
 
@@ -273,6 +275,8 @@ MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
 - `artifacts/legacy/matiec/iec2c`、`iec2iec` 和 `tmp.yy`；
 - `artifacts/legacy/openplc_fuzz`；
 - `tools/glue_generator`；
+- `artifacts/legacy/openplc-disabled-source/` 中不参与当前构建的早期模块；
+- `artifacts/legacy/fuzz-config/` 中不兼容当前输入格式的早期配置；
 - `findings/`、`findings copy/` 与 `results/`。
 
 使用以下命令校验保留二进制：
@@ -280,6 +284,19 @@ MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
 ```bash
 ./scripts/verify_preserved_artifacts.sh
 ```
+
+## 生成的参考快照
+
+仓库有意跟踪 `src/glueVars.cpp` 与根目录的 `plc_variables_mapping.csv`，二者对应 README 默认 ST 程序的同一份生成结果，使未运行完整工具链的检出也能进行代码审阅和轻量测试。更换参考程序时按以下顺序同时刷新：
+
+```sh
+./buildscript.sh plc testcases/race_test_success.st
+./buildscript.sh runtime
+./buildscript.sh analyze
+./scripts/check_source_layout.sh
+```
+
+`runtime` 步骤根据 `plclogic/LOCATED_VARIABLES.h` 刷新 glue 文件，`analyze` 随后从该文件重建唯一的活动变量映射。两份文件应在同一个提交中更新。
 
 ## 当前限制
 

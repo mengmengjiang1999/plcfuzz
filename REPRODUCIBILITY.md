@@ -66,6 +66,7 @@ Dockerfile 固定 OpenPLC 和 AFL++ 上游版本，并在镜像的 `/opt/upstrea
 
 ```sh
 ./scripts/verify_preserved_artifacts.sh
+./scripts/check_source_layout.sh
 ./scripts/validate_testcases.sh
 ./scripts/test_unit.sh
 ./buildscript.sh
