@@ -50,3 +50,6 @@ echo "PASS plc_input_grammar_test"
 
 PYTHONDONTWRITEBYTECODE=1 python3 "$repo_root/tests/testcase_manifest_test.py"
 echo "PASS testcase_manifest_test"
+
+PYTHONDONTWRITEBYTECODE=1 python3 "$repo_root/tests/static_analyse_test.py"
+echo "PASS static_analyse_test"

@@ -297,16 +297,17 @@ python3 ./scripts/check_testcase_manifest.py --verify-compiler
 
 ## 生成的参考快照
 
-仓库有意跟踪 `src/glueVars.cpp` 与根目录的 `plc_variables_mapping.csv`，二者对应 README 默认 ST 程序的同一份生成结果，使未运行完整工具链的检出也能进行代码审阅和轻量测试。更换参考程序时按以下顺序同时刷新：
+仓库有意跟踪 `src/glueVars.cpp`、根目录的 `plc_variables_mapping.csv` 和 `tests/fixtures/reference_LOCATED_VARIABLES.h`，三者对应 README 默认 ST 程序的同一份生成结果，使未运行完整工具链的检出也能进行代码审阅和轻量测试。更换参考程序时按以下顺序同时刷新：
 
 ```sh
 ./buildscript.sh plc testcases/race_test_success.st
 ./buildscript.sh runtime
 ./buildscript.sh analyze
+cp plclogic/LOCATED_VARIABLES.h tests/fixtures/reference_LOCATED_VARIABLES.h
 ./scripts/check_source_layout.sh
 ```
 
-`runtime` 步骤根据 `plclogic/LOCATED_VARIABLES.h` 刷新 glue 文件，`analyze` 随后从该文件重建唯一的活动变量映射。两份文件应在同一个提交中更新。
+`runtime` 步骤根据 `plclogic/LOCATED_VARIABLES.h` 刷新 glue 文件，`analyze` 随后直接从这些结构化地址记录重建唯一的活动变量映射。确认结果后，把 `plclogic/LOCATED_VARIABLES.h` 复制为测试参考快照；三份文件应在同一个提交中更新。
 
 ## 当前限制
 

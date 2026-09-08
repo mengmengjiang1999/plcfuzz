@@ -62,11 +62,11 @@ done
 generated_mapping=$(mktemp "${TMPDIR:-/tmp}/plcfuzz-mapping.XXXXXX")
 trap 'rm -f "$generated_mapping"' EXIT
 python3 "$repo_root/static_analyse/main.py" \
-    --input "$repo_root/src/glueVars.cpp" \
+    --input "$repo_root/tests/fixtures/reference_LOCATED_VARIABLES.h" \
     --output "$generated_mapping" >/dev/null
 
 if ! cmp -s "$repo_root/plc_variables_mapping.csv" "$generated_mapping"; then
-    echo "The root variable mapping does not match the tracked glue snapshot." >&2
+    echo "The root variable mapping does not match the tracked reference located-variable snapshot." >&2
     exit 1
 fi
 

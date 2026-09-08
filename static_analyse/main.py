@@ -1,69 +1,131 @@
 #!/usr/bin/env python3
-"""Extract PLC variable bindings from OpenPLC's generated glueVars.cpp."""
+"""Generate the OpenPLC runtime mapping from MatIEC located-variable records."""
 
 import argparse
 import csv
-import re
+import os
 from pathlib import Path
+import re
+import tempfile
 
 
-PATTERNS = {
-    "bool_inputs": r"bool_input\[([^\]]+)\]\[([^\]]+)\] = \(IEC_BOOL \*\)([^;]+);",
-    "bool_outputs": r"bool_output\[([^\]]+)\]\[([^\]]+)\] = \(IEC_BOOL \*\)([^;]+);",
-    "byte_inputs": r"byte_input\[([^\]]+)\] = \(IEC_BYTE \*\)([^;]+);",
-    "byte_outputs": r"byte_output\[([^\]]+)\] = \(IEC_BYTE \*\)([^;]+);",
-    "int_inputs": r"int_input\[([^\]]+)\] = \(IEC_UINT \*\)([^;]+);",
-    "int_outputs": r"int_output\[([^\]]+)\] = \(IEC_UINT \*\)([^;]+);",
-    "dint_inputs": r"dint_input\[([^\]]+)\] = \(IEC_UDINT \*\)([^;]+);",
-    "dint_outputs": r"dint_output\[([^\]]+)\] = \(IEC_UDINT \*\)([^;]+);",
-    "lint_inputs": r"lint_input\[([^\]]+)\] = \(IEC_ULINT \*\)([^;]+);",
-    "lint_outputs": r"lint_output\[([^\]]+)\] = \(IEC_ULINT \*\)([^;]+);",
-    "int_memory": r"int_memory\[([^\]]+)\] = \(IEC_UINT \*\)([^;]+);",
-    "dint_memory": r"dint_memory\[([^\]]+)\] = \(IEC_UDINT \*\)([^;]+);",
-    "lint_memory": r"lint_memory\[([^\]]+)\] = \(IEC_ULINT \*\)([^;]+);",
+CSV_HEADER = ["变量类型", "数组索引", "位索引(仅布尔)", "变量名"]
+RECORD_PATTERN = re.compile(r"^\s*__LOCATED_VAR\(([^()]*)\)\s*$")
+DECIMAL_PATTERN = re.compile(r"^(0|[1-9][0-9]*)$")
+TYPE_WIDTHS = {
+    "X": {"BOOL"},
+    "B": {"BYTE", "SINT", "USINT"},
+    "W": {"WORD", "INT", "UINT"},
+    "D": {"DWORD", "DINT", "UDINT", "REAL"},
+    "L": {"LWORD", "LINT", "ULINT", "LREAL"},
+}
+IO_MAPPINGS = {
+    ("I", "X"): "bool_inputs",
+    ("Q", "X"): "bool_outputs",
+    ("I", "B"): "byte_inputs",
+    ("Q", "B"): "byte_outputs",
+    ("I", "W"): "int_inputs",
+    ("Q", "W"): "int_outputs",
+    ("I", "D"): "dint_inputs",
+    ("Q", "D"): "dint_outputs",
+    ("I", "L"): "lint_inputs",
+    ("Q", "L"): "lint_outputs",
+    ("M", "W"): "int_memory",
+    ("M", "D"): "dint_memory",
+    ("M", "L"): "lint_memory",
 }
 
 
-def extract_all_glue_variables(file_path: Path):
-    result = {name: [] for name in PATTERNS}
-    content = file_path.read_text(encoding="utf-8")
-    gluevars_func = re.search(r"void glueVars\(\)\s*\{([^}]+)\}", content, re.DOTALL)
-    if not gluevars_func:
-        raise ValueError(f"glueVars() was not found in {file_path}")
-
-    bindings = gluevars_func.group(1)
-    for variable_type, pattern in PATTERNS.items():
-        for match in re.finditer(pattern, bindings):
-            if variable_type in ("bool_inputs", "bool_outputs"):
-                item = {
-                    "array_index": match.group(1),
-                    "bit_index": match.group(2),
-                    "var_name": match.group(3).strip(),
-                }
-            else:
-                item = {
-                    "array_index": match.group(1),
-                    "var_name": match.group(2).strip(),
-                }
-            result[variable_type].append(item)
-    return result
+class MappingError(ValueError):
+    pass
 
 
-def print_variable_summary(variables):
-    print("=== PLC variable bindings ===")
-    for variable_type, items in variables.items():
-        print(f"{variable_type}: {len(items)}")
+def record_error(path, line_number, message):
+    return MappingError("{}:{}: {}".format(path, line_number, message))
 
 
-def save_to_csv(variables, output_file: Path):
-    with output_file.open("w", encoding="utf-8", newline="") as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(["变量类型", "数组索引", "位索引(仅布尔)", "变量名"])
-        for variable_type, items in variables.items():
-            for item in items:
-                writer.writerow(
-                    [variable_type, item["array_index"], item.get("bit_index", ""), item["var_name"]]
-                )
+def parse_index(value, path, line_number, label):
+    if not DECIMAL_PATTERN.fullmatch(value):
+        raise record_error(path, line_number, "{} must be a non-negative decimal integer".format(label))
+    return int(value)
+
+
+def parse_located_variables(file_path):
+    mappings = []
+    destinations = set()
+    content = Path(file_path).read_text(encoding="utf-8")
+
+    for line_number, line in enumerate(content.splitlines(), start=1):
+        if not line.strip():
+            continue
+        match = RECORD_PATTERN.fullmatch(line)
+        if match is None:
+            raise record_error(file_path, line_number, "expected one __LOCATED_VAR(...) record")
+
+        fields = [field.strip() for field in match.group(1).split(",")]
+        if len(fields) not in (5, 6) or any(not field for field in fields):
+            raise record_error(file_path, line_number, "record must contain five or six non-empty fields")
+
+        iec_type, symbolic_name, area, width = fields[:4]
+        mapping_type = IO_MAPPINGS.get((area, width))
+        if mapping_type is None:
+            raise record_error(file_path, line_number, "unsupported location class {}{}".format(area, width))
+        if iec_type not in TYPE_WIDTHS[width]:
+            raise record_error(
+                file_path,
+                line_number,
+                "IEC type {} is incompatible with width {}".format(iec_type, width),
+            )
+
+        array_index = parse_index(fields[4], file_path, line_number, "array index")
+        bit_index = ""
+        if width == "X":
+            if len(fields) != 6:
+                raise record_error(file_path, line_number, "bit location requires a bit index")
+            bit_value = parse_index(fields[5], file_path, line_number, "bit index")
+            if bit_value > 7:
+                raise record_error(file_path, line_number, "bit index must be between 0 and 7")
+            bit_index = str(bit_value)
+        elif len(fields) != 5:
+            raise record_error(file_path, line_number, "non-bit location must not contain a bit index")
+
+        expected_name = "__{}{}{}".format(area, width, array_index)
+        if width == "X":
+            expected_name += "_" + bit_index
+        if symbolic_name != expected_name:
+            raise record_error(
+                file_path,
+                line_number,
+                "symbolic name {} does not match {}".format(symbolic_name, expected_name),
+            )
+
+        destination = (mapping_type, array_index, bit_index)
+        if destination in destinations:
+            raise record_error(file_path, line_number, "duplicate runtime destination {}".format(destination))
+        destinations.add(destination)
+        mappings.append([mapping_type, str(array_index), bit_index, symbolic_name])
+
+    if not mappings:
+        raise MappingError("{}: no located-variable records found".format(file_path))
+    return mappings
+
+
+def save_to_csv(mappings, output_file):
+    output_path = Path(output_file)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary_name = tempfile.mkstemp(prefix=output_path.name + ".", dir=str(output_path.parent))
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8", newline="") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(CSV_HEADER)
+            writer.writerows(mappings)
+        os.replace(temporary_name, output_path)
+    except Exception:
+        try:
+            os.unlink(temporary_name)
+        except FileNotFoundError:
+            pass
+        raise
 
 
 def parse_args():
@@ -72,8 +134,8 @@ def parse_args():
     parser.add_argument(
         "--input",
         type=Path,
-        default=repository_root / "src" / "glueVars.cpp",
-        help="generated glueVars.cpp path",
+        default=repository_root / "plclogic" / "LOCATED_VARIABLES.h",
+        help="MatIEC LOCATED_VARIABLES.h path",
     )
     parser.add_argument(
         "--output",
@@ -86,10 +148,12 @@ def parse_args():
 
 def main():
     args = parse_args()
-    variables = extract_all_glue_variables(args.input)
-    save_to_csv(variables, args.output)
-    print_variable_summary(variables)
-    print(f"Wrote {args.output}")
+    try:
+        mappings = parse_located_variables(args.input)
+        save_to_csv(mappings, args.output)
+    except (OSError, MappingError) as error:
+        raise SystemExit("Mapping generation failed: {}".format(error))
+    print("Wrote {} variable bindings to {}".format(len(mappings), args.output))
 
 
 if __name__ == "__main__":

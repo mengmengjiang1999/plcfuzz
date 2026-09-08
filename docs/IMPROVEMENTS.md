@@ -1,6 +1,6 @@
 # PLCFuzz 改进路线图
 
-本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **5 个主题完成**，另有 **9 个主题待处理**。每个待处理主题都应作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并在单独提交推送后更新本页状态。
+本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **6 个主题完成**，另有 **8 个主题待处理**。每个待处理主题都应作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并在单独提交推送后更新本页状态。
 
 ## 已完成
 
@@ -34,13 +34,13 @@ OpenSpec：[`version-plc-input-format`](../openspec/changes/archive/2026-09-08-v
 
 OpenSpec：[`catalog-test-corpus`](../openspec/changes/archive/2026-09-08-catalog-test-corpus/)
 
+### 结构化变量映射生成
+
+变量映射现在直接来自 MatIEC 的 `LOCATED_VARIABLES.h` 结构化宏记录，并在写入前校验类型、地址、索引、符号名和重复目标；输出继续使用自定义变异器现有的四列 CSV 接口。
+
+OpenSpec：[`generate-structured-variable-map`](../openspec/changes/archive/2026-09-08-generate-structured-variable-map/)
+
 ## P1：自动化与结果分析
-
-### 3. 改用结构化变量映射数据源
-
-建议 change：`generate-structured-variable-map`
-
-`static_analyse/main.py` 当前用正则解析生成的 `src/glueVars.cpp`，容易受排版变化影响。应优先从 OpenPLC 的 `VARIABLES.csv`、MatIEC 符号信息或 glue generator 的结构化输出生成映射，并用集成测试核对变量数量、类型和地址。
 
 ### 4. 建立 Linux CI
 
