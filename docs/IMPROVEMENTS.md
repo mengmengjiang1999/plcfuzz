@@ -1,6 +1,6 @@
 # PLCFuzz 改进路线图
 
-本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **7 个主题完成**，另有 **7 个主题待处理**。每个待处理主题都应作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并在单独提交推送后更新本页状态。
+本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **8 个主题完成**，另有 **6 个主题待处理**。每个待处理主题都应作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并在单独提交推送后更新本页状态。
 
 ## 已完成
 
@@ -46,13 +46,13 @@ GitHub Actions 现在在 Ubuntu 22.04 上验证固定 MatIEC、项目测试、�
 
 OpenSpec：[`add-linux-ci`](../openspec/changes/archive/2026-09-08-add-linux-ci/)
 
+### 运行诊断与非正常终止样本整理
+
+普通运行时和自定义输入组件现在提供相互隔离的 ASan/UBSan 构建。样本整理器会按摘要去重，确认稳定信号，在保持行为的前提下最小化，并记录仓库/MatIEC 版本、目标摘要、seed、环境、命令和诊断文本。
+
+OpenSpec：[`add-runtime-diagnostics`](../openspec/changes/archive/2026-09-08-add-runtime-diagnostics/)
+
 ## P1：自动化与结果分析
-
-### 5. 增加运行诊断配置与异常样本整理流程
-
-建议 change：`add-runtime-diagnostics`
-
-为普通目标和自定义变异器增加 ASan/UBSan 配置。对 AFL++ 记录的非正常终止样本执行去重、最小化、稳定复现和调用栈采集，并保存编译器 commit、目标摘要、seed、环境和命令。
 
 ### 6. 自动记录实验目录和 manifest
 

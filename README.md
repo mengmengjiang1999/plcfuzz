@@ -83,6 +83,8 @@ macOS 可以构建和测试新版 MatIEC；Apple 自带 Bison 2.3 不满足要�
 
 精确复现信息见 [REPRODUCIBILITY.md](REPRODUCIBILITY.md)，第三方来源和许可状态见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
+ASan/UBSan 构建及非正常终止样本的本地整理流程见 [运行诊断说明](docs/RUNTIME_DIAGNOSTICS.md)。
+
 ## 快速开始
 
 ### 1. 构建 MatIEC

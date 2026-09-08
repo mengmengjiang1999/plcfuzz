@@ -58,3 +58,8 @@ echo "PASS testcase_manifest_test"
 
 PYTHONDONTWRITEBYTECODE=1 python3 "$repo_root/tests/static_analyse_test.py"
 echo "PASS static_analyse_test"
+
+PYTHONDONTWRITEBYTECODE=1 python3 "$repo_root/tests/organize_abnormal_samples_test.py"
+echo "PASS organize_abnormal_samples_test"
+
+bash "$repo_root/scripts/check_diagnostics_workflow.sh"

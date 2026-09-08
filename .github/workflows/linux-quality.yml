@@ -68,6 +68,12 @@ jobs:
           ./buildscript.sh mutator
           test -f build/mutator/libplc_mutator.so
 
+      - name: Build diagnostic targets
+        run: |
+          ./scripts/build_diagnostics.sh all
+          test -x build/diagnostics/runtime/openplc_diagnostic
+          find build/diagnostics/mutator -maxdepth 1 -type f -name 'libplc_mutator.*' -print -quit | grep -q .
+
       - name: Build pinned AFL++ compiler
         run: |
           git clone --branch v5.03c --depth 1 \

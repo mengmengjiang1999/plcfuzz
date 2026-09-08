@@ -30,7 +30,7 @@ OBJS          := $(C_OBJS) $(CPP_OBJS)
 
 # 编译和链接标志
 CXXFLAGS      := -std=gnu++11 -I./lib -I$(PLCLOGIC_DIR) -I./include $(EXTRA_CXXFLAGS)
-LDFLAGS       := -pthread -fpermissive
+LDFLAGS       := -pthread -fpermissive $(EXTRA_LDFLAGS)
 LDLIBS        :=
 ifdef ETHERCAT_INC
     CXXFLAGS  += $(ETHERCAT_INC)
