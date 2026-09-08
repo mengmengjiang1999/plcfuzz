@@ -68,7 +68,7 @@ Dockerfile 固定 OpenPLC 和 AFL++ 上游版本，并在镜像的 `/opt/upstrea
 
 `.github/workflows/linux-quality.yml` 在 Ubuntu 22.04 上按本节顺序执行完整验证，并从源码构建固定的 AFL++ 5.03c。它对 `main` 的推送和目标为 `main` 的 pull request 运行，只申请仓库只读权限。
 
-MatIEC 与 AFL++ 的源码构建分别使用 `MATIEC_BUILD_JOBS=1` 和 `AFL_BUILD_JOBS=1`，防止递归构建共享输出；其他项目步骤仍使用独立的 `BUILD_JOBS` 设置。
+MatIEC 与 AFL++ 的源码构建分别使用 `MATIEC_BUILD_JOBS=1` 和 `PLCFUZZ_TOOLCHAIN_BUILD_JOBS=1`，防止递归构建共享输出；其他项目步骤仍使用独立的 `BUILD_JOBS` 设置。插桩编译包装器通过 `PLCFUZZ_INSTRUMENTED_CXX` 传给项目脚本，避免占用 AFL++ 自身解释的环境变量。
 
 ```sh
 ./scripts/verify_preserved_artifacts.sh

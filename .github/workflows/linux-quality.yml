@@ -18,9 +18,9 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 45
     env:
-      AFL_BUILD_JOBS: "1"
       BUILD_JOBS: "2"
       MATIEC_BUILD_JOBS: "1"
+      PLCFUZZ_TOOLCHAIN_BUILD_JOBS: "1"
     steps:
       - name: Check out pinned sources
         uses: actions/checkout@v4
@@ -73,10 +73,10 @@ jobs:
           git clone --branch v5.03c --depth 1 \
             https://github.com/AFLplusplus/AFLplusplus.git \
             "$RUNNER_TEMP/AFLplusplus"
-          make -C "$RUNNER_TEMP/AFLplusplus" source-only -j"$AFL_BUILD_JOBS"
+          make -C "$RUNNER_TEMP/AFLplusplus" source-only -j"$PLCFUZZ_TOOLCHAIN_BUILD_JOBS"
           "$RUNNER_TEMP/AFLplusplus/afl-clang-fast++" --version
 
       - name: Build instrumented runtime
         run: |
-          AFL_CXX="$RUNNER_TEMP/AFLplusplus/afl-clang-fast++" ./buildscript.sh fuzz
+          PLCFUZZ_INSTRUMENTED_CXX="$RUNNER_TEMP/AFLplusplus/afl-clang-fast++" ./buildscript.sh fuzz
           test -x openplc_fuzz

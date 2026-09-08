@@ -41,3 +41,10 @@ The workflow and reproducibility container SHALL build the fixed AFL++ source wi
 #### Scenario: AFL++ main and LLVM targets share a compiler output
 - **WHEN** the fixed source release is built
 - **THEN** the targets do not write `afl-cc` concurrently
+
+### Requirement: Isolated instrumentation environment
+The workflow SHALL use `PLCFUZZ_TOOLCHAIN_BUILD_JOBS` for fixed toolchain parallelism and `PLCFUZZ_INSTRUMENTED_CXX` for the project compiler-wrapper path.
+
+#### Scenario: The instrumented runtime stage starts
+- **WHEN** the workflow exports project build controls
+- **THEN** no project-only setting occupies an upstream `AFL_` variable name

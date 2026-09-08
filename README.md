@@ -184,6 +184,8 @@ python3 ./static_analyse/main.py
 ./build_scripts/buildfuzz.sh
 ```
 
+如需指定插桩编译包装器，设置项目变量 `PLCFUZZ_INSTRUMENTED_CXX`。不要把包装器路径写入 AFL++ 自身使用的下游编译器变量，否则包装器会再次选择自身。
+
 输出：
 
 - `build/mutator/libplc_mutator.so`：AFL++ 自定义变异器；

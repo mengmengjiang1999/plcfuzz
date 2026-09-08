@@ -7,5 +7,5 @@ cd "$repo_root"
 make \
     BUILD_DIR=build/fuzz \
     TARGET=openplc_fuzz \
-    CXX="${AFL_CXX:-afl-clang-fast++}" \
+    CXX="${PLCFUZZ_INSTRUMENTED_CXX:-afl-clang-fast++}" \
     EXTRA_CXXFLAGS="-O0 -g -Wno-c++11-narrowing"
