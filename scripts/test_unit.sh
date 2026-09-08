@@ -38,3 +38,8 @@ compile_and_run \
 compile_and_run \
     runtime_timing_test \
     "$repo_root/tests/runtime_timing_test.cpp"
+
+compile_and_run \
+    plc_mutator_test \
+    "$repo_root/tests/plc_mutator_test.cpp" \
+    "$repo_root/fuzz_config/plc_mutator.cpp"

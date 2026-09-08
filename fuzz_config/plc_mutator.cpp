@@ -3,16 +3,17 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <fstream>
 #include <random>
-#include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
 #include "mutator_helper.h"
 #include "plc_input_block.h"
+#include "variable_mapping.h"
 
 // 最小化的AFL++头文件接口
 extern "C" {
@@ -26,139 +27,87 @@ size_t afl_custom_fuzz(void *data, uint8_t *buf, size_t buf_size, uint8_t **out_
 void afl_custom_deinit(void *data);
 }
 
-// 变量映射结构体
-struct VariableMapping {
-    std::string var_type;
-    int array_index;
-    int bit_index;  // 仅布尔类型使用
-    std::string var_name;
-};
-
-// 全局变量映射表
-std::vector<VariableMapping> plc_variable_mappings;
-
-// 加载PLC变量映射表
-void load_plc_variable_mappings(const char *csv_file) {
-    plc_variable_mappings.clear();
-    std::ifstream file(csv_file);
-    if (!file.is_open())
-        return;
-
-    std::string line;
-    // 跳过标题行
-    std::getline(file, line);
-
-    while (std::getline(file, line)) {
-        std::stringstream ss(line);
-        VariableMapping mapping;
-
-        std::getline(ss, mapping.var_type, ',');
-        std::string temp;
-
-        std::getline(ss, temp, ',');
-        mapping.array_index = std::stoi(temp);
-
-        std::getline(ss, temp, ',');
-        mapping.bit_index = temp.empty() ? -1 : std::stoi(temp);
-
-        std::getline(ss, mapping.var_name, ',');
-
-        plc_variable_mappings.push_back(mapping);
-    }
-}
-
 // 变异器状态
 class MutatorState {
    private:
     std::mt19937 rng;
-    std::vector<PLCInputBlock> seed_cache;
+    std::vector<VariableMapping> mappings_;
     std::vector<uint8_t> output_buffer;
     int mutation_rate_ = 50;
 
    public:
     MutatorState(afl_state_t *, unsigned int seed) : rng(seed) {
-        load_plc_variable_mappings("plc_variables_mapping.csv");
+        const char *configured_path = std::getenv("PLCFUZZ_VARIABLE_MAPPING");
+        const std::string mapping_path = configured_path == NULL ? "plc_variables_mapping.csv" : configured_path;
+        mappings_ = load_variable_mappings(mapping_path);
     }
 
-    int mutation_rate() { return mutation_rate_; }
+    std::uint32_t random_value() { return rng(); }
 
-    // 获取随机数生成器
-    std::mt19937 &get_rng() { return rng; }
-
-    // 添加种子到缓存
-    void add_to_cache(const PLCInputBlock &block) { seed_cache.push_back(block); }
-
-    // 从缓存获取随机块
-    const PLCInputBlock *get_random_block() {
-        if (seed_cache.empty())
-            return nullptr;
-        std::uniform_int_distribution<size_t> dist(0, seed_cache.size() - 1);
-        return &seed_cache[dist(rng)];
+    std::uint64_t random_wide_value() {
+        const std::uint64_t high = random_value();
+        const std::uint64_t low = random_value();
+        return (high << 32) | low;
     }
+
+    std::uint32_t random_below(std::uint32_t upper_bound) { return random_value() % upper_bound; }
+
+    bool mutation_selected() { return random_below(100) < static_cast<std::uint32_t>(mutation_rate_); }
+
+    const std::vector<VariableMapping> &mappings() const { return mappings_; }
 
     uint8_t *set_output(const std::string &output) {
         output_buffer.assign(output.begin(), output.end());
         return output_buffer.data();
     }
-
-    // 检查是否需要变异该变量
-    bool should_mutate(const std::string &var_type, int array_idx, int bit_idx = -1) {
-        for (const auto &mapping : plc_variable_mappings) {
-            if (mapping.var_type == var_type && mapping.array_index == array_idx &&
-                (bit_idx == -1 || mapping.bit_index == bit_idx)) {
-                return true;
-            }
-        }
-        return false;
-    }
 };
 
 // 初始化函数
-extern "C" void *afl_custom_init(afl_state_t *afl, unsigned int seed) { return new MutatorState(afl, seed); }
+extern "C" void *afl_custom_init(afl_state_t *afl, unsigned int seed) {
+    try {
+        return new MutatorState(afl, seed);
+    } catch(const std::exception &error) {
+        std::fprintf(stderr, "PLCFuzz custom mutator initialization failed: %s\n", error.what());
+        return nullptr;
+    }
+}
 
 // 公共变异策略 - cycles
 void mutate_cycles(PLCInputBlock &block, MutatorState *state) {
-    int cycle_delta = (random() % 5) - 2;  // -2到+2的随机变化
     // 随机增减cycles值
-    if (random() % 100 < state->mutation_rate()) {
+    if (state->mutation_selected()) {
         // 布尔块
-        block.input_bool_block.cycles += cycle_delta;
+        block.input_bool_block.cycles += static_cast<int>(state->random_below(5)) - 2;
         if (block.input_bool_block.cycles < 0)
             block.input_bool_block.cycles = 0;
 
         // 字节块
-        cycle_delta = (random() % 5) - 2;  // -2到+2的随机变化
-        block.input_byte_block.cycles += cycle_delta;
+        block.input_byte_block.cycles += static_cast<int>(state->random_below(5)) - 2;
         if (block.input_byte_block.cycles < 0)
             block.input_byte_block.cycles = 0;
 
         // 整型块
-        cycle_delta = (random() % 5) - 2;  // -2到+2的随机变化
-        block.input_int_block.cycles += cycle_delta;
+        block.input_int_block.cycles += static_cast<int>(state->random_below(5)) - 2;
         if (block.input_int_block.cycles < 0)
             block.input_int_block.cycles = 0;
 
         // 双整型块
-        cycle_delta = (random() % 5) - 2;  // -2到+2的随机变化
-        block.input_dint_block.cycles += cycle_delta;
+        block.input_dint_block.cycles += static_cast<int>(state->random_below(5)) - 2;
         if (block.input_dint_block.cycles < 0)
             block.input_dint_block.cycles = 0;
 
         // 长整型块
-        cycle_delta = (random() % 5) - 2;  // -2到+2的随机变化
-        block.input_lint_block.cycles += cycle_delta;
+        block.input_lint_block.cycles += static_cast<int>(state->random_below(5)) - 2;
         if (block.input_lint_block.cycles < 0)
             block.input_lint_block.cycles = 0;
 
         // 整型内存块
-        cycle_delta = (random() % 5) - 2;  // -2到+2的随机变化
-        block.input_int_mem_block.cycles += cycle_delta;
+        block.input_int_mem_block.cycles += static_cast<int>(state->random_below(5)) - 2;
         if (block.input_int_mem_block.cycles < 0)
             block.input_int_mem_block.cycles = 0;
 
         // 双整型内存块
-        cycle_delta = (random() % 5) - 2;  // -2到+2的随机变化
-        block.input_dint_mem_block.cycles += cycle_delta;
+        block.input_dint_mem_block.cycles += static_cast<int>(state->random_below(5)) - 2;
         if (block.input_dint_mem_block.cycles < 0)
             block.input_dint_mem_block.cycles = 0;
     }
@@ -166,12 +115,12 @@ void mutate_cycles(PLCInputBlock &block, MutatorState *state) {
 
 // BoolBlock专用变异策略（2D数组）
 void mutate_bool_block(BasicInputBlock<unsigned char, 2> &block, MutatorState *state) {
-    for (const auto &mapping : plc_variable_mappings) {
+    for (const auto &mapping : state->mappings()) {
         if (mapping.var_type == "bool_inputs" && mapping.array_index >= 0 && mapping.array_index < PLC_INPUT_SIZE &&
             mapping.bit_index >= 0 && mapping.bit_index < 8) {
-            if (random() % 100 < state->mutation_rate()) {
+            if (state->mutation_selected()) {
                 // 更激进的变异策略
-                switch (random() % 3) {
+                switch (state->random_below(3)) {
                     case 0:
                         block.input[mapping.array_index][mapping.bit_index] ^= 1;  // 位翻转
                         break;
@@ -189,21 +138,20 @@ void mutate_bool_block(BasicInputBlock<unsigned char, 2> &block, MutatorState *s
 
 // ByteBlock专用变异策略
 void mutate_byte_block(BasicInputBlock<IEC_BYTE, 1> &block, MutatorState *state) {
-    for (const auto &mapping : plc_variable_mappings) {
+    for (const auto &mapping : state->mappings()) {
         if (mapping.var_type == "byte_inputs" && mapping.array_index >= 0 && mapping.array_index < PLC_INPUT_SIZE) {
-            if (random() % 100 < state->mutation_rate()) {
-                // 针对字节变量的强化变异
-                // block.input[mapping.array_index] = (random() % 2) ? 0xFF : 0x00;  // 50%概率全1或全0
-                //         // 字节级变异：位翻转、增减小量、随机值
-                switch (random() % 3) {
+            if (state->mutation_selected()) {
+                // 字节级变异：位翻转、增减小量、随机值
+                switch (state->random_below(3)) {
                     case 0:
-                        block.input[mapping.array_index] ^= (1 << (random() % 8));
+                        block.input[mapping.array_index] ^= unsigned_bit_mask<IEC_BYTE>(state->random_below(8));
                         break;  // 位翻转
                     case 1:
-                        block.input[mapping.array_index] += (random() % 5) - 2;
+                        block.input[mapping.array_index] = static_cast<IEC_BYTE>(
+                            block.input[mapping.array_index] + static_cast<int>(state->random_below(5)) - 2);
                         break;  // 小量增减
                     case 2:
-                        block.input[mapping.array_index] = random() & 0xFF;
+                        block.input[mapping.array_index] = static_cast<IEC_BYTE>(state->random_value());
                         break;  // 随机值
                 }
             }
@@ -213,23 +161,24 @@ void mutate_byte_block(BasicInputBlock<IEC_BYTE, 1> &block, MutatorState *state)
 
 // IntBlock专用变异策略
 void mutate_int_block(BasicInputBlock<IEC_UINT, 1> &block, MutatorState *state) {
-    for (const auto &mapping : plc_variable_mappings) {
+    for (const auto &mapping : state->mappings()) {
         if (mapping.var_type == "int_inputs" && mapping.array_index >= 0 && mapping.array_index < PLC_INPUT_SIZE) {
-            if (random() % 100 >= state->mutation_rate()) {
+            if (!state->mutation_selected()) {
                 continue;
             }
-            switch (random() % 4) {
+            switch (state->random_below(4)) {
                 case 0:
-                    block.input[mapping.array_index] ^= (1 << (random() % 16));
+                    block.input[mapping.array_index] ^= unsigned_bit_mask<IEC_UINT>(state->random_below(16));
                     break;  // 位翻转
                 case 1:
-                    block.input[mapping.array_index] += (random() % 100) - 50;
+                    block.input[mapping.array_index] = static_cast<IEC_UINT>(
+                        block.input[mapping.array_index] + static_cast<int>(state->random_below(100)) - 50);
                     break;  // 中等范围增减
                 case 2:
-                    block.input[mapping.array_index] = random() & 0xFFFF;
+                    block.input[mapping.array_index] = static_cast<IEC_UINT>(state->random_value());
                     break;  // 随机值
                 case 3:
-                    block.input[mapping.array_index] = -block.input[mapping.array_index];
+                    block.input[mapping.array_index] = IEC_UINT(0) - block.input[mapping.array_index];
                     break;  // 取负
             }
         }
@@ -238,22 +187,23 @@ void mutate_int_block(BasicInputBlock<IEC_UINT, 1> &block, MutatorState *state) 
 
 // DIntBlock专用变异策略（32位）
 void mutate_dint_block(BasicInputBlock<IEC_UDINT, 1> &block, MutatorState *state) {
-    for (const auto &mapping : plc_variable_mappings) {
+    for (const auto &mapping : state->mappings()) {
         if (mapping.var_type == "dint_inputs" && mapping.array_index >= 0 && mapping.array_index < PLC_INPUT_SIZE) {
-            if (random() % 100 < state->mutation_rate()) {
+            if (state->mutation_selected()) {
                 // 针对双整型的更复杂变异
-                switch (random() % 5) {
+                switch (state->random_below(5)) {
                     case 0:
-                        block.input[mapping.array_index] ^= (1 << (random() % 32));
+                        block.input[mapping.array_index] ^= unsigned_bit_mask<IEC_UDINT>(state->random_below(32));
                         break;
                     case 1:
-                        block.input[mapping.array_index] += (random() % 1000) - 500;
+                        block.input[mapping.array_index] +=
+                            static_cast<IEC_UDINT>(static_cast<int>(state->random_below(1000)) - 500);
                         break;
                     case 2:
-                        block.input[mapping.array_index] = random();
+                        block.input[mapping.array_index] = static_cast<IEC_UDINT>(state->random_value());
                         break;
                     case 3:
-                        block.input[mapping.array_index] = -block.input[mapping.array_index];
+                        block.input[mapping.array_index] = IEC_UDINT(0) - block.input[mapping.array_index];
                         break;
                     case 4:
                         reverse_bytes(block.input[mapping.array_index]);
@@ -265,21 +215,22 @@ void mutate_dint_block(BasicInputBlock<IEC_UDINT, 1> &block, MutatorState *state
 }
 // LIntBlock专用变异策略（64位）
 void mutate_lint_block(BasicInputBlock<IEC_ULINT, 1> &block, MutatorState *state) {
-    for (const auto &mapping : plc_variable_mappings) {
+    for (const auto &mapping : state->mappings()) {
         if (mapping.var_type == "lint_inputs" && mapping.array_index >= 0 && mapping.array_index < PLC_INPUT_SIZE) {
-            if (random() % 100 < state->mutation_rate()) {
-                switch (random() % 6) {
+            if (state->mutation_selected()) {
+                switch (state->random_below(6)) {
                     case 0:
-                        block.input[mapping.array_index] ^= (1LL << (random() % 64));
+                        block.input[mapping.array_index] ^= unsigned_bit_mask<IEC_ULINT>(state->random_below(64));
                         break;
                     case 1:
-                        block.input[mapping.array_index] += (random() % 10000) - 5000;
+                        block.input[mapping.array_index] +=
+                            static_cast<IEC_ULINT>(static_cast<int>(state->random_below(10000)) - 5000);
                         break;
                     case 2:
-                        block.input[mapping.array_index] = random();
+                        block.input[mapping.array_index] = static_cast<IEC_ULINT>(state->random_wide_value());
                         break;
                     case 3:
-                        block.input[mapping.array_index] = -block.input[mapping.array_index];
+                        block.input[mapping.array_index] = IEC_ULINT(0) - block.input[mapping.array_index];
                         break;
                     case 4:
                         reverse_bytes(block.input[mapping.array_index]);
@@ -295,10 +246,10 @@ void mutate_lint_block(BasicInputBlock<IEC_ULINT, 1> &block, MutatorState *state
 
 // 内存块专用变异策略（根据实际情况调整）
 void mutate_int_mem_block(BasicInputBlock<IEC_UINT, 1> &block, MutatorState *state) {
-    for (const auto &mapping : plc_variable_mappings) {
+    for (const auto &mapping : state->mappings()) {
         if (mapping.var_type == "int_memory" && mapping.array_index >= 0 && mapping.array_index < PLC_INPUT_SIZE) {
-            if (random() % 100 < state->mutation_rate()) {
-                switch (random() % 4) {
+            if (state->mutation_selected()) {
+                switch (state->random_below(4)) {
                     case 0:
                         block.input[mapping.array_index] = 0;
                         break;
@@ -319,10 +270,10 @@ void mutate_int_mem_block(BasicInputBlock<IEC_UINT, 1> &block, MutatorState *sta
 
 void mutate_dint_mem_block(BasicInputBlock<IEC_UDINT, 1> &block, MutatorState *state) {
     // 类似int_mem_block但针对32位
-    for (const auto &mapping : plc_variable_mappings) {
+    for (const auto &mapping : state->mappings()) {
         if (mapping.var_type == "dint_memory" && mapping.array_index >= 0 && mapping.array_index < PLC_INPUT_SIZE) {
-            if (random() % 100 < state->mutation_rate()) {
-                switch (random() % 5) {
+            if (state->mutation_selected()) {
+                switch (state->random_below(5)) {
                     case 0:
                         block.input[mapping.array_index] = 0;
                         break;
@@ -349,6 +300,13 @@ extern "C" size_t afl_custom_fuzz(void *data, uint8_t *buf, size_t buf_size, uin
                                   size_t add_buf_size, size_t max_size) {
     (void)add_buf;
     (void)add_buf_size;
+    if(out_buf == nullptr) {
+        return 0;
+    }
+    *out_buf = nullptr;
+    if(data == nullptr) {
+        return 0;
+    }
     MutatorState *state = static_cast<MutatorState *>(data);
     std::vector<PLCInputBlock> blocks;
 

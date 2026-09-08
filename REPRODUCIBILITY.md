@@ -87,6 +87,16 @@ PLCFUZZ_CYCLE_DELAY_NS=50000000 \
 
 `PLCFUZZ_CYCLE_COUNT` 必须是正整数；`PLCFUZZ_CYCLE_DELAY_NS` 是非负的纳秒数。后者只控制宿主机的绝对时钟休眠，不改变 MatIEC 的 `common_ticktime__` 或 IEC 程序逻辑时间。运行摘要中的 latency 是实际唤醒时刻相对绝对截止时刻的非负迟到量；关闭墙钟 pacing 时该值为零。复现实验必须记录这两个变量，未设置时分别记为 `100` 和 `0`。
 
+自定义变异器的随机流完全由 AFL++ 传入的 seed 驱动；在相同构建、映射和输入下，相同 seed 的首次变异结果一致，不再受进程全局 `random()` 状态影响。变量映射默认读取当前目录的 `plc_variables_mapping.csv`；从其他目录启动或比较不同 PLC 程序时，应显式记录并设置：
+
+```sh
+PLCFUZZ_VARIABLE_MAPPING=/workspace/plcfuzz/plc_variables_mapping.csv \
+FINDINGS_DIR=output/reproduction \
+./runfuzz.sh
+```
+
+映射文件缺失或存在不完整、越界、非数字字段时，变异器会在初始化阶段报告具体文件和行号并拒绝启动，避免退化成没有变量级变异的实验。
+
 只验证 ST 到 C：
 
 ```sh
