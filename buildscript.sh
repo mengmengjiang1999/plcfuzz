@@ -1,77 +1,77 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# 定义各步骤的执行函数
-build_plcfiles() {
-    echo "Building PLC files..."
-    ./build_scripts/build_plcfiles.sh ./testcases/race_test_success.st 
+repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+cd "$repo_root"
+
+usage() {
+    cat <<'EOF'
+Usage: ./buildscript.sh [step] [program.st]
+
+Steps:
+  all       Run PLC conversion, runtime build, analysis, mutator build, and fuzz build (default)
+  plc       Convert Structured Text to C
+  runtime   Build the non-instrumented OpenPLC target
+  analyze   Generate plc_variables_mapping.csv
+  mutator   Build the AFL++ custom mutator
+  fuzz      Build the AFL++-instrumented target
+
+The default input is testcases/race_test_success.st.
+EOF
 }
 
-build_c() {
-    echo "Building C code..."
-    make
+step=${1:-all}
+input_file=${2:-testcases/race_test_success.st}
+
+case "$step" in
+    -h|--help)
+        usage
+        exit 0
+        ;;
+    all|plc|runtime|c|analyze|analysis|mutator|lib|library|fuzz)
+        ;;
+    *.st)
+        input_file=$step
+        step=all
+        ;;
+    *)
+        echo "Unknown build step: $step" >&2
+        usage >&2
+        exit 2
+        ;;
+esac
+
+build_plc() {
+    "$repo_root/build_scripts/build_plcfiles.sh" "$input_file"
 }
 
-static_analyse() {
-    echo "Running static analysis..."
-    python3 ./static_analyse/main.py
+build_runtime() {
+    "$repo_root/build_scripts/build.sh"
 }
 
-build_shared_library() {
-    echo "Building shared library..."
-    ./build_scripts/build_shared_library.sh
+analyze_variables() {
+    python3 "$repo_root/static_analyse/main.py"
+}
+
+build_mutator() {
+    "$repo_root/build_scripts/build_shared_library.sh"
 }
 
 build_fuzz() {
-    echo "Building fuzz target..."
-    ./build_scripts/buildfuzz.sh
+    "$repo_root/build_scripts/buildfuzz.sh"
 }
 
-# 默认执行全部流程
-all() {
-    build_plcfiles
-    build_c
-    static_analyse
-    build_shared_library
-    build_fuzz
-}
-
-# 参数解析
-if [ $# -eq 0 ]; then
-    # 无参数时执行全部流程
-    all
-else
-    # 根据参数执行指定步骤
-    for arg in "$@"; do
-        case $arg in
-            plc)
-                build_plcfiles
-                ;;
-            c)
-                build_c
-                ;;
-            analyze|analysis)
-                static_analyse
-                ;;
-            lib|library)
-                build_shared_library
-                ;;
-            fuzz)
-                build_fuzz
-                ;;
-            all)
-                all
-                ;;
-            *)
-                echo "Unknown option: $arg"
-                echo "Available options:"
-                echo "  plc        Build PLC files"
-                echo "  c          Build C code"
-                echo "  analyze    Run static analysis"
-                echo "  lib        Build shared library"
-                echo "  fuzz       Build fuzz target"
-                echo "  all        Run all steps (default)"
-                exit 1
-                ;;
-        esac
-    done
-fi
+case "$step" in
+    all)
+        build_plc
+        build_runtime
+        analyze_variables
+        build_mutator
+        build_fuzz
+        ;;
+    plc) build_plc ;;
+    runtime|c) build_runtime ;;
+    analyze|analysis) analyze_variables ;;
+    mutator|lib|library) build_mutator ;;
+    fuzz) build_fuzz ;;
+esac

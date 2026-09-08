@@ -1,55 +1,21 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# 检查是否提供了参数
-if [ $# -eq 0 ]; then
-    echo "错误: 请指定要编译的ST文件名。"
-    echo "用法: $0 <文件名>"
-    exit 1
+repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
+if [[ $# -ne 1 ]]; then
+    echo "Usage: $0 <auto-test-name>" >&2
+    echo "Example: $0 auto1" >&2
+    exit 2
 fi
 
-filename=$1
+name=$1
+testcase="$repo_root/testcases/auto_race/$name.st"
+result_dir=${RESULT_DIR:-"$repo_root/results"}
 
-echo "filename: $filename"
+"$repo_root/buildscript.sh" all "$testcase"
+"$repo_root/runfuzz.sh"
 
-# 定义各步骤的执行函数
-build_plcfiles() {
-    echo "Building PLC files..."
-    local plc_file_name="$1"
-    ./build_scripts/build_plcfiles.sh ./testcases/auto_race/$plc_file_name.st 
-}
-
-build_c() {
-    echo "Building C code..."
-    make
-}
-
-static_analyse() {
-    echo "Running static analysis..."
-    python3 ./static_analyse/main.py
-}
-
-build_shared_library() {
-    echo "Building shared library..."
-    ./build_scripts/build_shared_library.sh
-}
-
-build_fuzz() {
-    echo "Building fuzz target..."
-    ./build_scripts/buildfuzz.sh
-}
-
-# 默认执行全部流程
-all() {
-    local plc_file_name="$1"
-    build_plcfiles $plc_file_name
-    build_c
-    static_analyse
-    build_shared_library
-    build_fuzz
-}
-
-# 参数解析
-all $filename
-./runfuzz.sh
-cp ./findings/default/fuzzer_stats ./results/fuzzer_stats_$filename
-cp ./findings/default/plot_data ./results/plot_data_$filename
+mkdir -p "$result_dir"
+cp "$repo_root/findings/default/fuzzer_stats" "$result_dir/fuzzer_stats_$name"
+cp "$repo_root/findings/default/plot_data" "$result_dir/plot_data_$name"

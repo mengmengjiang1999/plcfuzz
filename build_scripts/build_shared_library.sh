@@ -1,15 +1,10 @@
-# g++ -shared -fPIC -o ./fuzz_config/plc_mutator.so ./fuzz_config/plc_mutator.cpp
+#!/usr/bin/env bash
+set -euo pipefail
 
+repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+build_dir="$repo_root/build/mutator"
 
-# 1. 创建并进入构建目录
-mkdir -p build && cd build
+cmake -S "$repo_root" -B "$build_dir"
+cmake --build "$build_dir" --parallel "${BUILD_JOBS:-2}"
 
-rm -rf *
-
-# 2. 运行 CMake 配置项目
-cmake ..
-
-# 3. 编译项目
-make -j$(nproc)
-
-# 4. 编译完成后，共享库将生成在 ../lib/plc_mutator.so
+echo "Custom mutator: $build_dir/libplc_mutator.so"

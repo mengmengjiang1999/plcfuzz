@@ -1,12 +1,11 @@
-CC  = gcc
-CXX = g++
+CXX := g++
 
 # 目录和文件路径
-BUILD_DIR     := build
-PLCLOGIC_DIR  := plclogic
+BUILD_DIR     ?= build/runtime
+PLCLOGIC_DIR  ?= plclogic
 SRC_DIR       := src
 TOOLS_DIR     := tools
-TARGET        := openplc
+TARGET        ?= openplc
 GENERATED_CPP := $(SRC_DIR)/glueVars.cpp
 LOCATED_VARS  := $(PLCLOGIC_DIR)/LOCATED_VARIABLES.h
 GLUE_GENERATOR:= $(TOOLS_DIR)/glue_generator
@@ -24,7 +23,7 @@ CPP_OBJS      := $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(ALL_CPP_SRCS))
 OBJS          := $(C_OBJS) $(CPP_OBJS)
 
 # 编译和链接标志
-CXXFLAGS      := -std=gnu++11 -I./lib -I$(PLCLOGIC_DIR) -I./include -w
+CXXFLAGS      := -std=gnu++11 -I./lib -I$(PLCLOGIC_DIR) -I./include $(EXTRA_CXXFLAGS)
 LDFLAGS       := -pthread -fpermissive
 LDLIBS        := $(shell pkg-config --cflags --libs libmodbus) -lasiodnp3 -lasiopal -lopendnp3 -lopenpal
 ifdef ETHERCAT_INC
@@ -65,6 +64,6 @@ $(BUILD_DIR):
 
 # 清理生成的文件
 clean:
-	rm -rf $(BUILD_DIR) $(TARGET) $(GENERATED_CPP)
+	rm -rf build openplc openplc_fuzz
 
 .PHONY: all clean

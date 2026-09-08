@@ -1,0 +1,3 @@
+[submodule "third_party/matiec"]
+	path = third_party/matiec
+	url = https://github.com/mengmengjiang1999/matiec.git

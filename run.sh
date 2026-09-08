@@ -1,2 +1,17 @@
-strace -c -T ./openplc ./terminaloutput/input.txt  > ./terminaloutput/output.txt
-# ./openplc ./findings/default/queue/id:000000,time:0,execs:0,orig:seed_3 > output_raw.txt
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+input_file=${1:-"$repo_root/terminaloutput/input.txt"}
+
+if [[ ! -x $repo_root/openplc ]]; then
+    echo "Runtime target is missing; run ./buildscript.sh runtime first." >&2
+    exit 1
+fi
+
+if [[ ! -f $input_file ]]; then
+    echo "Input file not found: $input_file" >&2
+    exit 1
+fi
+
+exec "$repo_root/openplc" "$input_file"

@@ -47,10 +47,6 @@ class BasicBufferHistory : public SuperBasicBufferHistory {
                 }
             }
             if(is_crash) {
-                break;
-            }
-
-            if(is_crash) {
                 change_count++;
             }
         }

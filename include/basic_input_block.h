@@ -11,6 +11,7 @@ class BasicInputBlock : public SuperBasicInputBlock {
    public:
     int cycles;
     T input[BUFFER_SIZE];
+    virtual ~BasicInputBlock() = default;
     BasicInputBlock() {
         cycles = 0;
         for (int i = 0; i < BUFFER_SIZE; i++) {
@@ -36,10 +37,9 @@ class BasicInputBlock : public SuperBasicInputBlock {
         std::cout << std::endl;
     };
     virtual std::string serialize_data() const {
-        std::string buffer;
-        buffer += std::to_string(this->cycles);
+        std::string buffer = std::to_string(this->cycles);
         for (int i = 0; i < BUFFER_SIZE; i++) {
-            buffer += std::to_string(this->input[i]);
+            buffer += " " + std::to_string(this->input[i]);
         }
         return buffer;
     }
@@ -55,6 +55,7 @@ class BasicInputBlock<T, 2> {
    public:
     int cycles;
     T input[BUFFER_SIZE][8];
+    virtual ~BasicInputBlock() = default;
     BasicInputBlock() {
         cycles = 0;
         for (int i = 0; i < BUFFER_SIZE; i++) {
@@ -90,11 +91,10 @@ class BasicInputBlock<T, 2> {
     };
 
     virtual std::string serialize_data() const {
-        std::string buffer;
-        buffer += std::to_string(this->cycles);
+        std::string buffer = std::to_string(this->cycles);
         for (int i = 0; i < BUFFER_SIZE; i++) {
             for (int j = 0; j < 8; j++) {
-                buffer += std::to_string(this->input[i][j]);
+                buffer += " " + std::to_string(static_cast<uint64_t>(this->input[i][j]));
             }
         }
         return buffer;

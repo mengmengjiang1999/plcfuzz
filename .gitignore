@@ -12,6 +12,7 @@ seeds/
 *.pyc
 *.cfg
 openplc
+/openplc_fuzz
 *.original
 *.txt
 !**/CMakeLists.txt

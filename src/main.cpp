@@ -31,6 +31,7 @@
 #include <unistd.h>
 
 #include <chrono>
+#include <fstream>
 #include <iostream>
 #include <numeric>  // 需要包含这个头文件
 #include <sstream>
@@ -291,8 +292,6 @@ void logger_callback(char* msg) {
 
 PLCInputSimulator INPUT_PLC_DATA;
 
-#define BUFFER_SIZE (1 << 20)  // 1MB = 1024 * 1024 bytes
-
 int main(int argc, char** argv) {
     // 禁用缓冲（确保数据立即刷新）
     setvbuf(stdin, NULL, _IONBF, 0);
@@ -318,58 +317,25 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    // 从文件读取输入
-    FILE* file = fopen(argv[1], "rb");
-    if(!file) {
-        printf("Failed to open input file!\n");
+    std::ifstream input_file(argv[1]);
+    if(!input_file) {
+        fprintf(stderr, "Failed to open input file: %s\n", argv[1]);
         return 1;
     }
-
-    // 分配 1MB 缓冲区并初始化为 0
-    unsigned char* buffer = (unsigned char*)malloc(BUFFER_SIZE);
-    if(!buffer) {
-        fprintf(stderr, "Failed to allocate memory!\n");
-        fclose(file);
-        return 1;
-    }
-    memset(buffer, 0, BUFFER_SIZE);  // 可选：清零缓冲区
-
-    // 读取文件内容
-    size_t bytes_read = fread(buffer, 1, BUFFER_SIZE, file);
-    fclose(file);  // 立即关闭文件
-
-    if(bytes_read == 0) {
-        fprintf(stderr, "No data read from file!\n");
-        free(buffer);
-        return 1;
-    }
-
-    // 将字节数据转换为字符串流
-    std::string input_str(reinterpret_cast<char*>(buffer), bytes_read);
-
-    free(buffer);  // 释放缓冲区
-
-    std::istringstream input_stream(input_str);
 
     PLCInputBlock input_plc_block;
-
     int cnt_blocks = 0;
-    input_stream >> input_plc_block;
-
-    printf("Block 1: \n");
-    cnt_blocks++;
-    // input_plc_block.print();
-    INPUT_PLC_DATA.add_block(input_plc_block);
-
-    while(input_stream >> input_plc_block) {
+    while(input_file >> input_plc_block) {
         cnt_blocks++;
         INPUT_PLC_DATA.add_block(input_plc_block);
     }
 
-    std::cout << "Read end. Total blocks: %d\n" << cnt_blocks << std::endl;
+    if(cnt_blocks == 0) {
+        fprintf(stderr, "Input does not contain a complete PLC data block: %s\n", argv[1]);
+        return 1;
+    }
 
     printf("Total blocks: %d\n", cnt_blocks);
-    // return 0;
 
     //======================================================
     //                 PLC INITIALIZATION

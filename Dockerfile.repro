@@ -51,8 +51,10 @@ RUN git clone --branch "${AFLPP_TAG}" --depth 1 \
 COPY . /workspace/plcfuzz
 WORKDIR /workspace/plcfuzz
 
-RUN ./scripts/verify_preserved_artifacts.sh \
+RUN MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh \
+    && ./scripts/validate_testcases.sh \
+    && ./scripts/verify_preserved_artifacts.sh \
     && afl-fuzz --version \
-    && test -x ./tools/iec2c
+    && test -x ./third_party/matiec/iec2c
 
 CMD ["/bin/bash"]

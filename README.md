@@ -1,269 +1,292 @@
 # PLCFuzz
 
-PLCFuzz 是一个面向 PLC 程序的研究型模糊测试原型。项目将 IEC 61131-3 Structured Text（ST）程序转换为 C 代码，构建基于 OpenPLC 的执行目标，分析 PLC 变量映射，并通过 AFL++ 和自定义变异器生成结构化输入，用于发现 PLC 控制逻辑中的崩溃、竞争状态等异常行为。
+PLCFuzz 是一个面向 PLC 控制逻辑的研究型模糊测试原型。它使用 MatIEC 将 IEC 61131-3 Structured Text（ST）程序转换为 C，构建基于 OpenPLC 的执行目标，提取 PLC 变量映射，再通过 AFL++ 和结构感知自定义变异器寻找崩溃、异常状态变化和潜在竞争问题。
 
-> 本仓库主要用于实验复现，不是可直接部署到生产控制系统的 OpenPLC 发行版。历史 findings、预编译工具和实验结果均属于研究材料，请勿在整理构建产物时直接删除。
+> [!WARNING]
+> 本项目用于安全研究和实验复现，不是可直接部署到生产控制系统的 OpenPLC 发行版，也不应作为功能安全判断工具。
 
-## 工作流程
+## 工作流
 
 ```text
-Structured Text 测试程序
-        │
-        ▼
-MatIEC（tools/iec2c）
-        │
-        ▼
-生成的 PLC C 代码（plclogic/）
-        │
-        ├── OpenPLC 运行时 ──────────────► openplc / openplc_fuzz
-        │
-        └── 变量映射静态分析 ───────────► plc_variables_mapping.csv
-                                               │
-                                               ▼
-                                  AFL++ 自定义变异器
-                                               │
-                                               ▼
-                                      findings/ 与 results/
+ST 测试程序
+    │
+    ▼
+MatIEC submodule ────────────────► 语法/语义兼容性测试
+    │
+    ▼
+生成 PLC C 代码（plclogic/）
+    │
+    ├──► OpenPLC 普通目标（openplc）
+    │
+    ├──► 变量映射（plc_variables_mapping.csv）
+    │         │
+    │         ▼
+    │    AFL++ 自定义变异器
+    │
+    └──► AFL++ 插桩目标（openplc_fuzz）
+              │
+              ▼
+        findings/ 与 results/
 ```
 
-核心流程包括：
+## 当前 MatIEC
 
-1. 使用 MatIEC 将 ST 程序转换为 C 代码。
-2. 将生成代码与 OpenPLC 运行时编译为普通目标 `openplc`。
-3. 从 `src/glueVars.cpp` 提取参与测试的 PLC 输入、输出和内存变量。
-4. 构建 AFL++ 自定义变异器 `libplc_mutator.so`。
-5. 构建插桩目标 `openplc_fuzz` 并运行模糊测试。
+项目通过 Git submodule 固定使用 [`mengmengjiang1999/matiec`](https://github.com/mengmengjiang1999/matiec)。当前锁定的提交由 `third_party/matiec` gitlink 决定，克隆仓库时不会随上游 `main` 自动漂移。
+
+新版 MatIEC 提供：
+
+- `iec2c`：校验 IEC 61131-3 文本程序并生成 C；
+- `iec2iec`：校验并规范化输出 IEC 文本；
+- 默认 `legacy` profile；
+- 可选 `iec61131-3:2025-experimental` profile，覆盖 UTF-8 字符串、引用初始化、命名空间、功能块方法和配置级 `VAR_ACCESS` 等实验性能力。
+
+实验 profile 不是完整或经认证的 IEC 61131-3:2025 符合性声明。PLCFuzz 的默认运行时构建继续使用 `legacy` profile；实验 profile 用例用于编译器兼容性验证。
+
+旧实验使用的 MatIEC 二进制已移至 `artifacts/legacy/matiec/`，仅用于复现，不再是当前默认编译器。
+
+## 克隆
+
+```bash
+git clone --recurse-submodules https://github.com/mengmengjiang1999/plcfuzz.git
+cd plcfuzz
+```
+
+如果已经克隆过仓库：
+
+```bash
+git submodule update --init --recursive
+```
 
 ## 环境要求
 
-推荐在 **x86-64 Ubuntu 22.04** 中复现实验。仓库保留的 MatIEC/OpenPLC 工具是 Linux x86-64 ELF 文件，不能在 macOS 上直接运行。
+完整 OpenPLC/AFL++ 流程推荐使用 **x86-64 Ubuntu 22.04**。主要依赖：
 
-主要依赖：
-
-- GCC/G++，支持 GNU++11
-- CMake、Make、pkg-config
+- Autoconf 2.69+
+- Automake 1.16+
+- Bison 2.4+
+- Flex 2.6+
+- GCC/G++ 与 GNU++11/17 支持
+- CMake、GNU Make、pkg-config
 - Python 3
 - AFL++ 4.10c
-- OpenDNP3
-- libmodbus
-- MatIEC（仓库的 `tools/` 中保留了历史实验所用二进制）
+- OpenDNP3 与 libmodbus
 
-精确版本、上游提交和已知限制见 [REPRODUCIBILITY.md](REPRODUCIBILITY.md)。第三方代码来源和许可状态见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+macOS 可以构建和测试新版 MatIEC；Apple 自带 Bison 2.3 不满足要求，`scripts/setup_matiec.sh` 会优先使用 Homebrew Bison。完整 PLCFuzz 运行时仍建议放在 Linux 容器中验证。
 
-## MatIEC 版本策略
+精确复现信息见 [REPRODUCIBILITY.md](REPRODUCIBILITY.md)，第三方来源和许可状态见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
-PLCFuzz 支持两种 MatIEC 使用方式：
+## 快速开始
 
-| 场景 | 编译器 | 说明 |
-| --- | --- | --- |
-| 历史实验复现 | `tools/iec2c` | 默认方式；二进制有固定 SHA-256，用于尽可能还原原实验 |
-| 新开发与兼容性测试 | [`mengmengjiang1999/matiec`](https://github.com/mengmengjiang1999/matiec) | 维护中的新版编译器，具有现代化构建、测试和实验性语言 profile |
-
-新版 MatIEC 保留 `iec2c`、`iec2iec` 和默认 `legacy` profile，同时提供可选的 `iec61131-3:2025-experimental` profile。后者包含 UTF-8 字符串、引用初始化、命名空间、功能块方法和配置级 `VAR_ACCESS` 等实验性能力，但不表示完整或经认证的 IEC 61131-3:2025 符合性。
-
-在相邻目录构建新版 MatIEC：
+### 1. 构建 MatIEC
 
 ```bash
-git clone git@github.com:mengmengjiang1999/matiec.git ../matiec
-cd ../matiec
-autoreconf --install
-./configure
-make --jobs=2
-make check
-cd ../plcfuzz
+./scripts/setup_matiec.sh
 ```
 
-使用新版 MatIEC 的兼容模式转换 PLCFuzz 测试程序：
+同时运行 MatIEC 自身测试：
 
 ```bash
-MATIEC_IEC2C=../matiec/iec2c \
-MATIEC_INCLUDE_DIR=../matiec/lib \
-MATIEC_STD=legacy \
+MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
+```
+
+### 2. 验证 ST 测试用例
+
+```bash
+./scripts/validate_testcases.sh
+```
+
+验证器分别使用 `legacy` 和 `iec61131-3:2025-experimental` profile，将生成结果写入临时目录，不会覆盖 `plclogic/`。
+
+### 3. 构建 PLCFuzz
+
+```bash
+./buildscript.sh
+```
+
+默认输入是 `testcases/race_test_success.st`，依次执行：
+
+1. ST 转 C；
+2. 构建普通运行目标；
+3. 生成变量映射；
+4. 构建 AFL++ 自定义变异器；
+5. 构建 AFL++ 插桩目标。
+
+指定其他输入：
+
+```bash
+./buildscript.sh all testcases/matiec/legacy/state_machine.st
+```
+
+只执行某一步：
+
+```bash
+./buildscript.sh plc testcases/race_test_success.st
+./buildscript.sh runtime
+./buildscript.sh analyze
+./buildscript.sh mutator
+./buildscript.sh fuzz
+```
+
+## 手动构建
+
+### ST 转 C
+
+```bash
 ./build_scripts/build_plcfiles.sh ./testcases/race_test_success.st
 ```
 
-要专门测试新版实验语法，可将 `MATIEC_STD` 改为 `iec61131-3:2025-experimental`。新版编译器产生的 C 代码可能与历史二进制不同，因此这类结果应作为新的实验批次记录，不能直接与历史 AFL++ 数据混合比较。
+默认调用 `third_party/matiec/iec2c`，生成 `plclogic/Config0.c`、`Res0.c`、`LOCATED_VARIABLES.h` 等文件。可用环境变量覆盖：
 
-## 使用 Docker 复现
+| 变量 | 用途 |
+| --- | --- |
+| `MATIEC_IEC2C` | 指定其他 `iec2c` 可执行文件 |
+| `MATIEC_INCLUDE_DIR` | 指定 MatIEC 标准库/include 目录 |
+| `MATIEC_STD` | 选择 MatIEC 语言 profile |
+| `PLCLOGIC_DIR` | 覆盖生成代码目录 |
 
-Dockerfile 会构建 Ubuntu 22.04、AFL++ 4.10c、OpenDNP3 和 libmodbus 环境：
+例如，使用历史编译器复现旧结果：
 
 ```bash
-docker build --platform linux/amd64 \
-  -f Dockerfile.repro \
-  -t plcfuzz:repro .
-
-docker run --rm -it --platform linux/amd64 \
-  -v "$PWD:/workspace/plcfuzz" \
-  plcfuzz:repro
+MATIEC_IEC2C=./artifacts/legacy/matiec/iec2c \
+./build_scripts/build_plcfiles.sh ./testcases/race_test_success.st
 ```
 
-进入容器后先校验仓库保留的工具和实验材料：
+新版和历史 MatIEC 的生成结果不能默认视为等价；比较 fuzzing 数据时应记录使用的 MatIEC commit 或二进制 SHA-256。
+
+### 普通目标与变量映射
+
+```bash
+./build_scripts/build.sh
+python3 ./static_analyse/main.py
+```
+
+输出：
+
+- `openplc`：非插桩运行目标；
+- `plc_variables_mapping.csv`：自定义变异器使用的 I/O 与内存变量映射。
+
+### 自定义变异器与 fuzz 目标
+
+```bash
+./build_scripts/build_shared_library.sh
+./build_scripts/buildfuzz.sh
+```
+
+输出：
+
+- `build/mutator/libplc_mutator.so`：AFL++ 自定义变异器；
+- `openplc_fuzz`：AFL++ 插桩目标；
+- `build/runtime/` 与 `build/fuzz/`：互相隔离的对象文件。
+
+## 运行模糊测试
+
+先复制保留的种子：
+
+```bash
+mkdir -p seeds
+cp -a "seeds copy/." seeds/
+```
+
+运行：
+
+```bash
+./runfuzz.sh
+```
+
+脚本默认启用 `build/mutator/libplc_mutator.so`，并使用仓库内的 `fuzz_config/plc.grammar`。常用配置：
+
+| 变量 | 默认值 | 用途 |
+| --- | --- | --- |
+| `FUZZ_DURATION` | `3600` | 运行秒数 |
+| `FUZZ_TIMEOUT` | `10000` | 单次执行超时（毫秒） |
+| `SEED_DIR` | `seeds/` | 种子目录 |
+| `FINDINGS_DIR` | `findings/` | 输出目录 |
+| `AFL_GRAMMAR` | `fuzz_config/plc.grammar` | grammar 文件 |
+| `AFL_CUSTOM_MUTATOR_LIBRARY` | `build/mutator/libplc_mutator.so` | 自定义变异器 |
+| `FUZZ_TARGET` | `openplc_fuzz` | 插桩目标 |
+
+建议为新实验指定独立输出目录，避免覆盖历史结果：
+
+```bash
+FUZZ_DURATION=60 \
+FINDINGS_DIR=output/smoke-test \
+./runfuzz.sh
+```
+
+重放一个 AFL 输入：
+
+```bash
+./run_single_fuzz_example.sh findings/default/queue/<input-file>
+```
+
+## 测试
+
+```bash
+# MatIEC 自身完整测试
+MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
+
+# PLCFuzz 新增的 MatIEC 合法用例
+./scripts/validate_testcases.sh
+
+# 自定义变异器输入的解析/序列化往返测试
+./scripts/test_unit.sh
+
+# 历史二进制和 findings 完整性
+./scripts/verify_preserved_artifacts.sh
+```
+
+测试用例说明见 [testcases/matiec/README.md](testcases/matiec/README.md)。
+
+## 目录
+
+| 路径 | 内容 |
+| --- | --- |
+| `third_party/matiec/` | 当前 MatIEC submodule |
+| `src/`、`include/`、`lib/` | OpenPLC 运行时及 PLC 输入模拟代码 |
+| `build_scripts/` | 构建流水线内部脚本 |
+| `scripts/` | 环境准备、验证和单元测试入口 |
+| `fuzz_config/` | AFL++ grammar、dictionary 与自定义变异器 |
+| `static_analyse/` | PLC 变量映射提取工具 |
+| `testcases/` | 历史 ST/LD 样例和 MatIEC 兼容性用例 |
+| `tests/` | PLCFuzz 单元测试 |
+| `artifacts/legacy/` | 历史 MatIEC/OpenPLC 二进制与快照 |
+| `seeds copy/` | 只读保留的历史种子 |
+| `findings/`、`findings copy/` | 历史 AFL++ 队列、崩溃和统计数据 |
+| `results/` | 批量实验统计结果 |
+| `docs/` | 研究笔记、实验记录和改进建议 |
+| `lunwenfuxian/petrinet/` | 梯形图到 Petri 网及竞争分析实验 |
+
+## 历史材料
+
+以下内容用于复现，不应作为普通构建缓存删除：
+
+- `artifacts/legacy/matiec/iec2c`、`iec2iec` 和 `tmp.yy`；
+- `artifacts/legacy/openplc_fuzz`；
+- `tools/glue_generator`；
+- `findings/`、`findings copy/` 与 `results/`。
+
+使用以下命令校验保留二进制：
 
 ```bash
 ./scripts/verify_preserved_artifacts.sh
 ```
 
-然后执行默认构建流程：
+## 当前限制
 
-```bash
-./buildscript.sh
-```
+- 竞争问题的判定目前基于最近输出变化，是实验性启发式，不等价于严格的数据竞争检测。
+- 历史 ST 语料中仍有部分文件不满足新版 MatIEC 的严格语法要求；它们作为历史输入保留，不纳入新增兼容性测试套件。
+- 默认 fuzz 输入格式是固定顺序的文本数值块，grammar、解析器和变异器需要同步演进。
+- 当前没有远端 CI；完整 OpenPLC/AFL++ 链仍需在 Linux 环境验证。
+- 仓库尚未提供顶层 `LICENSE`，原创代码和实验数据的再分发权限尚未明确。
 
-默认测试程序是 `testcases/race_test_success.st`。
-
-## 手动构建
-
-下面的命令均在仓库根目录执行。
-
-### 1. 将 ST 转换为 C
-
-```bash
-./build_scripts/build_plcfiles.sh ./testcases/race_test_success.st
-```
-
-生成文件位于 `plclogic/`，主要包括 `Config0.c`、`Res0.c` 和 `LOCATED_VARIABLES.h`。
-
-转换脚本默认使用 `tools/iec2c`，也接受以下环境变量：
-
-- `MATIEC_IEC2C`：指定其他 `iec2c` 可执行文件；
-- `MATIEC_INCLUDE_DIR`：传给 MatIEC 的库/include 目录；
-- `MATIEC_STD`：选择 `legacy` 或其他受编译器支持的语言 profile；
-- `PLCLOGIC_DIR`：覆盖生成代码的输出目录。
-
-### 2. 构建普通执行目标
-
-```bash
-make
-```
-
-该步骤生成 `openplc`，同时根据 `LOCATED_VARIABLES.h` 生成 `src/glueVars.cpp`。
-
-### 3. 提取 PLC 变量映射
-
-```bash
-python3 ./static_analyse/main.py
-```
-
-分析结果写入根目录的 `plc_variables_mapping.csv`。自定义变异器根据该映射只变异目标 PLC 变量。
-
-### 4. 构建自定义变异器和插桩目标
-
-```bash
-./build_scripts/build_shared_library.sh
-./build_scripts/buildfuzz.sh
-```
-
-生成的主要文件：
-
-- `build/libplc_mutator.so`：AFL++ 自定义变异器
-- `openplc_fuzz`：AFL++ 插桩目标
-
-也可以使用组合脚本依次完成以上步骤：
-
-```bash
-./buildscript.sh
-```
-
-`buildscript.sh` 还支持分别执行某一步：
-
-```bash
-./buildscript.sh plc
-./buildscript.sh c
-./buildscript.sh analyze
-./buildscript.sh lib
-./buildscript.sh fuzz
-./buildscript.sh all
-```
-
-## 运行
-
-普通运行：
-
-```bash
-./run.sh
-```
-
-运行 AFL++ 前，将仓库保留的原始种子复制到工作目录：
-
-```bash
-mkdir -p seeds
-cp -a "seeds copy/." seeds/
-./runfuzz.sh
-```
-
-当前 `runfuzz.sh` 默认：
-
-- 运行 3600 秒；
-- 单次执行超时 10000 ms；
-- 使用 `fuzz_config/plc.grammar`；
-- 将结果写入 `findings/`。
-
-运行前请备份已有 `findings/`，或者在独立 Git worktree 中实验，以免覆盖历史结果。
-
-批量运行 `testcases/auto_race/auto1.st` 至 `auto12.st`：
-
-```bash
-./run_fuzz_all.sh
-```
-
-每个样例的 `fuzzer_stats` 和 `plot_data` 会被复制到 `results/`。
-
-## 目录结构
-
-| 路径 | 内容 |
-| --- | --- |
-| `src/`、`include/`、`lib/` | OpenPLC 运行时及 PLC 输入模拟相关代码 |
-| `tools/` | 实验所用 MatIEC 与 glue generator 二进制 |
-| `testcases/` | ST/LD 测试程序和竞争状态样例 |
-| `build_scripts/` | PLC 转换、目标构建和变异器构建脚本 |
-| `static_analyse/` | 从 `glueVars.cpp` 提取变量映射的脚本 |
-| `fuzz_config/` | AFL++ grammar、dictionary 与自定义变异器 |
-| `seeds copy/` | 保留的原始种子；运行时复制到 `seeds/` |
-| `findings/`、`findings copy/` | 历史 AFL++ 队列、崩溃和统计数据 |
-| `results/` | 批量实验提取的统计结果 |
-| `lunwenfuxian/petrinet/` | 梯形图到 Petri 网及竞争状态分析实验 |
-
-## 自定义测试程序
-
-要测试新的 ST 文件：
-
-1. 将文件放入 `testcases/`。
-2. 使用 `build_scripts/build_plcfiles.sh` 指定该文件。
-3. 重新执行普通目标构建和静态分析。
-4. 重新构建自定义变异器及插桩目标。
-5. 准备与输入结构相匹配的种子并运行 AFL++。
-
-例如：
-
-```bash
-./build_scripts/build_plcfiles.sh ./testcases/example.st
-make
-python3 ./static_analyse/main.py
-./build_scripts/build_shared_library.sh
-./build_scripts/buildfuzz.sh
-./runfuzz.sh
-```
-
-## 实验材料与可复现性
-
-- `findings/`、`findings copy/` 和 `results/` 包含历史实验材料，不应当作普通缓存清理。
-- `tools/iec2c`、`tools/iec2iec`、`tools/glue_generator` 和根目录的 `openplc_fuzz` 是为复现实验保留的二进制。
-- 可使用 `scripts/verify_preserved_artifacts.sh` 校验这些二进制的 SHA-256。
-- 发表或归档实验时，应记录仓库 commit、容器镜像 digest、CPU、内核、内存、AFL++ 版本和完整命令行。
-
-## 已知限制
-
-- 这是研究原型，部分脚本仍包含原实验机路径或特定环境假设。
-- `runfuzz.sh` 会写入固定的 `findings/` 目录，不适合并发启动多个实例。
-- 当前没有自动化测试或 CI；最可靠的验证方式是在复现容器中执行完整构建链。
-- 仓库尚未提供顶层 `LICENSE`，项目原创部分的再分发权限尚未明确；第三方组件仍受各自许可证约束。
+更完整的技术债与优先级见 [docs/IMPROVEMENTS.md](docs/IMPROVEMENTS.md)。
 
 ## 相关文档
 
-- [可复现环境与实验记录要求](REPRODUCIBILITY.md)
+- [可复现环境](REPRODUCIBILITY.md)
 - [第三方代码与许可说明](THIRD_PARTY_NOTICES.md)
-- [新版 MatIEC 项目](https://github.com/mengmengjiang1999/matiec)
-- [构建脚本说明](build_scripts/Readmd.md)
-- [PLC 代码安全文献综述](PLC代码安全的文献综述.md)
-- [Petri 网实验说明](lunwenfuxian/petrinet/readme.md)
+- [改进建议](docs/IMPROVEMENTS.md)
+- [变更记录](docs/CHANGELOG.md)
+- [构建脚本历史说明](build_scripts/README.md)
+- [PLC 代码安全文献综述](docs/research/PLC代码安全的文献综述.md)
+- [Petri 网实验说明](lunwenfuxian/petrinet/README.md)
