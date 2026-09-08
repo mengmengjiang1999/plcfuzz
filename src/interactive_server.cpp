@@ -36,11 +36,11 @@
 #include <unistd.h>
 
 #include "ladder.h"
-#define BUFFER_SIZE 1024
+#define COMMAND_BUFFER_SIZE 1024
 
 // Global Variables
 bool ethercat_configured = 0;
-char ethercat_conf_file[BUFFER_SIZE];
+char ethercat_conf_file[COMMAND_BUFFER_SIZE];
 bool run_modbus = 0;
 uint16_t modbus_port = 502;
 bool run_dnp3 = 0;

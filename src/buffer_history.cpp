@@ -13,47 +13,55 @@ BufferHistory::BufferHistory() { std::cout << "InputHistory constructor called."
 //     this->bool_history.update_history(input, output);
 // }
 
-void BufferHistory::updateBoolHistory(IEC_BOOL *bool_input[BUFFER_SIZE][8], IEC_BOOL *bool_output[BUFFER_SIZE][8]) {
+void BufferHistory::updateBoolHistory(IEC_BOOL *bool_input[OPENPLC_BUFFER_SIZE][8],
+                                      IEC_BOOL *bool_output[OPENPLC_BUFFER_SIZE][8]) {
     // std::cout << "updateBoolHistory called." << std::endl;
     this->bool_history.update_history(bool_input, bool_output);
 }
 
-void BufferHistory::updateByteHistory(IEC_BYTE *input[8], IEC_BYTE *output[8]) {
+void BufferHistory::updateByteHistory(IEC_BYTE *input[OPENPLC_BUFFER_SIZE], IEC_BYTE *output[OPENPLC_BUFFER_SIZE]) {
     // std::cout << "updateByteHistory called." << std::endl;
     this->byte_history.update_history(input, output);
 }
 
-void BufferHistory::updateIntHistory(IEC_UINT *input[8], IEC_UINT *output[8]) {
+void BufferHistory::updateIntHistory(IEC_UINT *input[OPENPLC_BUFFER_SIZE], IEC_UINT *output[OPENPLC_BUFFER_SIZE]) {
     // std::cout << "updateIntHistory called." << std::endl;
     this->int_history.update_history(input, output);
 }
 
-void BufferHistory::updateDintHistory(IEC_UDINT *input[8], IEC_UDINT *output[8]) {
+void BufferHistory::updateDintHistory(IEC_UDINT *input[OPENPLC_BUFFER_SIZE], IEC_UDINT *output[OPENPLC_BUFFER_SIZE]) {
     // std::cout << "updateDintHistory called." << std::endl;
     this->dint_history.update_history(input, output);
 }
 
-void BufferHistory::updateLintHistory(IEC_ULINT *input[8], IEC_ULINT *output[8]) {
+void BufferHistory::updateLintHistory(IEC_ULINT *input[OPENPLC_BUFFER_SIZE], IEC_ULINT *output[OPENPLC_BUFFER_SIZE]) {
     // std::cout << "updateLintHistory called." << std::endl;
     this->lint_history.update_history(input, output);
 }
 
-void BufferHistory::updateIntMemoryHistory(IEC_UINT *input[8], IEC_UINT *output[8]) {
+void BufferHistory::updateIntMemoryHistory(IEC_UINT *input[OPENPLC_BUFFER_SIZE], IEC_UINT *output[OPENPLC_BUFFER_SIZE]) {
     // std::cout << "updateIntMemoryHistory called." << std::endl;
     this->int_memory_history.update_history(input, output);
 }
 
-void BufferHistory::updateDintMemoryHistory(IEC_UDINT *input[8], IEC_UDINT *output[8]) {
+void BufferHistory::updateDintMemoryHistory(IEC_UDINT *input[OPENPLC_BUFFER_SIZE], IEC_UDINT *output[OPENPLC_BUFFER_SIZE]) {
     // std::cout << "updateDintMemoryHistory called." << std::endl;
     this->dint_memory_history.update_history(input, output);
 }
 
-void BufferHistory::updateHistory(IEC_BOOL *bool_input[BUFFER_SIZE][8], IEC_BOOL *bool_output[BUFFER_SIZE][8],
-                                  IEC_BYTE *input_byte[8], IEC_BYTE *output_byte[8], IEC_UINT *input_int[8],
-                                  IEC_UINT *output_int[8], IEC_UDINT *input_dint[8], IEC_UDINT *output_dint[8],
-                                  IEC_ULINT *input_lint[8], IEC_ULINT *output_lint[8], IEC_UINT *input_int_memory[8],
-                                  IEC_UINT *output_int_memory[8], IEC_UDINT *input_dint_memory[8],
-                                  IEC_UDINT *output_dint_memory[8]) {
+void BufferHistory::updateHistory(IEC_BOOL *bool_input[OPENPLC_BUFFER_SIZE][8],
+                                  IEC_BOOL *bool_output[OPENPLC_BUFFER_SIZE][8],
+                                  IEC_BYTE *input_byte[OPENPLC_BUFFER_SIZE],
+                                  IEC_BYTE *output_byte[OPENPLC_BUFFER_SIZE],
+                                  IEC_UINT *input_int[OPENPLC_BUFFER_SIZE], IEC_UINT *output_int[OPENPLC_BUFFER_SIZE],
+                                  IEC_UDINT *input_dint[OPENPLC_BUFFER_SIZE],
+                                  IEC_UDINT *output_dint[OPENPLC_BUFFER_SIZE],
+                                  IEC_ULINT *input_lint[OPENPLC_BUFFER_SIZE],
+                                  IEC_ULINT *output_lint[OPENPLC_BUFFER_SIZE],
+                                  IEC_UINT *input_int_memory[OPENPLC_BUFFER_SIZE],
+                                  IEC_UINT *output_int_memory[OPENPLC_BUFFER_SIZE],
+                                  IEC_UDINT *input_dint_memory[OPENPLC_BUFFER_SIZE],
+                                  IEC_UDINT *output_dint_memory[OPENPLC_BUFFER_SIZE]) {
     this->updateBoolHistory(bool_input, bool_output);
     this->updateByteHistory(input_byte, output_byte);
     this->updateIntHistory(input_int, output_int);

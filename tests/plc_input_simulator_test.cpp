@@ -8,6 +8,11 @@
 
 namespace {
 
+static_assert(OPENPLC_BUFFER_SIZE == 1024, "OpenPLC glue compatibility requires 1024 runtime slots");
+static_assert(PLC_INPUT_SIZE == 8, "The serialized fuzz input model requires eight slots");
+static_assert(sizeof(IntBlock().input) / sizeof(IEC_UINT) == PLC_INPUT_SIZE,
+              "Input blocks must use the fuzz input capacity");
+
 PLCInputBlock make_block(int cycles, unsigned int base) {
     PLCInputBlock block;
     block.input_bool_block.cycles = cycles;
@@ -77,23 +82,23 @@ void test_composite_snapshot_advances_once() {
 void test_type_correct_application() {
     const PLCInputBlock block = make_block(1, 40);
 
-    IEC_BOOL bool_values[BUFFER_SIZE][8] = {};
-    IEC_BYTE byte_values[BUFFER_SIZE] = {};
-    IEC_UINT int_values[BUFFER_SIZE] = {};
-    IEC_UDINT dint_values[BUFFER_SIZE] = {};
-    IEC_ULINT lint_values[BUFFER_SIZE] = {};
-    IEC_UINT int_memory_values[BUFFER_SIZE] = {};
-    IEC_UDINT dint_memory_values[BUFFER_SIZE] = {};
+    IEC_BOOL bool_values[OPENPLC_BUFFER_SIZE][8] = {};
+    IEC_BYTE byte_values[OPENPLC_BUFFER_SIZE] = {};
+    IEC_UINT int_values[OPENPLC_BUFFER_SIZE] = {};
+    IEC_UDINT dint_values[OPENPLC_BUFFER_SIZE] = {};
+    IEC_ULINT lint_values[OPENPLC_BUFFER_SIZE] = {};
+    IEC_UINT int_memory_values[OPENPLC_BUFFER_SIZE] = {};
+    IEC_UDINT dint_memory_values[OPENPLC_BUFFER_SIZE] = {};
 
-    IEC_BOOL* bool_destinations[BUFFER_SIZE][8];
-    IEC_BYTE* byte_destinations[BUFFER_SIZE];
-    IEC_UINT* int_destinations[BUFFER_SIZE];
-    IEC_UDINT* dint_destinations[BUFFER_SIZE];
-    IEC_ULINT* lint_destinations[BUFFER_SIZE];
-    IEC_UINT* int_memory_destinations[BUFFER_SIZE];
-    IEC_UDINT* dint_memory_destinations[BUFFER_SIZE];
+    IEC_BOOL* bool_destinations[OPENPLC_BUFFER_SIZE][8];
+    IEC_BYTE* byte_destinations[OPENPLC_BUFFER_SIZE];
+    IEC_UINT* int_destinations[OPENPLC_BUFFER_SIZE];
+    IEC_UDINT* dint_destinations[OPENPLC_BUFFER_SIZE];
+    IEC_ULINT* lint_destinations[OPENPLC_BUFFER_SIZE];
+    IEC_UINT* int_memory_destinations[OPENPLC_BUFFER_SIZE];
+    IEC_UDINT* dint_memory_destinations[OPENPLC_BUFFER_SIZE];
 
-    for (int i = 0; i < BUFFER_SIZE; ++i) {
+    for (int i = 0; i < OPENPLC_BUFFER_SIZE; ++i) {
         for (int j = 0; j < 8; ++j) {
             bool_destinations[i][j] = &bool_values[i][j];
         }

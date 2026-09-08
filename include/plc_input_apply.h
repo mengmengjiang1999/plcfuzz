@@ -4,14 +4,14 @@
 #include "plc_input_block.h"
 
 inline void applyPLCInputBlock(const PLCInputBlock& block,
-                               IEC_BOOL* destination_bool[BUFFER_SIZE][8],
-                               IEC_BYTE* destination_byte[BUFFER_SIZE],
-                               IEC_UINT* destination_int[BUFFER_SIZE],
-                               IEC_UDINT* destination_dint[BUFFER_SIZE],
-                               IEC_ULINT* destination_lint[BUFFER_SIZE],
-                               IEC_UINT* destination_int_memory[BUFFER_SIZE],
-                               IEC_UDINT* destination_dint_memory[BUFFER_SIZE]) {
-    for (int i = 0; i < BUFFER_SIZE; ++i) {
+                               IEC_BOOL* destination_bool[OPENPLC_BUFFER_SIZE][8],
+                               IEC_BYTE* destination_byte[OPENPLC_BUFFER_SIZE],
+                               IEC_UINT* destination_int[OPENPLC_BUFFER_SIZE],
+                               IEC_UDINT* destination_dint[OPENPLC_BUFFER_SIZE],
+                               IEC_ULINT* destination_lint[OPENPLC_BUFFER_SIZE],
+                               IEC_UINT* destination_int_memory[OPENPLC_BUFFER_SIZE],
+                               IEC_UDINT* destination_dint_memory[OPENPLC_BUFFER_SIZE]) {
+    for (int i = 0; i < PLC_INPUT_SIZE; ++i) {
         for (int j = 0; j < 8; ++j) {
             *destination_bool[i][j] = static_cast<IEC_BOOL>(block.input_bool_block.input[i][j]);
         }

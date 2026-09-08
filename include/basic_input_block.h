@@ -10,18 +10,18 @@ template <typename T, int Dim = 1>
 class BasicInputBlock : public SuperBasicInputBlock {
    public:
     int cycles;
-    T input[BUFFER_SIZE];
+    T input[PLC_INPUT_SIZE];
     virtual ~BasicInputBlock() = default;
     BasicInputBlock() {
         cycles = 0;
-        for (int i = 0; i < BUFFER_SIZE; i++) {
+        for (int i = 0; i < PLC_INPUT_SIZE; i++) {
             input[i] = 0;
         }
     }
     friend std::istream& operator>>(std::istream& is, BasicInputBlock<T, Dim>& obj) {
         is >> obj.cycles;
 
-        for (int i = 0; i < BUFFER_SIZE; i++) {
+        for (int i = 0; i < PLC_INPUT_SIZE; i++) {
             uint64_t tmp;
             is >> tmp;
             obj.input[i] = (T)tmp;
@@ -31,14 +31,14 @@ class BasicInputBlock : public SuperBasicInputBlock {
     virtual void print() {
         std::cout << "BasicInputBlock<" << typeid(T).name() << ", " << Dim << ">" << std::endl;
         std::cout << "cycles: " << cycles << std::endl;
-        for (int i = 0; i < BUFFER_SIZE; i++) {
+        for (int i = 0; i < PLC_INPUT_SIZE; i++) {
             std::cout << input[i] << " ";
         }
         std::cout << std::endl;
     };
     virtual std::string serialize_data() const {
         std::string buffer = std::to_string(this->cycles);
-        for (int i = 0; i < BUFFER_SIZE; i++) {
+        for (int i = 0; i < PLC_INPUT_SIZE; i++) {
             buffer += " " + std::to_string(this->input[i]);
         }
         return buffer;
@@ -46,7 +46,7 @@ class BasicInputBlock : public SuperBasicInputBlock {
 
     size_t size() const {
         return sizeof(cycles) +          // int类型的大小
-               sizeof(T) * BUFFER_SIZE;  // 一维数组的大小
+               sizeof(T) * PLC_INPUT_SIZE;  // 一维数组的大小
     }
 };
 
@@ -54,11 +54,11 @@ template <typename T>
 class BasicInputBlock<T, 2> {
    public:
     int cycles;
-    T input[BUFFER_SIZE][8];
+    T input[PLC_INPUT_SIZE][8];
     virtual ~BasicInputBlock() = default;
     BasicInputBlock() {
         cycles = 0;
-        for (int i = 0; i < BUFFER_SIZE; i++) {
+        for (int i = 0; i < PLC_INPUT_SIZE; i++) {
             for (int j = 0; j < 8; j++) {
                 input[i][j] = 0;
             }
@@ -67,7 +67,7 @@ class BasicInputBlock<T, 2> {
     friend std::istream& operator>>(std::istream& is, BasicInputBlock<T, 2>& obj) {
         is >> obj.cycles;
         // std::cout << "cycles=" << obj.cycles << std::endl;
-        for (int i = 0; i < BUFFER_SIZE; i++) {
+        for (int i = 0; i < PLC_INPUT_SIZE; i++) {
             for (int j = 0; j < 8; j++) {
                 uint64_t tmp;
                 is >> tmp;
@@ -81,7 +81,7 @@ class BasicInputBlock<T, 2> {
     virtual void print() {
         std::cout << "BasicInputBlock<" << typeid(T).name() << ">" << std::endl;
         std::cout << "cycles: " << cycles << std::endl;
-        for (int i = 0; i < BUFFER_SIZE; i++) {
+        for (int i = 0; i < PLC_INPUT_SIZE; i++) {
             for (int j = 0; j < 8; j++) {
                 std::cout << (uint64_t)input[i][j] << " ";
             }
@@ -92,7 +92,7 @@ class BasicInputBlock<T, 2> {
 
     virtual std::string serialize_data() const {
         std::string buffer = std::to_string(this->cycles);
-        for (int i = 0; i < BUFFER_SIZE; i++) {
+        for (int i = 0; i < PLC_INPUT_SIZE; i++) {
             for (int j = 0; j < 8; j++) {
                 buffer += " " + std::to_string(static_cast<uint64_t>(this->input[i][j]));
             }
@@ -101,7 +101,7 @@ class BasicInputBlock<T, 2> {
     }
     size_t size() const {
         return sizeof(cycles) +              // int类型的大小
-               sizeof(T) * BUFFER_SIZE * 8;  // 一维数组的大小
+               sizeof(T) * PLC_INPUT_SIZE * 8;  // 二维数组的大小
     }
 };
 

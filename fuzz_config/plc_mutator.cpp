@@ -167,7 +167,7 @@ void mutate_cycles(PLCInputBlock &block, MutatorState *state) {
 // BoolBlock专用变异策略（2D数组）
 void mutate_bool_block(BasicInputBlock<unsigned char, 2> &block, MutatorState *state) {
     for (const auto &mapping : plc_variable_mappings) {
-        if (mapping.var_type == "bool_inputs" && mapping.array_index >= 0 && mapping.array_index < BUFFER_SIZE &&
+        if (mapping.var_type == "bool_inputs" && mapping.array_index >= 0 && mapping.array_index < PLC_INPUT_SIZE &&
             mapping.bit_index >= 0 && mapping.bit_index < 8) {
             if (random() % 100 < state->mutation_rate()) {
                 // 更激进的变异策略
@@ -190,7 +190,7 @@ void mutate_bool_block(BasicInputBlock<unsigned char, 2> &block, MutatorState *s
 // ByteBlock专用变异策略
 void mutate_byte_block(BasicInputBlock<IEC_BYTE, 1> &block, MutatorState *state) {
     for (const auto &mapping : plc_variable_mappings) {
-        if (mapping.var_type == "byte_inputs" && mapping.array_index >= 0 && mapping.array_index < BUFFER_SIZE) {
+        if (mapping.var_type == "byte_inputs" && mapping.array_index >= 0 && mapping.array_index < PLC_INPUT_SIZE) {
             if (random() % 100 < state->mutation_rate()) {
                 // 针对字节变量的强化变异
                 // block.input[mapping.array_index] = (random() % 2) ? 0xFF : 0x00;  // 50%概率全1或全0
@@ -214,7 +214,7 @@ void mutate_byte_block(BasicInputBlock<IEC_BYTE, 1> &block, MutatorState *state)
 // IntBlock专用变异策略
 void mutate_int_block(BasicInputBlock<IEC_UINT, 1> &block, MutatorState *state) {
     for (const auto &mapping : plc_variable_mappings) {
-        if (mapping.var_type == "int_inputs" && mapping.array_index >= 0 && mapping.array_index < BUFFER_SIZE) {
+        if (mapping.var_type == "int_inputs" && mapping.array_index >= 0 && mapping.array_index < PLC_INPUT_SIZE) {
             if (random() % 100 >= state->mutation_rate()) {
                 continue;
             }
@@ -239,7 +239,7 @@ void mutate_int_block(BasicInputBlock<IEC_UINT, 1> &block, MutatorState *state) 
 // DIntBlock专用变异策略（32位）
 void mutate_dint_block(BasicInputBlock<IEC_UDINT, 1> &block, MutatorState *state) {
     for (const auto &mapping : plc_variable_mappings) {
-        if (mapping.var_type == "dint_inputs" && mapping.array_index >= 0 && mapping.array_index < BUFFER_SIZE) {
+        if (mapping.var_type == "dint_inputs" && mapping.array_index >= 0 && mapping.array_index < PLC_INPUT_SIZE) {
             if (random() % 100 < state->mutation_rate()) {
                 // 针对双整型的更复杂变异
                 switch (random() % 5) {
@@ -266,7 +266,7 @@ void mutate_dint_block(BasicInputBlock<IEC_UDINT, 1> &block, MutatorState *state
 // LIntBlock专用变异策略（64位）
 void mutate_lint_block(BasicInputBlock<IEC_ULINT, 1> &block, MutatorState *state) {
     for (const auto &mapping : plc_variable_mappings) {
-        if (mapping.var_type == "lint_inputs" && mapping.array_index >= 0 && mapping.array_index < BUFFER_SIZE) {
+        if (mapping.var_type == "lint_inputs" && mapping.array_index >= 0 && mapping.array_index < PLC_INPUT_SIZE) {
             if (random() % 100 < state->mutation_rate()) {
                 switch (random() % 6) {
                     case 0:
@@ -296,7 +296,7 @@ void mutate_lint_block(BasicInputBlock<IEC_ULINT, 1> &block, MutatorState *state
 // 内存块专用变异策略（根据实际情况调整）
 void mutate_int_mem_block(BasicInputBlock<IEC_UINT, 1> &block, MutatorState *state) {
     for (const auto &mapping : plc_variable_mappings) {
-        if (mapping.var_type == "int_memory" && mapping.array_index >= 0 && mapping.array_index < BUFFER_SIZE) {
+        if (mapping.var_type == "int_memory" && mapping.array_index >= 0 && mapping.array_index < PLC_INPUT_SIZE) {
             if (random() % 100 < state->mutation_rate()) {
                 switch (random() % 4) {
                     case 0:
@@ -320,7 +320,7 @@ void mutate_int_mem_block(BasicInputBlock<IEC_UINT, 1> &block, MutatorState *sta
 void mutate_dint_mem_block(BasicInputBlock<IEC_UDINT, 1> &block, MutatorState *state) {
     // 类似int_mem_block但针对32位
     for (const auto &mapping : plc_variable_mappings) {
-        if (mapping.var_type == "dint_memory" && mapping.array_index >= 0 && mapping.array_index < BUFFER_SIZE) {
+        if (mapping.var_type == "dint_memory" && mapping.array_index >= 0 && mapping.array_index < PLC_INPUT_SIZE) {
             if (random() % 100 < state->mutation_rate()) {
                 switch (random() % 5) {
                     case 0:

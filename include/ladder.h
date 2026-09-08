@@ -32,7 +32,11 @@
 
 // Internal buffers for I/O and memory. These buffers are defined in the
 // auto-generated glueVars.cpp file
-#define BUFFER_SIZE 8
+#define OPENPLC_BUFFER_SIZE 1024
+#define PLC_INPUT_SIZE 8
+
+// Compatibility name used by the upstream-derived OpenPLC runtime.
+#define BUFFER_SIZE OPENPLC_BUFFER_SIZE
 /*********************/
 /*  IEC Types defs   */
 /*********************/
