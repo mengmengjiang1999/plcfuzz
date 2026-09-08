@@ -3,8 +3,10 @@ set -euo pipefail
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 workflow="$repo_root/.github/workflows/linux-quality.yml"
+setup_script="$repo_root/scripts/setup_matiec.sh"
 
 test -f "$workflow"
+test -f "$setup_script"
 rg --quiet '^name: Linux quality checks$' "$workflow"
 rg --quiet '^  contents: read$' "$workflow"
 rg --quiet '^    runs-on: ubuntu-22\.04$' "$workflow"
@@ -17,6 +19,7 @@ rg --quiet 'git clone --branch v4\.10c --depth 1' "$workflow"
 rg --quiet './buildscript\.sh runtime' "$workflow"
 rg --quiet './buildscript\.sh mutator' "$workflow"
 rg --quiet './buildscript\.sh fuzz' "$workflow"
+rg --quiet '^mkdir -p stage4/\.deps$' "$setup_script"
 if rg --quiet 'contents: write' "$workflow"; then
     echo "CI workflow must not request repository write permission." >&2
     exit 1

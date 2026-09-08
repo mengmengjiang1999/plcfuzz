@@ -16,3 +16,10 @@ The setup entry point SHALL accept `MATIEC_BUILD_JOBS` as the only override for 
 #### Scenario: General project parallelism is configured
 - **WHEN** `BUILD_JOBS` is set but `MATIEC_BUILD_JOBS` is absent
 - **THEN** MatIEC still uses the deterministic one-job default
+
+### Requirement: Clean build preparation
+The MatIEC setup entry point SHALL create the generated stage-four dependency directory after configuration and before compilation.
+
+#### Scenario: Fresh checkout has no generated dependency directories
+- **WHEN** the setup entry point configures MatIEC from a clean source tree
+- **THEN** `stage4/.deps` exists before `make` starts

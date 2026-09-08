@@ -20,6 +20,7 @@ fi
 cd "$matiec_dir"
 autoreconf --install
 ./configure
+mkdir -p stage4/.deps
 make --jobs="$jobs"
 
 if [[ ${MATIEC_RUN_TESTS:-0} == 1 ]]; then
