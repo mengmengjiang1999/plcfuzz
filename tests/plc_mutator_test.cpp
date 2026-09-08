@@ -91,6 +91,12 @@ int main() {
     assert(!first.empty());
     assert(first == second);
 
+    const std::string legacy_input =
+        serialize_plc_data(std::vector<PLCInputBlock>(1, block), PLCInputFormat::Legacy);
+    const std::string migrated_output = mutate_once(12345, legacy_input, 1024 * 1024);
+    assert(migrated_output.compare(0, sizeof(PLC_INPUT_FORMAT_V1_HEADER) - 1,
+                                   PLC_INPUT_FORMAT_V1_HEADER) == 0);
+
     bool found_different_seed = false;
     for(unsigned int seed = 1; seed < 10; ++seed) {
         if(mutate_once(seed, input, 1024 * 1024) != first) {

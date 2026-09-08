@@ -201,6 +201,8 @@ cp -a "seeds copy/." seeds/
 
 脚本默认启用 `build/mutator/libplc_mutator.so`，并使用仓库内的 `fuzz_config/plc.grammar`。常用配置：
 
+活动 grammar 和自定义变异器生成带 `PLCFUZZ_INPUT_V1` 标头的规范数据；保留的无标头历史种子仍可读取。完整字段顺序和兼容规则见 [PLC 自动化测试输入格式](docs/PLC_INPUT_FORMAT.md)。
+
 | 变量 | 默认值 | 用途 |
 | --- | --- | --- |
 | `FUZZ_DURATION` | `3600` | 运行秒数 |
@@ -317,4 +319,5 @@ MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
 - [改进建议](docs/IMPROVEMENTS.md)
 - [变更记录](docs/CHANGELOG.md)
 - [构建脚本历史说明](build_scripts/README.md)
+- [PLC 自动化测试输入格式](docs/PLC_INPUT_FORMAT.md)
 - [Petri 网实验说明](lunwenfuxian/petrinet/README.md)

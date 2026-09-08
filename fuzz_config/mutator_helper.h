@@ -4,13 +4,11 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
-#include <vector>
 
-#include "plc_input_block.h"
+#include "plc_input_format.h"
 
 template <typename T>
 void reverse_bytes(T &value) {
@@ -28,42 +26,4 @@ T unsigned_bit_mask(std::size_t bit_index) {
         throw std::out_of_range("bit index exceeds value width");
     }
     return static_cast<T>(T(1) << bit_index);
-}
-
-inline bool parse_plc_data(const uint8_t *data, size_t size, std::vector<PLCInputBlock> &blocks) {
-    blocks.clear();
-    if (data == nullptr || size == 0) {
-        return false;
-    }
-
-    const std::string input(reinterpret_cast<const char *>(data), size);
-    std::istringstream stream(input);
-
-    while (true) {
-        stream >> std::ws;
-        if (stream.eof()) {
-            break;
-        }
-
-        PLCInputBlock block;
-        if (!(stream >> block)) {
-            blocks.clear();
-            return false;
-        }
-        blocks.push_back(block);
-    }
-
-    return !blocks.empty();
-}
-
-inline std::string serialize_plc_data(const std::vector<PLCInputBlock> &blocks) {
-    std::string output;
-    for (size_t i = 0; i < blocks.size(); ++i) {
-        if (i != 0) {
-            output.push_back('\n');
-        }
-        output += blocks[i].serialize_data();
-    }
-    output.push_back('\n');
-    return output;
 }

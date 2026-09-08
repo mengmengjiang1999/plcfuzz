@@ -34,6 +34,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <sstream>
 #include <stdexcept>
 #include <vector>
@@ -44,6 +45,7 @@
 #include "input_data_simulator.h"
 #include "ladder.h"
 #include "plc_input_block.h"
+#include "plc_input_format.h"
 #include "plc_input_simulator.h"
 #include "runtime_timing.h"
 #ifdef _ethercat_src
@@ -294,7 +296,7 @@ int main(int argc, char** argv) {
         std::cerr << "Invalid runtime timing configuration: " << error.what() << std::endl;
         return 1;
     }
-    std::cout << "Fuzz cycles: " << timing_config.cycle_count
+    std::cout << "Configured cycles: " << timing_config.cycle_count
               << ", wall-clock cycle delay: " << timing_config.cycle_delay_ns << " ns" << std::endl;
 
     std::ifstream input_file(argv[1]);
@@ -303,19 +305,22 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    PLCInputBlock input_plc_block;
-    int cnt_blocks = 0;
-    while(input_file >> input_plc_block) {
-        cnt_blocks++;
-        INPUT_PLC_DATA.add_block(input_plc_block);
-    }
-
-    if(cnt_blocks == 0) {
-        fprintf(stderr, "Input does not contain a complete PLC data block: %s\n", argv[1]);
+    const std::string input_data((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
+    std::vector<PLCInputBlock> input_blocks;
+    PLCInputFormat input_format = PLCInputFormat::Legacy;
+    if(!parse_plc_data(reinterpret_cast<const uint8_t*>(input_data.data()), input_data.size(), input_blocks,
+                       &input_format)) {
+        fprintf(stderr, "Input does not follow a supported PLC data format: %s\n", argv[1]);
         return 1;
     }
 
-    printf("Total blocks: %d\n", cnt_blocks);
+    for(std::size_t i = 0; i < input_blocks.size(); ++i) {
+        INPUT_PLC_DATA.add_block(input_blocks[i]);
+    }
+
+    printf("Input format: %s; total blocks: %zu\n",
+           input_format == PLCInputFormat::V1 ? "V1" : "legacy-compatible",
+           input_blocks.size());
 
     //======================================================
     //                 PLC INITIALIZATION

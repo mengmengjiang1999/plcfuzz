@@ -1,4 +1,5 @@
-start         = bigblocks
+start         = format_header bigblocks
+format_header = "PLCFUZZ_INPUT_V1"
 bigblocks     = bigblock | bigblocks bigblock
 bigblock      = bool_block byte_block int_block dint_block lint_block int_mem_block dint_mem_block
 bool_block        = header 64_w8numbers

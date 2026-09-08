@@ -1,6 +1,6 @@
 # PLCFuzz 改进路线图
 
-本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **3 个主题完成**，另有 **11 个主题待处理**。每个待处理主题都应作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并在单独提交推送后更新本页状态。
+本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **4 个主题完成**，另有 **10 个主题待处理**。每个待处理主题都应作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并在单独提交推送后更新本页状态。
 
 ## 已完成
 
@@ -22,13 +22,13 @@ OpenSpec：[`make-mutator-deterministic`](../openspec/changes/archive/2026-09-08
 
 OpenSpec：[`make-mutator-deterministic`](../openspec/changes/archive/2026-09-08-make-mutator-deterministic/)
 
+### 版本化输入数据协议
+
+运行时和自定义变异器现在共用严格解析器；新数据使用 `PLCFUZZ_INPUT_V1` 标头和固定的 119 字段记录，未知版本、不完整记录及超范围数值会被拒绝。保留的无标头种子继续以只读兼容方式加载。
+
+OpenSpec：[`version-plc-input-format`](../openspec/changes/archive/2026-09-08-version-plc-input-format/)
+
 ## P0：研究结论可靠性
-
-### 1. 固定并版本化输入数据协议
-
-建议 change：`version-plc-input-format`
-
-运行时、grammar、种子解析器和自定义变异器依赖同一套固定顺序文本格式，但目前没有版本字段或单一 schema。应定义格式规范与版本号，由一处实现负责解析和序列化，并覆盖无效输入、边界值、截断输入和兼容性场景。
 
 ### 2. 为历史测试语料建立机器可读清单
 
