@@ -79,6 +79,8 @@ git submodule update --init --recursive
 
 macOS 可以构建和测试新版 MatIEC；Apple 自带 Bison 2.3 不满足要求，`scripts/setup_matiec.sh` 会优先使用 Homebrew Bison。完整 PLCFuzz 运行时仍建议放在 Linux 容器中验证。
 
+当前运行时保持离线边界：MatIEC 标准库声明的 TCP 辅助函数仅提供链接兼容定义，调用时统一返回“不支持”，不会建立连接或交换数据。
+
 精确复现信息见 [REPRODUCIBILITY.md](REPRODUCIBILITY.md)，第三方来源和许可状态见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
 ## 快速开始

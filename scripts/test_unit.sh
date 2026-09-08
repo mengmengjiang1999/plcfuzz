@@ -36,6 +36,11 @@ compile_and_run \
     "$repo_root/tests/buffer_history_test.cpp"
 
 compile_and_run \
+    communication_compat_test \
+    "$repo_root/tests/communication_compat_test.cpp" \
+    "$repo_root/src/communication_compat.cpp"
+
+compile_and_run \
     runtime_timing_test \
     "$repo_root/tests/runtime_timing_test.cpp"
 

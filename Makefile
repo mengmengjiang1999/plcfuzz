@@ -15,6 +15,7 @@ GLUE_GENERATOR:= $(TOOLS_DIR)/glue_generator
 C_SRCS        := $(PLCLOGIC_DIR)/Config0.c $(PLCLOGIC_DIR)/Res0.c
 CPP_SRCS      := \
 	$(SRC_DIR)/buffer_history.cpp \
+	$(SRC_DIR)/communication_compat.cpp \
 	$(SRC_DIR)/hardware_layer.cpp \
 	$(SRC_DIR)/main.cpp \
 	$(SRC_DIR)/modbus.cpp \
