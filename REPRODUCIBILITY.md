@@ -77,6 +77,16 @@ Dockerfile 固定 OpenPLC 和 AFL++ 上游版本，并在镜像的 `/opt/upstrea
 
 当前输出变化 oracle 只比较实际记录的 history 样本，并按环形缓冲区的时间顺序处理。旧版本会把未写入的零值槽位加入比较，因此旧 findings 还可能包含初始化导致的候选；跨版本评估必须分别记录 oracle 所在的仓库 commit。输出变化仍只是候选信号，不等价于严格的数据竞争证明。
 
+每个输入默认执行 100 个 PLC 周期，并且不主动等待墙钟时间，以保持 fuzzing 吞吐量。可按实验需要设置：
+
+```sh
+PLCFUZZ_CYCLE_COUNT=250 \
+PLCFUZZ_CYCLE_DELAY_NS=50000000 \
+./openplc_fuzz seeds/example
+```
+
+`PLCFUZZ_CYCLE_COUNT` 必须是正整数；`PLCFUZZ_CYCLE_DELAY_NS` 是非负的纳秒数。后者只控制宿主机的绝对时钟休眠，不改变 MatIEC 的 `common_ticktime__` 或 IEC 程序逻辑时间。运行摘要中的 latency 是实际唤醒时刻相对绝对截止时刻的非负迟到量；关闭墙钟 pacing 时该值为零。复现实验必须记录这两个变量，未设置时分别记为 `100` 和 `0`。
+
 只验证 ST 到 C：
 
 ```sh

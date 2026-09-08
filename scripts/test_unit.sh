@@ -34,3 +34,7 @@ compile_and_run \
 compile_and_run \
     buffer_history_test \
     "$repo_root/tests/buffer_history_test.cpp"
+
+compile_and_run \
+    runtime_timing_test \
+    "$repo_root/tests/runtime_timing_test.cpp"

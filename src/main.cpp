@@ -34,9 +34,9 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
-#include <numeric>  // 需要包含这个头文件
 #include <sstream>
-#include <stdexcept>  // 包含标准异常类
+#include <stdexcept>
+#include <vector>
 
 #include "basic_input_block.h"
 #include "buffer_history.h"
@@ -45,6 +45,7 @@
 #include "ladder.h"
 #include "plc_input_block.h"
 #include "plc_input_simulator.h"
+#include "runtime_timing.h"
 #ifdef _ethercat_src
 #include "ethercat_src.h"
 #endif
@@ -66,17 +67,43 @@ int log_index = 0;
 int log_counter = 0;
 
 //-----------------------------------------------------------------------------
-// Helper function - Makes the running thread sleep for the ammount of time
-// in milliseconds
+// Wait for an absolute monotonic deadline. Linux provides this directly;
+// other POSIX hosts use repeated relative sleeps without moving the deadline.
 //-----------------------------------------------------------------------------
-void sleep_until(struct timespec* ts, long long delay) {
-    ts->tv_sec += delay / (1000 * 1000 * 1000);
-    ts->tv_nsec += delay % (1000 * 1000 * 1000);
-    if(ts->tv_nsec >= 1000 * 1000 * 1000) {
-        ts->tv_nsec -= 1000 * 1000 * 1000;
-        ts->tv_sec++;
+int wait_until_deadline(const struct timespec& deadline) {
+#ifdef __linux__
+    int result = 0;
+    do {
+        result = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &deadline, NULL);
+    } while(result == EINTR);
+    return result;
+#else
+    while(true) {
+        struct timespec now;
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        if(now.tv_sec > deadline.tv_sec ||
+           (now.tv_sec == deadline.tv_sec && now.tv_nsec >= deadline.tv_nsec)) {
+            return 0;
+        }
+
+        struct timespec remaining;
+        remaining.tv_sec = deadline.tv_sec - now.tv_sec;
+        remaining.tv_nsec = deadline.tv_nsec - now.tv_nsec;
+        if(remaining.tv_nsec < 0) {
+            --remaining.tv_sec;
+            remaining.tv_nsec += static_cast<long>(runtime_timing::kNanosecondsPerSecond);
+        }
+        if(nanosleep(&remaining, NULL) != 0 && errno != EINTR) {
+            return errno;
+        }
     }
-    clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, ts, NULL);
+#endif
+}
+
+// Advances an absolute deadline and sleeps until it. delay is in nanoseconds.
+void sleep_until(struct timespec* ts, long long delay) {
+    runtime_timing::add_nanoseconds(ts, static_cast<std::uint64_t>(delay));
+    wait_until_deadline(*ts);
 }
 
 //-----------------------------------------------------------------------------
@@ -88,22 +115,6 @@ void sleepms(int milliseconds) {
     ts.tv_sec = milliseconds / 1000;
     ts.tv_nsec = (milliseconds % 1000) * 1000000;
     nanosleep(&ts, NULL);
-}
-
-/**
- * @fn timespec_diff(struct timespec *, struct timespec *, struct timespec *)
- * @brief Compute the diff of two timespecs, that is a - b = result.
- * @param a the minuend
- * @param b the subtrahend
- * @param result a - b
- */
-static inline void timespec_diff(struct timespec* a, struct timespec* b, struct timespec* result) {
-    result->tv_sec = a->tv_sec - b->tv_sec;
-    result->tv_nsec = a->tv_nsec - b->tv_nsec;
-    if(result->tv_nsec < 0) {
-        --result->tv_sec;
-        result->tv_nsec += 1000000000L;
-    }
 }
 
 //-----------------------------------------------------------------------------
@@ -221,39 +232,24 @@ void RecordCycletimeLatency(long cycle_time, long sleep_latency) {
  * 使用一个数组进行记录
  */
 
-// 单位是微妙
-std::vector<long> record_cycle_time;
-std::vector<long> record_latency_time;
-void record_cycle_time_latency(long cycle_time, long sleep_latency) {
+// Values are recorded in nanoseconds.
+std::vector<std::uint64_t> record_cycle_time;
+std::vector<std::uint64_t> record_latency_time;
+void record_cycle_time_latency(std::uint64_t cycle_time, std::uint64_t sleep_latency) {
     record_cycle_time.push_back(cycle_time);
     record_latency_time.push_back(sleep_latency);
 }
 
-void calculate_latency_max_min_avg(long& latency_max, long& latency_min, long& latency_avg) {
-    latency_max = record_latency_time[0];
-    latency_min = record_latency_time[0];
-    latency_avg = 0;
-    for(int i = 1; i < record_latency_time.size(); i++) {
-        if(latency_max < record_latency_time[i] - record_latency_time[i - 1]) {
-            latency_max = record_latency_time[i] - record_latency_time[i - 1];
-        }
-        if(latency_min > record_latency_time[i] - record_latency_time[i - 1]) {
-            latency_min = record_latency_time[i] - record_latency_time[i - 1];
-        }
-        std::cout << "latency_max = " << latency_max << " latency_min = " << latency_min << std::endl;
-    }
-}
 /**
  * 打印cycle_time和latency的记录
  */
-void print_cycle_time_latency() {
-    for(int i = 0; i < record_cycle_time.size(); i++) {
+void print_cycle_time_latency(const runtime_timing::RunningStatistics& cycle_statistics,
+                              const runtime_timing::RunningStatistics& latency_statistics) {
+    for(std::size_t i = 0; i < record_cycle_time.size(); i++) {
         std::cout << i << "," << record_cycle_time[i] << "," << record_latency_time[i] << std::endl;
     }
-    auto cycle_everage = accumulate(record_cycle_time.begin(), record_cycle_time.end(), 0.0) / record_cycle_time.size();
-    auto latency_everage = record_latency_time[record_latency_time.size() - 1] / record_latency_time.size();
-    std::cout << "cycle_time_everage: " << cycle_everage << std::endl;
-    std::cout << "latency_time_everage: " << latency_everage << std::endl;
+    std::cout << "cycle_time_average: " << cycle_statistics.average() << std::endl;
+    std::cout << "latency_time_average: " << latency_statistics.average() << std::endl;
 }
 
 // pointers to IO *array[const][const] from cpp to c and back again don't work as expected, so instead callbacks
@@ -298,25 +294,29 @@ int main(int argc, char** argv) {
     setvbuf(stdin, NULL, _IONBF, 0);
     setvbuf(stdout, NULL, _IONBF, 0);
 
-    // Define the max/min/avg/total cycle and latency variables used in REAL-TIME computation(in nanoseconds)
+    // Track observed cycle duration and optional wall-clock pacing latency in nanoseconds.
     printf("Initializing variables for REAL-TIME computation\n");
-    long cycle_avg, cycle_max, cycle_min, cycle_total;
-    long latency_avg, latency_max, latency_min, latency_total;
-    cycle_max = 0;
-    cycle_min = LONG_MAX;
-    cycle_total = 0;
-    latency_max = 0;
-    latency_min = LONG_MAX;
-    latency_total = 0;
+    runtime_timing::RunningStatistics cycle_statistics;
+    runtime_timing::RunningStatistics latency_statistics;
 
     char log_msg[1000];
-    sprintf(log_msg, "OpenPLC Runtime starting...\n");
+    snprintf(log_msg, sizeof(log_msg), "OpenPLC Runtime starting...\n");
     log(log_msg);
 
     if(argc < 2) {
         printf("Usage: %s <input_file>\n", argv[0]);
         return 1;
     }
+
+    runtime_timing::Config timing_config = {0, 0};
+    try {
+        timing_config = runtime_timing::load_config();
+    } catch(const std::exception& error) {
+        std::cerr << "Invalid runtime timing configuration: " << error.what() << std::endl;
+        return 1;
+    }
+    std::cout << "Fuzz cycles: " << timing_config.cycle_count
+              << ", wall-clock cycle delay: " << timing_config.cycle_delay_ns << " ns" << std::endl;
 
     std::ifstream input_file(argv[1]);
     if(!input_file) {
@@ -350,7 +350,7 @@ int main(int argc, char** argv) {
     config_init__();
     glueVars();
 
-    sprintf(log_msg, "After GlueVars ...\n");
+    snprintf(log_msg, sizeof(log_msg), "After GlueVars ...\n");
 
     //======================================================
     //               MUTEX INITIALIZATION
@@ -376,7 +376,7 @@ int main(int argc, char** argv) {
     updateBuffersOut();
     updateCustomOut();
 
-    sprintf(log_msg, "After Hardware initialization ...\n");
+    snprintf(log_msg, sizeof(log_msg), "After Hardware initialization ...\n");
 
     //======================================================
     //          PERSISTENT STORAGE INITIALIZATION
@@ -411,8 +411,8 @@ int main(int argc, char** argv) {
 #endif
 
     // Define the start, end, cycle time and latency time variables
-    struct timespec cycle_start, cycle_end, cycle_time;
-    struct timespec timer_start, timer_end, sleep_latency;
+    struct timespec cycle_start, cycle_end;
+    struct timespec timer_start, timer_end;
 
     // gets the starting point for the clock
     printf("Getting current time\n");
@@ -422,7 +422,7 @@ int main(int argc, char** argv) {
     //                    MAIN LOOP
     //======================================================
     // while(run_openplc)
-    for(int i = 0; i < 100; i++) {
+    for(std::uint64_t i = 0; i < timing_config.cycle_count; i++) {
         // printf("Main loop iteration %d\n", i);
         // Get the start time for the running cycle
         // printf("Getting current time...main loop\n");
@@ -479,54 +479,40 @@ int main(int argc, char** argv) {
 
         // Get the end time for the running cycle
         clock_gettime(CLOCK_MONOTONIC, &cycle_end);
-        // Compute the time usage in one cycle and do max/min/total comparison/recording
-        timespec_diff(&cycle_end, &cycle_start, &cycle_time);
+        const std::uint64_t cycle_time_ns = runtime_timing::elapsed_nanoseconds(cycle_end, cycle_start);
+        cycle_statistics.add(cycle_time_ns);
 
-        if(cycle_time.tv_nsec > cycle_max)
-            cycle_max = cycle_time.tv_nsec;
-        if(cycle_time.tv_nsec < cycle_min)
-            cycle_min = cycle_time.tv_nsec;
-        cycle_total = cycle_total + cycle_time.tv_nsec;
+        std::uint64_t sleep_latency_ns = 0;
+        if(timing_config.cycle_delay_ns != 0) {
+            runtime_timing::add_nanoseconds(&timer_start, timing_config.cycle_delay_ns);
+            const int sleep_result = wait_until_deadline(timer_start);
+            if(sleep_result != 0) {
+                throw std::runtime_error("clock_nanosleep failed");
+            }
+            clock_gettime(CLOCK_MONOTONIC, &timer_end);
+            sleep_latency_ns = runtime_timing::elapsed_nanoseconds(timer_end, timer_start);
+        }
+        latency_statistics.add(sleep_latency_ns);
 
-        unsigned long long common_test_ticktime__ = 50ULL * 1ULL; /*ns*/
-        sleep_until(&timer_start, common_test_ticktime__);
-
-        // Get the sleep end point which is also the start time/point of the next cycle
-        clock_gettime(CLOCK_MONOTONIC, &timer_end);
-        // Compute the time latency of the next cycle(caused by sleep) and do max/min/total comparison/recording
-        timespec_diff(&timer_end, &timer_start, &sleep_latency);
-
-        // latency_total = latency_total + sleep_latency.tv_nsec;
-        latency_total = sleep_latency.tv_nsec;
-
-        record_cycle_time_latency((long)cycle_time.tv_nsec, (long)sleep_latency.tv_nsec);
+        record_cycle_time_latency(cycle_time_ns, sleep_latency_ns);
 
         // Store the cycle_time/sleep_latency in microsecond, so it can be displayed in the webpage
-        RecordCycletimeLatency((long)cycle_time.tv_nsec / 1000, (long)sleep_latency.tv_nsec / 1000);
+        RecordCycletimeLatency(static_cast<long>(cycle_time_ns / 1000),
+                               static_cast<long>(sleep_latency_ns / 1000));
     }
 
-    // Compute/print the max/min/avg cycle time and latency
-    cycle_avg = (long)cycle_total / __tick;
-    latency_avg = (long)latency_total / __tick;
+    std::cout << "###Summary: The maximum/minimum/average cycle time in microsecond is "
+              << cycle_statistics.maximum() / 1000 << "/" << cycle_statistics.minimum() / 1000 << "/"
+              << cycle_statistics.average() / 1000 << std::endl;
+    std::cout << "###Summary: The maximum/minimum/average latency in microsecond is "
+              << latency_statistics.maximum() / 1000 << "/" << latency_statistics.minimum() / 1000 << "/"
+              << latency_statistics.average() / 1000 << std::endl;
+    std::cout << "cycle_average = " << cycle_statistics.average() << std::endl;
+    std::cout << "latency_average = " << latency_statistics.average() << std::endl;
+    std::cout << "cycle_total = " << cycle_statistics.total() << std::endl;
+    std::cout << "latency_total = " << latency_statistics.total() << std::endl;
 
-    printf("###Summary: The maximum/minimum/average cycle time in microsecond is %ld/%ld/%ld\n",
-           cycle_max / 1000,
-           cycle_min / 1000,
-           cycle_avg / 1000);
-
-    calculate_latency_max_min_avg(latency_max, latency_min, latency_avg);
-
-    printf("###Summary: The maximum/minimum/average latency in microsecond is %ld/%ld/%ld\n",
-           latency_max / 1000,
-           latency_min / 1000,
-           latency_avg / 1000);
-
-    std::cout << "cycle_average = " << cycle_avg << std::endl;
-    std::cout << "latency_average = " << latency_avg << std::endl;
-    std::cout << "cycle_total = " << cycle_total << std::endl;
-    std::cout << "latency_total = " << latency_total << std::endl;
-
-    print_cycle_time_latency();
+    print_cycle_time_latency(cycle_statistics, latency_statistics);
 //======================================================
 //             SHUTTING DOWN OPENPLC RUNTIME
 //======================================================
