@@ -20,6 +20,7 @@ rg --quiet './buildscript\.sh runtime' "$workflow"
 rg --quiet './buildscript\.sh mutator' "$workflow"
 rg --quiet './buildscript\.sh fuzz' "$workflow"
 rg --quiet '^mkdir -p stage4/\.deps$' "$setup_script"
+rg --quiet '^    make check LIBS="\$matiec_dir/compiler/libcompiler\.a"$' "$setup_script"
 if rg --quiet 'contents: write' "$workflow"; then
     echo "CI workflow must not request repository write permission." >&2
     exit 1

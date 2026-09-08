@@ -24,7 +24,7 @@ mkdir -p stage4/.deps
 make --jobs="$jobs"
 
 if [[ ${MATIEC_RUN_TESTS:-0} == 1 ]]; then
-    make check
+    make check LIBS="$matiec_dir/compiler/libcompiler.a"
 fi
 
 echo "MatIEC compiler: $matiec_dir/iec2c"
