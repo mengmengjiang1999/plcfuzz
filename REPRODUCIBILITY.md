@@ -9,7 +9,7 @@ PLCFuzz 同时保留两套需要区分的基线：当前开发基线使用仓库
 | MatIEC | `third_party/matiec` gitlink，当前为 `cc7cb0250fc3199e726fb43260c180727fd4d128` |
 | MatIEC 来源 | `https://github.com/mengmengjiang1999/matiec.git` |
 | 容器基础系统 | Ubuntu 22.04，digest `sha256:23bda685...92216ccf` |
-| AFL++ | `v4.10c` |
+| AFL++ | `v5.03c` |
 | OpenPLC v3 上游源码 | `091524e1d80120cbe6b2c130822e91369f12eccd` |
 | C/C++ 标准 | PLCFuzz 运行时使用 GNU++11；自定义变异器使用 C++11 |
 | Python | Python 3，仅依赖标准库 |
@@ -66,7 +66,7 @@ Dockerfile 固定 OpenPLC 和 AFL++ 上游版本，并在镜像的 `/opt/upstrea
 
 ## 当前编译流程
 
-`.github/workflows/linux-quality.yml` 在 Ubuntu 22.04 上按本节顺序执行完整验证，并从源码构建固定的 AFL++ 4.10c。它对 `main` 的推送和目标为 `main` 的 pull request 运行，只申请仓库只读权限。
+`.github/workflows/linux-quality.yml` 在 Ubuntu 22.04 上按本节顺序执行完整验证，并从源码构建固定的 AFL++ 5.03c。它对 `main` 的推送和目标为 `main` 的 pull request 运行，只申请仓库只读权限。
 
 ```sh
 ./scripts/verify_preserved_artifacts.sh

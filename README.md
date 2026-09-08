@@ -75,7 +75,7 @@ git submodule update --init --recursive
 - GCC/G++ 与 GNU++11/17 支持
 - CMake、GNU Make、pkg-config
 - Python 3
-- AFL++ 4.10c
+- AFL++ 5.03c
 
 macOS 可以构建和测试新版 MatIEC；Apple 自带 Bison 2.3 不满足要求，`scripts/setup_matiec.sh` 会优先使用 Homebrew Bison。完整 PLCFuzz 运行时仍建议放在 Linux 容器中验证。
 

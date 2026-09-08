@@ -23,11 +23,11 @@
 
 | 组件 | 用途 | 许可 |
 | --- | --- | --- |
-| AFL++ 4.10c | 插桩编译与模糊测试 | Apache-2.0 |
+| AFL++ 5.03c | 插桩编译与自动化测试 | Apache-2.0 |
 | OpenDNP3 | DNP3 协议实现，由目标程序动态链接 | Apache-2.0 |
 | libmodbus | Modbus 协议库，由目标程序动态链接 | LGPL-2.1-or-later |
 
-AFL++ 来源为 <https://github.com/AFLplusplus/AFLplusplus/tree/v4.10c>。OpenDNP3 和 libmodbus 在复现镜像中取自固定版本的 OpenPLC v3 上游树，详见 `Dockerfile.repro`。
+AFL++ 来源为 <https://github.com/AFLplusplus/AFLplusplus/tree/v5.03c>。OpenDNP3 和 libmodbus 在复现镜像中取自固定版本的 OpenPLC v3 上游树，详见 `Dockerfile.repro`。
 
 ## 保留的预编译二进制
 

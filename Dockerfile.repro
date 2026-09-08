@@ -2,7 +2,7 @@ FROM public.ecr.aws/ubuntu/ubuntu:22.04@sha256:23bda685bd84a4d3b9caf2086a4c35f36
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG OPENPLC_COMMIT=091524e1d80120cbe6b2c130822e91369f12eccd
-ARG AFLPP_TAG=v4.10c
+ARG AFLPP_TAG=v5.03c
 
 RUN sed -i \
         -E 's|[a-z]+\.ubuntu\.com/ubuntu|mirrors.aliyun.com/ubuntu|g' \

@@ -11,11 +11,11 @@ The repository SHALL run its maintained verification workflow on Ubuntu 22.04 fo
 - **THEN** GitHub Actions starts the Linux quality workflow with read-only repository permissions
 
 ### Requirement: Pinned toolchain inputs
-The workflow SHALL initialize the recorded MatIEC submodule commit, build it with deterministic single-job ordering, and build the recorded AFL++ 4.10c tag from source.
+The workflow SHALL initialize the recorded MatIEC submodule commit, build it with deterministic single-job ordering, and build the recorded AFL++ `v5.03c` tag from source.
 
-#### Scenario: Toolchain is prepared
-- **WHEN** the workflow reaches build setup
-- **THEN** compiler inputs come from repository-recorded immutable revisions and MatIEC uses its deterministic build setting
+#### Scenario: A workflow run starts from a fresh checkout
+- **WHEN** dependency setup completes
+- **THEN** MatIEC matches the repository gitlink and AFL++ is checked out at `v5.03c`
 
 ### Requirement: Complete verification sequence
 The workflow SHALL install every command used by maintained validation scripts, then run MatIEC tests, project validation scripts, ST conversion, normal runtime build, structured mapping generation, custom-mutator build, and instrumented-target build.

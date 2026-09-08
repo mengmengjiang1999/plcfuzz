@@ -42,7 +42,7 @@ OpenSpec：[`generate-structured-variable-map`](../openspec/changes/archive/2026
 
 ### Linux 持续集成
 
-GitHub Actions 现在在 Ubuntu 22.04 上验证固定 MatIEC、项目测试、普通运行目标、结构化变量映射、自定义变异器和固定 AFL++ 4.10c 插桩目标，并使用仓库只读权限。
+GitHub Actions 现在在 Ubuntu 22.04 上验证固定 MatIEC、项目测试、普通运行目标、结构化变量映射、自定义变异器和固定 AFL++ 5.03c 插桩目标，并使用仓库只读权限。
 
 OpenSpec：[`add-linux-ci`](../openspec/changes/archive/2026-09-08-add-linux-ci/)
 

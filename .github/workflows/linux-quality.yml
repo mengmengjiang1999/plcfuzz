@@ -69,7 +69,7 @@ jobs:
 
       - name: Build pinned AFL++ compiler
         run: |
-          git clone --branch v4.10c --depth 1 \
+          git clone --branch v5.03c --depth 1 \
             https://github.com/AFLplusplus/AFLplusplus.git \
             "$RUNNER_TEMP/AFLplusplus"
           make -C "$RUNNER_TEMP/AFLplusplus" source-only -j"$BUILD_JOBS"
