@@ -561,7 +561,7 @@ static inline TIME __string_to_time(STRING IN){
      *  date_and_time#1984-06-25-15:36:55.36 dt#1984-06-25-15:36:55.36
      *
      */
-    /* Quick hack : only transform seconds */
+    /* Compatibility workaround: only transform seconds */
     /* search the dot */
     l = IN.len;
     while(--l > 0 && IN.body[l] != '.');

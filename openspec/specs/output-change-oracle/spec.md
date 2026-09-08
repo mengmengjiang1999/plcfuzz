@@ -25,7 +25,7 @@ The oracle SHALL report no candidate when every retained output snapshot is iden
 - **THEN** the oracle reports no output-change candidate
 
 ### Requirement: Explicit fuzz failure signal
-The fuzz runtime MUST use a defined process-abort operation to turn an output-change candidate into an AFL-observable crash.
+The automated-testing runtime MUST use a defined process-abort operation to turn an output-change candidate into an AFL-observable abnormal termination.
 
 #### Scenario: Candidate is selected for reporting
 - **WHEN** the end-of-run oracle reports an output-change candidate

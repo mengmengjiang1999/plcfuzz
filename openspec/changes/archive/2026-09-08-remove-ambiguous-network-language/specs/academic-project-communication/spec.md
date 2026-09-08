@@ -1,14 +1,4 @@
-# academic-project-communication Specification
-
-## Purpose
-TBD - created by archiving change clarify-academic-project-scope. Update Purpose after archive.
-## Requirements
-### Requirement: Prominent academic scope
-The project SHALL state before operational instructions that it is an academic software-robustness prototype intended only for authorized work in isolated simulation or laboratory environments.
-
-#### Scenario: Reader opens the README
-- **WHEN** a reader reviews the project introduction
-- **THEN** the academic purpose, authorization boundary, isolation expectation, and non-production status are visible without following another link
+## MODIFIED Requirements
 
 ### Requirement: Neutral maintained terminology
 All project-authored tracked text SHALL describe automated input generation and observed software behavior using neutral, technically precise quality-assurance terms and SHALL exclude unrelated operational-risk framing.
@@ -39,10 +29,3 @@ The project SHALL preserve exact third-party identifiers only where required for
 #### Scenario: Unrelated historical prose
 - **WHEN** an archived prose document discusses a subject outside the implemented offline robustness workflow
 - **THEN** it is absent from the current tree and remains recoverable through Git history
-
-### Requirement: Contributor terminology guidance
-The repository SHALL provide contributor guidance for maintaining the academic scope and preferred terminology.
-
-#### Scenario: Contributor edits public documentation
-- **WHEN** a contributor prepares maintained project text
-- **THEN** the repository provides preferred terms, terms requiring context, and the boundary between active and archival material

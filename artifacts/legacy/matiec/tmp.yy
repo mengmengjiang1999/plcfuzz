@@ -104,7 +104,7 @@ void yyerror (const char *error_msg);
 
 #include "../absyntax_utils/add_en_eno_param_decl.hh"	/* required for  add_en_eno_param_decl_c */
 
-/* an ugly hack!!
+/* compatibility workaround
  * We will probably not need it when we decide
  *  to cut down the abstract syntax down to size.
  *  We keep it as it is until we get to write

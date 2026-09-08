@@ -3,7 +3,7 @@
 PLCFuzz 是一个面向 PLC 控制逻辑的学术软件鲁棒性测试原型。它使用 MatIEC 将 IEC 61131-3 Structured Text（ST）程序转换为 C，构建基于 OpenPLC 的离线执行目标，提取 PLC 变量映射，再通过 AFL++ 和结构感知的自动输入生成观察非正常终止、异常状态变化和候选并发问题。
 
 > [!IMPORTANT]
-> 本项目只用于经过授权的学术研究与软件质量实验。所有实验都应在隔离的仿真环境或专用实验台中进行，不得连接或控制生产 PLC、现场设备及在役工业系统。本项目不是可部署的 OpenPLC 发行版，也不提供认证、生产运行或功能安全结论。
+> 本项目只用于经过授权的学术研究与软件质量实验。所有实验都应在隔离的仿真环境或专用实验台中进行，不得连接或控制生产 PLC、现场设备及在役工业系统。本项目不是可部署的 OpenPLC 发行版，也不提供认证、生产运行或运行可靠性结论。
 
 ## 研究范围
 
@@ -279,6 +279,8 @@ MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
 - `artifacts/legacy/fuzz-config/` 中不兼容当前输入格式的早期配置；
 - `findings/`、`findings copy/` 与 `results/`。
 
+这些目录中的 AFL++ 原始统计文件保持第三方工具的字段名称不变，以保证实验记录可核验；其中的字段名属于上游数据格式，不代表本项目的用途或结论。
+
 使用以下命令校验保留二进制：
 
 ```bash
@@ -315,5 +317,4 @@ MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
 - [改进建议](docs/IMPROVEMENTS.md)
 - [变更记录](docs/CHANGELOG.md)
 - [构建脚本历史说明](build_scripts/README.md)
-- [PLC 代码安全文献综述](docs/research/PLC代码安全的文献综述.md)
 - [Petri 网实验说明](lunwenfuxian/petrinet/README.md)

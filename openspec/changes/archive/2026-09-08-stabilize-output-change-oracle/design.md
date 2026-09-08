@@ -23,7 +23,7 @@ Each typed history is a ten-slot ring containing copied input and output values.
 - Iterate from the oldest valid ring slot and compare consecutive output snapshots.
 - Keep inputs recorded for future oracle refinement, but this change continues to detect output transitions only.
 - Cache each typed result once in `BufferHistory::checkChange()` before logging and combining it.
-- Use `std::abort()` as the explicit AFL crash signal after printing and flushing the candidate message.
+- Use `std::abort()` as the explicit AFL-observable abnormal-termination signal after printing and flushing the candidate message.
 
 ## Risks / Trade-offs
 

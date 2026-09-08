@@ -14,7 +14,7 @@ The output-change heuristic compares all ten physical history slots even before 
 
 ### New Capabilities
 
-- `output-change-oracle`: Defines the bounded-history heuristic and explicit crash signaling used to report fuzz candidates.
+- `output-change-oracle`: Defines the bounded-history heuristic and explicit abnormal-termination signaling used to report generated-input candidates.
 
 ### Modified Capabilities
 

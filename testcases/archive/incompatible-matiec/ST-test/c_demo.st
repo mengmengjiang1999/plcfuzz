@@ -1,6 +1,6 @@
 FUNCTION_BLOCK SAFE_MotorControl
 VAR_INPUT
-    Enable : BOOL;            // 安全使能信号
+    Enable : BOOL;            // 保护使能信号
     SpeedSetpoint : INT;      // 转速设定值 (0-1000 RPM)
 END_VAR
 VAR_OUTPUT
@@ -8,18 +8,18 @@ VAR_OUTPUT
     FaultCode : WORD;         // 故障代码 (IEC 61508标准)
 END_VAR
 VAR
-    SpeedPID : PID_Controller; // 安全认证的PID模块
+    SpeedPID : PID_Controller; // 经认证的PID模块
     SafeRangeCheck: LIMIT_INT; // 带自检的边界限制器
 END_VAR
 
-// 安全约束：转速设定值必须在[0,1000]区间
+// 范围约束：转速设定值必须在[0,1000]区间
 SafeRangeCheck(
     MIN := 0,
     MAX := 1000,
     IN := SpeedSetpoint,
     OUT => SpeedPID.Setpoint);
 
-// 执行安全PID控制（TÜV认证算法）
+// 执行经认证的PID控制（TÜV认证算法）
 SpeedPID(
     ProcessValue := ActualSpeed,
     Enable := Enable AND (FaultCode = 16#0000));

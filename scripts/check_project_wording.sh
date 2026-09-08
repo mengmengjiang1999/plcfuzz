@@ -3,27 +3,34 @@ set -euo pipefail
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 
-maintained_files=(
-    "$repo_root/README.md"
-    "$repo_root/REPRODUCIBILITY.md"
-    "$repo_root/docs/IMPROVEMENTS.md"
-    "$repo_root/docs/CHANGELOG.md"
-    "$repo_root/src/main.cpp"
-    "$repo_root/src/buffer_history.cpp"
-)
+# Scan every tracked project-authored text file. Raw AFL++ measurements retain
+# their upstream schema, preserved executables remain byte-identical, and this
+# script contains the search expression itself, so those narrow paths are exempt.
+ambiguous_phrases='attack|exploit|weapon|intrusion|hack|vulnerab|security research|crash capture|threat model|offensive|pentest|cybersecurity|malware|backdoor|寻找崩溃|崩溃|漏洞|攻击|利用|武器化|入侵|黑客|威胁模型|恶意代码|后门'
 
-# These project-authored phrases are ambiguous without academic context. Exact
-# third-party identifiers and quoted titles live outside this maintained set.
-ambiguous_phrases='security research|crash capture|threat model|寻找崩溃|崩溃|漏洞|攻击|利用|武器化|入侵|黑客|威胁模型'
-
-if rg --line-number --ignore-case "$ambiguous_phrases" "${maintained_files[@]}"; then
-    echo "Maintained project text contains ambiguous wording; use the terminology in CONTRIBUTING.md." >&2
+cd "$repo_root"
+if git grep -I --line-number --ignore-case --extended-regexp "$ambiguous_phrases" -- . \
+    ':!scripts/check_project_wording.sh' \
+    ':!findings/**' \
+    ':!findings copy/**' \
+    ':!findings_compare_with_petrinet/default/fuzzer_stats' \
+    ':!findings_compare_with_petrinet/default/plot_data' \
+    ':!results/**' \
+    ':!artifacts/legacy/matiec/iec2c' \
+    ':!artifacts/legacy/matiec/iec2iec' \
+    ':!artifacts/legacy/openplc_fuzz' \
+    ':!tools/glue_generator'; then
+    echo "Project-authored text contains ambiguous wording; use the terminology in CONTRIBUTING.md." >&2
     exit 1
 fi
 
 rg --quiet "只用于经过授权的学术研究" "$repo_root/README.md"
 rg --quiet "隔离的仿真环境或专用实验台" "$repo_root/README.md"
-rg --quiet "历史草稿" "$repo_root/docs/archive/tmp.md"
-rg --quiet "学术综述" "$repo_root/docs/research/PLC代码安全的文献综述.md"
+rg --quiet "原始统计文件保持第三方工具的字段名称不变" "$repo_root/README.md"
+
+test ! -e "$repo_root/docs/archive/tmp.md"
+test ! -e "$repo_root/docs/archive/一些脚本介绍.md"
+test ! -e "$repo_root/docs/archive/常用的prompt.md"
+test ! -e "$repo_root/docs/research/PLC代码安全的文献综述.md"
 
 echo "PASS project wording"
