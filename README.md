@@ -247,7 +247,7 @@ MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
 | `scripts/` | 环境准备、验证和单元测试入口 |
 | `fuzz_config/` | AFL++ grammar、dictionary 与自定义变异器 |
 | `static_analyse/` | PLC 变量映射提取工具 |
-| `testcases/` | 历史 ST/LD 样例和 MatIEC 兼容性用例 |
+| `testcases/` | 活动 ST/LD 样例、MatIEC 兼容性用例和历史归档 |
 | `tests/` | PLCFuzz 单元测试 |
 | `artifacts/legacy/` | 历史 MatIEC/OpenPLC 二进制与快照 |
 | `seeds copy/` | 只读保留的历史种子 |
@@ -274,7 +274,7 @@ MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
 ## 当前限制
 
 - 竞争问题的判定目前基于最近输出变化，是实验性启发式，不等价于严格的数据竞争检测。
-- 历史 ST 语料中仍有部分文件不满足新版 MatIEC 的严格语法要求；它们作为历史输入保留，不纳入新增兼容性测试套件。
+- 13 个不满足新版 MatIEC 要求的历史 ST 文件已移至 `testcases/archive/incompatible-matiec/`，原始内容保持不变且不纳入活动语料。
 - 默认 fuzz 输入格式是固定顺序的文本数值块，grammar、解析器和变异器需要同步演进。
 - 当前没有远端 CI；完整 OpenPLC/AFL++ 链仍需在 Linux 环境验证。
 - 仓库尚未提供顶层 `LICENSE`，原创代码和实验数据的再分发权限尚未明确。

@@ -104,7 +104,7 @@ FINDINGS_DIR=output/reproduction ./runfuzz.sh
 ## 已知限制
 
 - Ubuntu APT 软件包尚未按包哈希封存；论文归档还应记录成功构建后的最终镜像 digest。
-- 13 个历史 ST 文件不能通过当前 MatIEC profile；它们包含旧语法或实验输入，原样保留且不计入新增合法用例套件。
+- 13 个不能通过当前 MatIEC profile 的历史 ST 文件已原样归档到 `testcases/archive/incompatible-matiec/`，不计入活动语料或新增合法用例套件。
 - 历史统计和笔记中可能包含原实验机绝对路径；这些只是元数据，不再被当前脚本使用。
 - 当前没有远端 CI，完整 OpenPLC/AFL++ 构建仍以 x86-64 Linux 为权威环境。
 
