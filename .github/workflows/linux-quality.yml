@@ -44,7 +44,26 @@ jobs:
           bash scripts/check_ci_workflow.sh
           ./scripts/verify_preserved_artifacts.sh
 
+      - name: Compute fixed toolchain cache keys
+        id: toolchain-cache-keys
+        shell: bash
+        run: |
+          matiec_revision=$(git rev-parse HEAD:third_party/matiec)
+          cxx_version=$(c++ -dumpfullversion -dumpversion)
+          clang_version=$(clang -dumpversion)
+          echo "matiec=${matiec_revision}-cxx-${cxx_version}-cache-v1" >> "$GITHUB_OUTPUT"
+          echo "aflpp=v5.03c-clang-${clang_version}-cache-v1" >> "$GITHUB_OUTPUT"
+
+      - name: Restore MatIEC build cache
+        id: cache-matiec
+        uses: actions/cache@v5
+        with:
+          path: third_party/matiec
+          key: linux-toolchain-matiec-${{ runner.os }}-${{ runner.arch }}-${{ steps.toolchain-cache-keys.outputs.matiec }}
+
       - name: Build and test MatIEC
+        env:
+          MATIEC_USE_PREBUILT: ${{ steps.cache-matiec.outputs.cache-hit }}
         run: MATIEC_RUN_TESTS=1 ./scripts/plcfuzz setup
 
       - name: Run project checks
@@ -74,12 +93,23 @@ jobs:
           test -x build/diagnostics/runtime/openplc_diagnostic
           find build/diagnostics/mutator -maxdepth 1 -type f -name 'libplc_mutator.*' -print -quit | grep -q .
 
+      - name: Restore AFL++ build cache
+        id: cache-aflpp
+        uses: actions/cache@v5
+        with:
+          path: ${{ runner.temp }}/AFLplusplus
+          key: linux-toolchain-aflpp-${{ runner.os }}-${{ runner.arch }}-${{ steps.toolchain-cache-keys.outputs.aflpp }}
+
       - name: Build pinned AFL++ compiler
+        shell: bash
         run: |
-          git clone --branch v5.03c --depth 1 \
-            https://github.com/AFLplusplus/AFLplusplus.git \
-            "$RUNNER_TEMP/AFLplusplus"
-          make -C "$RUNNER_TEMP/AFLplusplus" source-only -j"$PLCFUZZ_TOOLCHAIN_BUILD_JOBS"
+          if [[ "${{ steps.cache-aflpp.outputs.cache-hit }}" != true ]]; then
+            git clone --branch v5.03c --depth 1 \
+              https://github.com/AFLplusplus/AFLplusplus.git \
+              "$RUNNER_TEMP/AFLplusplus"
+            make -C "$RUNNER_TEMP/AFLplusplus" source-only -j"$PLCFUZZ_TOOLCHAIN_BUILD_JOBS"
+          fi
+          test -x "$RUNNER_TEMP/AFLplusplus/afl-clang-fast++"
           "$RUNNER_TEMP/AFLplusplus/afl-clang-fast++" --version
 
       - name: Build instrumented runtime

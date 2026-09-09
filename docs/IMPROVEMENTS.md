@@ -1,6 +1,6 @@
 # PLCFuzz 改进路线图
 
-本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **15 个主题完成**，**0 个主题待处理**。每个主题均作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并单独提交和推送。
+本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **16 个主题完成**，**0 个主题待处理**。每个主题均作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并单独提交和推送。
 
 ## 已完成
 
@@ -93,6 +93,12 @@ OpenSpec：[`verify-linux-container-build`](../openspec/changes/archive/2026-09-
 Linux 质量工作流已从 `actions/checkout@v4` 升级到使用 Node.js 24 的 v5 line，继续保持递归检出固定 MatIEC submodule 和仓库只读权限。结构检查会要求 v5 并阻止旧 v4 配置重新进入工作流。
 
 OpenSpec：[`upgrade-checkout-node-runtime`](../openspec/changes/archive/2026-09-09-upgrade-checkout-node-runtime/)
+
+### Linux 固定工具链构建缓存
+
+Linux 质量工作流现在为 MatIEC 和固定 AFL++ 源码树使用精确构建缓存。缓存键包含系统、架构、编译器版本、固定源码标识和显式 schema；不使用模糊恢复前缀。MatIEC 命中缓存后仍清除旧测试结果并重跑全套测试，项目检查和产物核对保持不变。
+
+OpenSpec：[`cache-linux-toolchain-builds`](../openspec/changes/archive/2026-09-09-cache-linux-toolchain-builds/)
 
 ## 待处理
 
