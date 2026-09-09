@@ -12,12 +12,14 @@
 | MatIEC/Beremiz IEC 运行库 | `lib/iec_std_functions.h`、`lib/iec_std_lib.h` | LGPL-2.0-or-later |
 | MatIEC/Beremiz IEC 类型定义 | `lib/iec_types_all.h` | LGPL-3.0-or-later |
 | LDmicro 衍生部分 | `src/hardware_layer.cpp`、`src/modbus.cpp`、`include/ladder.h` | 随 OpenPLC 文件按 GPL-3.0-or-later 分发；仍应保留原始归属 |
+| LDmicro 测试材料 | `testcases/LD-test/`、两个归档 ST 转换文件 | GPL-3.0-or-later；逐文件来源和修改状态见 `testcases/LD-test/SOURCE.tsv` |
 
 上游位置：
 
 - 当前 MatIEC fork：<https://github.com/mengmengjiang1999/matiec>
 - MatIEC 原上游：<https://github.com/beremiz/matiec>
 - OpenPLC v3：<https://github.com/thiagoralves/OpenPLC_v3>
+- LDmicro 固定来源：<https://github.com/LDmicro/LDmicro/tree/5b058e05103d85a93c9b91807307b1bd44ee0925>
 
 ## 构建和运行时依赖
 
@@ -48,6 +50,6 @@ MatIEC 历史二进制是 GPL 覆盖的目标代码。对外分发时需要满�
 
 正式公开发布前应：
 
-1. 核对 `testcases/LD-test/` 等收集用例和实验数据的出处及再分发权。
-2. 按核对结果补齐实际随仓库分发材料所需的第三方许可证文本。
-3. 保留所有原始文件头、作者归属、submodule commit 和修改记录。
+1. 核对测试用例之外的历史实验数据出处及再分发条件。
+2. 按后续核对结果补齐其他实际随仓库分发材料所需的第三方许可证文本。
+3. 保留所有原始文件头、作者归属、submodule commit、测试材料来源映射和修改记录。

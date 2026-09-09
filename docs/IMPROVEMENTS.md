@@ -1,6 +1,6 @@
 # PLCFuzz 改进路线图
 
-本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **10 个主题完成**，另有 **4 个主题待处理**。每个待处理主题都应作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并在单独提交推送后更新本页状态。
+本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **11 个主题完成**，另有 **3 个主题待处理**。每个待处理主题都应作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并在单独提交推送后更新本页状态。
 
 ## 已完成
 
@@ -64,13 +64,13 @@ OpenSpec：[`record-experiment-manifests`](../openspec/changes/archive/2026-09-0
 
 OpenSpec：[`add-license-metadata`](../openspec/changes/archive/2026-09-09-add-license-metadata/)
 
+### 第三方测试材料来源与再分发条件
+
+31 个 LD 文件已逐项映射到固定 LDmicro commit、上游路径和 blob，并记录当前文件摘要及“换行归一后一致/本地修改”状态。两个 ST 转换文件保持 LDmicro 衍生归属；其余 ST 文件记录为项目原创。所有测试条目均有明确 SPDX 标识和机器可读来源证据，不再包含待核对占位值。
+
+OpenSpec：[`audit-testcase-provenance`](../openspec/changes/archive/2026-09-09-audit-testcase-provenance/)
+
 ## P2：发布与长期维护
-
-### 8. 核对第三方测试材料来源
-
-建议 change：`audit-testcase-provenance`
-
-核对第三方测试用例的来源、许可状态和再分发条件，并把结果写入机器可读清单和第三方说明。
 
 ### 9. 统一构建与运行脚本入口
 

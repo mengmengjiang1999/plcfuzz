@@ -2,14 +2,18 @@
 
 import argparse
 import csv
+import hashlib
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
 
 
 CATALOG_MARKER = "# plcfuzz-testcase-catalog-v1"
+PROVENANCE_MARKER = "# plcfuzz-testcase-provenance-v1"
+SOURCE_MAP_MARKER = "# plcfuzz-ldmicro-source-map-v1"
 FIELDS = [
     "path",
     "original_path",
@@ -26,9 +30,25 @@ ALLOWED = {
     "collection": {"active", "archived", "ld-reference", "matiec-experimental", "matiec-legacy"},
     "profile": {"legacy", "iec61131-3:2025-experimental", "not-applicable"},
     "expected": {"pass", "fail", "not-checked"},
-    "origin": {"project-authored", "repository-history", "to-review"},
-    "license": {"GPL-3.0-only", "to-review"},
+    "origin": {"project-authored", "ldmicro", "ldmicro-derived"},
+    "license": {"GPL-3.0-only", "GPL-3.0-or-later"},
     "purpose": {"runtime-example", "compiler-compatibility", "compatibility-reference", "ladder-reference"},
+}
+PROVENANCE_FIELDS = [
+    "origin",
+    "scope",
+    "source_url",
+    "source_revision",
+    "license",
+    "redistribution",
+    "evidence",
+    "notes",
+]
+SOURCE_MAP_FIELDS = ["path", "upstream_path", "upstream_blob", "comparison", "local_sha256"]
+LDMICRO_REVISION = "5b058e05103d85a93c9b91807307b1bd44ee0925"
+LDMICRO_DERIVED_PATHS = {
+    "testcases/archive/incompatible-matiec/ctc_osr.st",
+    "testcases/archive/incompatible-matiec/hello_ld_convert.st",
 }
 
 
@@ -57,6 +77,17 @@ def load_catalog(manifest_path):
         reader = csv.DictReader(manifest_file, delimiter="\t")
         if reader.fieldnames != FIELDS:
             raise ValueError("catalog columns must be: " + ", ".join(FIELDS))
+        return list(reader)
+
+
+def load_table(path, marker, fields):
+    with path.open("r", encoding="utf-8", newline="") as table_file:
+        observed_marker = table_file.readline().rstrip("\r\n")
+        if observed_marker != marker:
+            raise ValueError("{} marker must be {}".format(path.name, marker))
+        reader = csv.DictReader(table_file, delimiter="\t")
+        if reader.fieldnames != fields:
+            raise ValueError("{} columns must be: {}".format(path.name, ", ".join(fields)))
         return list(reader)
 
 
@@ -94,6 +125,15 @@ def validate_rows(rows, tracked_paths):
         if is_archived and row["expected"] != "fail":
             report_error(errors, "line {} archived ST case must declare fail".format(number))
 
+        if row["origin"] == "project-authored" and row["license"] != "GPL-3.0-only":
+            report_error(errors, "line {} project-authored case must use GPL-3.0-only".format(number))
+        if row["origin"] in {"ldmicro", "ldmicro-derived"} and row["license"] != "GPL-3.0-or-later":
+            report_error(errors, "line {} LDmicro case must use GPL-3.0-or-later".format(number))
+        if row["language"] == "ld" and row["origin"] != "ldmicro":
+            report_error(errors, "line {} LD case must identify the LDmicro origin".format(number))
+        if (path in LDMICRO_DERIVED_PATHS) != (row["origin"] == "ldmicro-derived"):
+            report_error(errors, "line {} LDmicro-derived classification is inconsistent".format(number))
+
     if catalog_paths != sorted(catalog_paths):
         report_error(errors, "catalog paths must be sorted")
 
@@ -103,6 +143,60 @@ def validate_rows(rows, tracked_paths):
         report_error(errors, "manifest is missing tracked testcase: " + path)
     for path in extra:
         report_error(errors, "manifest contains an untracked testcase: " + path)
+    return errors
+
+
+def validate_provenance(rows, provenance_rows, source_rows, repo_root):
+    errors = []
+    provenance = {}
+    for number, row in enumerate(provenance_rows, start=3):
+        origin = row["origin"]
+        if origin in provenance:
+            report_error(errors, "provenance line {} duplicates {}".format(number, origin))
+        provenance[origin] = row
+        if not all(row[field] for field in PROVENANCE_FIELDS):
+            report_error(errors, "provenance line {} has an empty field".format(number))
+        if not row["source_url"].startswith("https://github.com/"):
+            report_error(errors, "provenance line {} source URL is not a GitHub HTTPS URL".format(number))
+        if not re.fullmatch(r"[0-9a-f]{40}", row["source_revision"]):
+            report_error(errors, "provenance line {} source revision is not a full commit".format(number))
+        if row["redistribution"] != "permitted-with-license-and-notices":
+            report_error(errors, "provenance line {} has unsupported redistribution status".format(number))
+
+    catalog_origins = {row["origin"] for row in rows}
+    if set(provenance) != catalog_origins:
+        report_error(errors, "provenance origins must exactly match catalog origins")
+    for row in rows:
+        evidence = provenance.get(row["origin"])
+        if evidence is not None and evidence["license"] != row["license"]:
+            report_error(errors, "{} license differs from provenance".format(row["path"]))
+
+    source_map = {}
+    for number, row in enumerate(source_rows, start=3):
+        path = "testcases/" + row["path"]
+        if path in source_map:
+            report_error(errors, "source map line {} duplicates {}".format(number, path))
+        source_map[path] = row
+        if not re.fullmatch(r"[0-9a-f]{40}", row["upstream_blob"]):
+            report_error(errors, "source map line {} has an invalid upstream blob".format(number))
+        if row["comparison"] not in {"normalized-equivalent", "modified"}:
+            report_error(errors, "source map line {} has an invalid comparison".format(number))
+        if not re.fullmatch(r"[0-9a-f]{64}", row["local_sha256"]):
+            report_error(errors, "source map line {} has an invalid local digest".format(number))
+        local_path = repo_root / path
+        if not local_path.is_file():
+            report_error(errors, "source map path does not exist: " + path)
+        else:
+            observed = hashlib.sha256(local_path.read_bytes()).hexdigest()
+            if observed != row["local_sha256"]:
+                report_error(errors, "source map digest differs for " + path)
+
+    ld_paths = {row["path"] for row in rows if row["origin"] == "ldmicro"}
+    if set(source_map) != ld_paths:
+        report_error(errors, "LDmicro source map must exactly cover LD catalog rows")
+    ldmicro_evidence = provenance.get("ldmicro")
+    if ldmicro_evidence is not None and ldmicro_evidence["source_revision"] != LDMICRO_REVISION:
+        report_error(errors, "LDmicro provenance must use the audited fixed revision")
     return errors
 
 
@@ -152,12 +246,19 @@ def main():
     manifest_path = repo_root / "testcases/manifest.tsv"
     try:
         rows = load_catalog(manifest_path)
+        provenance_rows = load_table(
+            repo_root / "testcases/provenance.tsv", PROVENANCE_MARKER, PROVENANCE_FIELDS
+        )
+        source_rows = load_table(
+            repo_root / "testcases/LD-test/SOURCE.tsv", SOURCE_MAP_MARKER, SOURCE_MAP_FIELDS
+        )
         tracked_paths = tracked_testcases(repo_root)
     except (OSError, ValueError, subprocess.CalledProcessError, UnicodeError) as error:
         print("Catalog validation failed: {}".format(error), file=sys.stderr)
         return 1
 
     errors = validate_rows(rows, tracked_paths)
+    errors.extend(validate_provenance(rows, provenance_rows, source_rows, repo_root))
     if arguments.verify_compiler:
         verify_compiler(rows, repo_root, errors)
     if errors:

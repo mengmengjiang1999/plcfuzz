@@ -12,15 +12,17 @@
 | `collection` | 活动运行样例、MatIEC 兼容用例、归档参考或 LD 参考集合 |
 | `profile` | MatIEC profile；LD 使用 `not-applicable` |
 | `expected` | 编译器预期结果；LD 使用 `not-checked` |
-| `origin` | 已确认的项目原创状态或 `repository-history` |
-| `license` | 已确认的 SPDX 标识或 `to-review` |
+| `origin` | `project-authored`、`ldmicro` 或 `ldmicro-derived` |
+| `license` | 已核对的 SPDX 标识 |
 | `purpose` | 该文件在当前仓库中的研究用途 |
 
-`repository-history` 只说明文件存在于项目历史中，并不推断其最初来源；`to-review` 表示需要在后续来源与许可核对主题中补充证据。
+全部条目都已关联到 [`provenance.tsv`](provenance.tsv) 的来源证据。31 个 LD 文件逐项映射到固定 LDmicro commit 的信息见 [`LD-test/SOURCE.tsv`](LD-test/SOURCE.tsv)；可读说明见 [`LD-test/SOURCE.md`](LD-test/SOURCE.md)。其中 13 个文件在统一换行后与固定上游版本一致，18 个文件保留本地修改，清单不会把这些修改版本表示为未改动的上游副本。
+
+两个归档 ST 文件 `ctc_osr.st` 和 `hello_ld_convert.st` 是 LDmicro 示例的本地转换版本，使用 `ldmicro-derived`；其他 ST 文件由本项目作者提交或在项目内生成。第三方材料按 `GPL-3.0-or-later` 分发，必须保留顶层 GPLv3 完整文本、来源映射、修改状态和上游归属。
 
 ## 验证
 
-快速检查 manifest 结构、字段值和 Git 文件覆盖范围：
+快速检查 manifest 结构、字段值、Git 文件覆盖范围、来源证据连接、外部文件映射和本地摘要：
 
 ```bash
 python3 scripts/check_testcase_manifest.py

@@ -56,26 +56,36 @@ def parse_metadata(path):
     if not re.search(r"(?m)^version\s*=\s*1\s*$", text):
         fail("REUSE.toml must declare version 1")
     blocks = text.split("[[annotations]]")
-    if len(blocks) != 2:
-        fail("exactly one aggregate annotation is required")
-    block = blocks[1]
-    path_match = re.search(r"(?ms)^path\s*=\s*(\[.*?\])\s*$", block)
-    if path_match is None:
-        fail("annotation path list is missing")
-    try:
-        patterns = json.loads(path_match.group(1))
-    except json.JSONDecodeError as error:
-        fail("annotation path list is invalid: {}".format(error))
-    required_fields = {
-        "precedence": "aggregate",
-        "SPDX-FileCopyrightText": "2024-2026 PLCFuzz contributors",
-        "SPDX-License-Identifier": "GPL-3.0-only",
-    }
-    for name, expected in required_fields.items():
-        match = re.search(r'(?m)^{}\s*=\s*"([^"]+)"\s*$'.format(re.escape(name)), block)
-        if match is None or match.group(1) != expected:
-            fail("{} must be {!r}".format(name, expected))
-    return patterns
+    if len(blocks) < 2:
+        fail("at least one aggregate annotation is required")
+    project_patterns = None
+    annotation_patterns = []
+    for block in blocks[1:]:
+        path_match = re.search(r"(?ms)^path\s*=\s*(\[.*?\])\s*$", block)
+        if path_match is None:
+            fail("annotation path list is missing")
+        try:
+            patterns = json.loads(path_match.group(1))
+        except json.JSONDecodeError as error:
+            fail("annotation path list is invalid: {}".format(error))
+        annotation_patterns.append(patterns)
+        fields = {}
+        for name in ("precedence", "SPDX-FileCopyrightText", "SPDX-License-Identifier"):
+            match = re.search(r'(?m)^{}\s*=\s*"([^"]+)"\s*$'.format(re.escape(name)), block)
+            if match is None:
+                fail("annotation field is missing: " + name)
+            fields[name] = match.group(1)
+        if fields["precedence"] != "aggregate":
+            fail("annotation precedence must be aggregate")
+        if fields["SPDX-License-Identifier"] not in {"GPL-3.0-only", "GPL-3.0-or-later"}:
+            fail("annotation uses an unsupported license identifier")
+        if fields["SPDX-FileCopyrightText"] == "2024-2026 PLCFuzz contributors":
+            if fields["SPDX-License-Identifier"] != "GPL-3.0-only":
+                fail("project-authored annotation must use GPL-3.0-only")
+            project_patterns = patterns
+    if project_patterns is None:
+        fail("project-authored aggregate annotation is missing")
+    return project_patterns, annotation_patterns
 
 
 def expand_patterns(repo_root, patterns, tracked):
@@ -103,7 +113,9 @@ def expand_patterns(repo_root, patterns, tracked):
 def main():
     repo_root = pathlib.Path(__file__).resolve().parents[1]
     tracked = tracked_paths(repo_root)
-    patterns = parse_metadata(repo_root / "REUSE.toml")
+    patterns, annotation_patterns = parse_metadata(repo_root / "REUSE.toml")
+    for annotated_group in annotation_patterns:
+        expand_patterns(repo_root, annotated_group, tracked)
     covered = expand_patterns(repo_root, patterns, tracked)
 
     missing = REQUIRED_ORIGINAL_PATHS - covered
