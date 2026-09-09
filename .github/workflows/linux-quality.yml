@@ -45,32 +45,32 @@ jobs:
           ./scripts/verify_preserved_artifacts.sh
 
       - name: Build and test MatIEC
-        run: MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
+        run: MATIEC_RUN_TESTS=1 ./scripts/plcfuzz setup
 
       - name: Run project checks
         run: |
           ./scripts/check_project_wording.sh
           ./scripts/check_source_layout.sh
-          ./scripts/test_unit.sh
+          ./scripts/plcfuzz test unit
           python3 scripts/check_testcase_manifest.py --verify-compiler
-          ./scripts/validate_testcases.sh
+          ./scripts/plcfuzz test testcases
 
       - name: Build normal runtime and mapping
         run: |
-          ./buildscript.sh plc testcases/race_test_success.st
-          ./buildscript.sh runtime
-          ./buildscript.sh analyze
+          ./scripts/plcfuzz build plc testcases/race_test_success.st
+          ./scripts/plcfuzz build runtime
+          ./scripts/plcfuzz build analyze
           test -x openplc
           test -s plc_variables_mapping.csv
 
       - name: Build custom mutator
         run: |
-          ./buildscript.sh mutator
+          ./scripts/plcfuzz build mutator
           test -f build/mutator/libplc_mutator.so
 
       - name: Build diagnostic targets
         run: |
-          ./scripts/build_diagnostics.sh all
+          ./scripts/plcfuzz diagnostics all
           test -x build/diagnostics/runtime/openplc_diagnostic
           find build/diagnostics/mutator -maxdepth 1 -type f -name 'libplc_mutator.*' -print -quit | grep -q .
 
@@ -84,5 +84,5 @@ jobs:
 
       - name: Build instrumented runtime
         run: |
-          PLCFUZZ_INSTRUMENTED_CXX="$RUNNER_TEMP/AFLplusplus/afl-clang-fast++" ./buildscript.sh fuzz
+          PLCFUZZ_INSTRUMENTED_CXX="$RUNNER_TEMP/AFLplusplus/afl-clang-fast++" ./scripts/plcfuzz build instrumented
           test -x openplc_fuzz

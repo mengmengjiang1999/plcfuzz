@@ -4,7 +4,7 @@
 TBD - created by archiving change record-experiment-manifests. Update Purpose after archive.
 ## Requirements
 ### Requirement: Unique experiment directory
-The launcher SHALL create a new experiment directory for every run and SHALL refuse an explicitly selected path that already exists.
+The maintained unified experiment command SHALL create a new experiment directory for every run and SHALL refuse an explicitly selected path that already exists.
 
 #### Scenario: No explicit experiment path is supplied
 - **WHEN** a run starts
@@ -18,7 +18,7 @@ Before starting AFL++, the launcher SHALL write a versioned JSON manifest contai
 - **THEN** its manifest exists with status `running`
 
 ### Requirement: Manifest lifecycle completion
-The launcher SHALL finalize the manifest with completion time, exit code, and a success, nonzero, or interrupted status.
+The maintained unified experiment command SHALL finalize the manifest with completion time, exit code, and a success, nonzero, or interrupted status.
 
 #### Scenario: AFL++ returns a nonzero code
 - **WHEN** the launcher exits

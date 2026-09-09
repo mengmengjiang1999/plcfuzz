@@ -7,14 +7,14 @@
 同时构建普通运行时和自定义输入组件：
 
 ```bash
-./scripts/build_diagnostics.sh all
+./scripts/plcfuzz diagnostics all
 ```
 
 也可以只构建一个目标：
 
 ```bash
-./scripts/build_diagnostics.sh runtime
-./scripts/build_diagnostics.sh mutator
+./scripts/plcfuzz diagnostics runtime
+./scripts/plcfuzz diagnostics mutator
 ```
 
 输出与普通构建相互隔离：

@@ -48,3 +48,10 @@ The workflow SHALL use `PLCFUZZ_TOOLCHAIN_BUILD_JOBS` for fixed toolchain parall
 #### Scenario: The instrumented runtime stage starts
 - **WHEN** the workflow exports project build controls
 - **THEN** no project-only setting occupies an upstream `AFL_` variable name
+
+### Requirement: Unified command use in CI
+Linux CI SHALL invoke maintained build and test workflows through `scripts/plcfuzz` rather than deprecated root compatibility wrappers.
+
+#### Scenario: CI workflow structure is checked
+- **WHEN** the Linux workflow is validated
+- **THEN** its project build steps use canonical unified subcommands and contain no deprecated root invocation

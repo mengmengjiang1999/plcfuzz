@@ -19,20 +19,20 @@ PLCFuzz 同时保留两套需要区分的基线：当前开发基线使用仓库
 ```sh
 git clone --recurse-submodules https://github.com/mengmengjiang1999/plcfuzz.git
 cd plcfuzz
-./scripts/setup_matiec.sh
+./scripts/plcfuzz setup
 ```
 
 已有工作树可执行：
 
 ```sh
 git submodule update --init --recursive
-./scripts/setup_matiec.sh
+./scripts/plcfuzz setup
 ```
 
 若要同时运行 MatIEC 自身测试：
 
 ```sh
-MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh
+MATIEC_RUN_TESTS=1 ./scripts/plcfuzz setup
 ```
 
 `setup_matiec.sh` 默认使用 `MATIEC_BUILD_JOBS=1` 保证清洁构建顺序稳定。该变量专用于 MatIEC；项目其他构建步骤的 `BUILD_JOBS` 不会改变它。
@@ -73,12 +73,12 @@ MatIEC 与 AFL++ 的源码构建分别使用 `MATIEC_BUILD_JOBS=1` 和 `PLCFUZZ_
 ```sh
 ./scripts/verify_preserved_artifacts.sh
 ./scripts/check_source_layout.sh
-./scripts/validate_testcases.sh
-./scripts/test_unit.sh
-./buildscript.sh
+./scripts/plcfuzz test testcases
+./scripts/plcfuzz test unit
+./scripts/plcfuzz build
 ```
 
-`buildscript.sh` 默认把 `testcases/race_test_success.st` 转为 C，然后依次构建普通运行目标、生成变量映射、构建自定义变异器和 AFL++ 插桩目标。
+`scripts/plcfuzz build` 默认把 `testcases/race_test_success.st` 转为 C，然后依次构建普通运行目标、生成变量映射、构建自定义变异器和 AFL++ 插桩目标。
 
 当前输入回放语义规定每个 OpenPLC 周期只推进每种输入类型一次。修复前的运行时会在同一周期重复推进 simulator，且把 UINT 输入误接到 UDINT 数据；因此修复前后的 findings 不能直接作为同一运行时基线比较，实验记录必须包含仓库 commit。
 
@@ -99,7 +99,7 @@ PLCFUZZ_CYCLE_DELAY_NS=50000000 \
 ```sh
 PLCFUZZ_VARIABLE_MAPPING=/workspace/plcfuzz/plc_variables_mapping.csv \
 FINDINGS_DIR=output/reproduction-runs \
-./runfuzz.sh
+./scripts/plcfuzz experiment
 ```
 
 映射文件缺失或存在不完整、越界、非数字字段时，变异器会在初始化阶段报告具体文件和行号并拒绝启动，避免退化成没有变量级变异的实验。
@@ -107,7 +107,7 @@ FINDINGS_DIR=output/reproduction-runs \
 只验证 ST 到 C：
 
 ```sh
-./build_scripts/build_plcfiles.sh ./testcases/race_test_success.st
+./scripts/plcfuzz build plc testcases/race_test_success.st
 test -s ./plclogic/Config0.c
 test -s ./plclogic/Res0.c
 ```
@@ -117,7 +117,7 @@ test -s ./plclogic/Res0.c
 ```sh
 MATIEC_IEC2C=./artifacts/legacy/matiec/iec2c \
 MATIEC_INCLUDE_DIR=./lib \
-./build_scripts/build_plcfiles.sh ./testcases/race_test_success.st
+./scripts/plcfuzz build plc testcases/race_test_success.st
 ```
 
 ## 复现自动输入生成实验
@@ -127,10 +127,10 @@ MATIEC_INCLUDE_DIR=./lib \
 ```sh
 mkdir -p seeds
 cp -a "seeds copy/." seeds/
-FINDINGS_DIR=output/reproduction-runs ./runfuzz.sh
+FINDINGS_DIR=output/reproduction-runs ./scripts/plcfuzz experiment
 ```
 
-`runfuzz.sh` 默认运行 3600 秒，单次执行超时 10000 ms。`FINDINGS_DIR` 是实验根目录；脚本会为每次启动创建独立子目录，并拒绝覆盖显式指定的 `EXPERIMENT_DIR`。仓库内已有的 `findings/` 和 `findings copy/` 不会被修改。
+`scripts/plcfuzz experiment` 默认运行 3600 秒，单次执行超时 10000 ms。`FINDINGS_DIR` 是实验根目录；脚本会为每次启动创建独立子目录，并拒绝覆盖显式指定的 `EXPERIMENT_DIR`。仓库内已有的 `findings/` 和 `findings copy/` 不会被修改。
 
 ## 已知限制
 
@@ -141,7 +141,7 @@ FINDINGS_DIR=output/reproduction-runs ./runfuzz.sh
 
 ## 记录一次实验
 
-`runfuzz.sh` 会在执行长期进程前写入版本化的 `manifest.json`，结束时再原子更新完成时间、退出码及最终状态。清单自动记录仓库 commit、MatIEC gitlink、AFL++ 版本、目标 SHA-256、CPU/内核信息、持续时间、单次超时、输入与输出路径、选定环境变量和完整命令。实验目录会在终端打印，也可以提前用尚不存在的 `EXPERIMENT_DIR` 指定。
+`scripts/plcfuzz experiment` 会在执行长期进程前写入版本化的 `manifest.json`，结束时再原子更新完成时间、退出码及最终状态。清单自动记录仓库 commit、MatIEC gitlink、AFL++ 版本、目标 SHA-256、CPU/内核信息、持续时间、单次超时、输入与输出路径、选定环境变量和完整命令。实验目录会在终端打印，也可以提前用尚不存在的 `EXPERIMENT_DIR` 指定。
 
 镜像 digest、内存容量以及保留二进制的摘要仍应作为外部验收记录补充：
 

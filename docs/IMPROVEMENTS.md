@@ -1,6 +1,6 @@
 # PLCFuzz 改进路线图
 
-本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **11 个主题完成**，另有 **3 个主题待处理**。每个待处理主题都应作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并在单独提交推送后更新本页状态。
+本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **12 个主题完成**，另有 **2 个主题待处理**。每个待处理主题都应作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并在单独提交推送后更新本页状态。
 
 ## 已完成
 
@@ -54,7 +54,7 @@ OpenSpec：[`add-runtime-diagnostics`](../openspec/changes/archive/2026-09-08-ad
 
 ### 自动生成实验目录和环境清单
 
-`runfuzz.sh` 现在为每次启动创建独立目录，并在执行前写入版本化 JSON 清单；清单记录仓库与 MatIEC 版本、工具版本、目标摘要、机器、参数、路径、环境和完整命令，结束时原子写入状态与退出码。显式目录已存在时会拒绝运行。
+`scripts/plcfuzz experiment` 现在为每次启动创建独立目录，并在执行前写入版本化 JSON 清单；清单记录仓库与 MatIEC 版本、工具版本、目标摘要、机器、参数、路径、环境和完整命令，结束时原子写入状态与退出码。显式目录已存在时会拒绝运行。
 
 OpenSpec：[`record-experiment-manifests`](../openspec/changes/archive/2026-09-09-record-experiment-manifests/)
 
@@ -70,13 +70,13 @@ OpenSpec：[`add-license-metadata`](../openspec/changes/archive/2026-09-09-add-l
 
 OpenSpec：[`audit-testcase-provenance`](../openspec/changes/archive/2026-09-09-audit-testcase-provenance/)
 
+### 统一构建与运行脚本入口
+
+`scripts/plcfuzz` 现在统一提供 setup、build、run、experiment、replay、test、batch、diagnostics 和 lines 子命令。根目录历史脚本仅保留带迁移提示的参数转发；批量实验改用每个用例独立的实验目录和清单。
+
+OpenSpec：[`unify-script-entrypoints`](../openspec/changes/archive/2026-09-09-unify-script-entrypoints/)
+
 ## P2：发布与长期维护
-
-### 9. 统一构建与运行脚本入口
-
-建议 change：`unify-script-entrypoints`
-
-将 `buildscript_new.sh` 等历史入口迁移为语义明确的 `scripts/` 命令，并保留带弃用提示的兼容包装器。
 
 ### 10. 强化运行时资源所有权
 

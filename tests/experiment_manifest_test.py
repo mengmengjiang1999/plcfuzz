@@ -130,7 +130,7 @@ def main():
             }
         )
         launched = subprocess.run(
-            ["bash", str(REPO_ROOT / "runfuzz.sh")],
+            [str(REPO_ROOT / "scripts" / "plcfuzz"), "experiment"],
             check=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
