@@ -13,43 +13,7 @@ BufferHistory::BufferHistory() { std::cout << "InputHistory constructor called."
 //     this->bool_history.update_history(input, output);
 // }
 
-void BufferHistory::updateBoolHistory(IEC_BOOL *bool_input[OPENPLC_BUFFER_SIZE][8],
-                                      IEC_BOOL *bool_output[OPENPLC_BUFFER_SIZE][8]) {
-    // std::cout << "updateBoolHistory called." << std::endl;
-    this->bool_history.update_history(bool_input, bool_output);
-}
-
-void BufferHistory::updateByteHistory(IEC_BYTE *input[OPENPLC_BUFFER_SIZE], IEC_BYTE *output[OPENPLC_BUFFER_SIZE]) {
-    // std::cout << "updateByteHistory called." << std::endl;
-    this->byte_history.update_history(input, output);
-}
-
-void BufferHistory::updateIntHistory(IEC_UINT *input[OPENPLC_BUFFER_SIZE], IEC_UINT *output[OPENPLC_BUFFER_SIZE]) {
-    // std::cout << "updateIntHistory called." << std::endl;
-    this->int_history.update_history(input, output);
-}
-
-void BufferHistory::updateDintHistory(IEC_UDINT *input[OPENPLC_BUFFER_SIZE], IEC_UDINT *output[OPENPLC_BUFFER_SIZE]) {
-    // std::cout << "updateDintHistory called." << std::endl;
-    this->dint_history.update_history(input, output);
-}
-
-void BufferHistory::updateLintHistory(IEC_ULINT *input[OPENPLC_BUFFER_SIZE], IEC_ULINT *output[OPENPLC_BUFFER_SIZE]) {
-    // std::cout << "updateLintHistory called." << std::endl;
-    this->lint_history.update_history(input, output);
-}
-
-void BufferHistory::updateIntMemoryHistory(IEC_UINT *input[OPENPLC_BUFFER_SIZE], IEC_UINT *output[OPENPLC_BUFFER_SIZE]) {
-    // std::cout << "updateIntMemoryHistory called." << std::endl;
-    this->int_memory_history.update_history(input, output);
-}
-
-void BufferHistory::updateDintMemoryHistory(IEC_UDINT *input[OPENPLC_BUFFER_SIZE], IEC_UDINT *output[OPENPLC_BUFFER_SIZE]) {
-    // std::cout << "updateDintMemoryHistory called." << std::endl;
-    this->dint_memory_history.update_history(input, output);
-}
-
-void BufferHistory::updateHistory(IEC_BOOL *bool_input[OPENPLC_BUFFER_SIZE][8],
+bool BufferHistory::updateHistory(IEC_BOOL *bool_input[OPENPLC_BUFFER_SIZE][8],
                                   IEC_BOOL *bool_output[OPENPLC_BUFFER_SIZE][8],
                                   IEC_BYTE *input_byte[OPENPLC_BUFFER_SIZE],
                                   IEC_BYTE *output_byte[OPENPLC_BUFFER_SIZE],
@@ -62,13 +26,22 @@ void BufferHistory::updateHistory(IEC_BOOL *bool_input[OPENPLC_BUFFER_SIZE][8],
                                   IEC_UINT *output_int_memory[OPENPLC_BUFFER_SIZE],
                                   IEC_UDINT *input_dint_memory[OPENPLC_BUFFER_SIZE],
                                   IEC_UDINT *output_dint_memory[OPENPLC_BUFFER_SIZE]) {
-    this->updateBoolHistory(bool_input, bool_output);
-    this->updateByteHistory(input_byte, output_byte);
-    this->updateIntHistory(input_int, output_int);
-    this->updateDintHistory(input_dint, output_dint);
-    this->updateLintHistory(input_lint, output_lint);
-    this->updateIntMemoryHistory(input_int_memory, output_int_memory);
-    this->updateDintMemoryHistory(input_dint_memory, output_dint_memory);
+    if (!buffer_pointers_complete(bool_input, bool_output) || !buffer_pointers_complete(input_byte, output_byte) ||
+        !buffer_pointers_complete(input_int, output_int) || !buffer_pointers_complete(input_dint, output_dint) ||
+        !buffer_pointers_complete(input_lint, output_lint) ||
+        !buffer_pointers_complete(input_int_memory, output_int_memory) ||
+        !buffer_pointers_complete(input_dint_memory, output_dint_memory)) {
+        return false;
+    }
+
+    bool_history.update_history(bool_input, bool_output);
+    byte_history.update_history(input_byte, output_byte);
+    int_history.update_history(input_int, output_int);
+    dint_history.update_history(input_dint, output_dint);
+    lint_history.update_history(input_lint, output_lint);
+    int_memory_history.update_history(input_int_memory, output_int_memory);
+    dint_memory_history.update_history(input_dint_memory, output_dint_memory);
+    return true;
 }
 
 bool BufferHistory::checkChange() {

@@ -33,14 +33,18 @@
 #include <unistd.h>
 
 #include <iostream>
+#include <stdexcept>
 
 #include "buffer_history.h"
 #include "custom_layer.h"
 #include "ladder.h"
 #include "plc_input_apply.h"
 #include "plc_input_simulator.h"
+#include "pthread_mutex_guard.h"
+#include "runtime_buffer_storage.h"
 
 static BufferHistory io_history;
+static RuntimeBufferStorage runtime_buffer_storage;
 
 extern PLCInputSimulator INPUT_PLC_DATA;
 
@@ -52,56 +56,10 @@ extern PLCInputSimulator INPUT_PLC_DATA;
 //-----------------------------------------------------------------------------
 
 void initializeHardware() {
-    // initialize bool input and output buffers
     printf("Initializing hardware layer...\n");
-    for (int i = 0; i < BUFFER_SIZE; i++) {
-        byte_input[i] = new IEC_BYTE;
-        int_input[i] = new IEC_UINT;
-        dint_input[i] = new IEC_UDINT;
-        lint_input[i] = new IEC_ULINT;
-        int_memory[i] = new IEC_UINT;
-        dint_memory[i] = new IEC_UDINT;
-        lint_memory[i] = new IEC_ULINT;
-        for (int j = 0; j < 8; j++) {
-            bool_input[i][j] = new IEC_BOOL;
-        }
-    }
-
-    for (int i = 0; i < BUFFER_SIZE; i++) {
-        for (int j = 0; j < 8; j++) {
-            *bool_input[i][j] = 0;
-        }
-        *byte_input[i] = 0;
-        *int_input[i] = 0;
-        *dint_input[i] = 0;
-        *lint_input[i] = 0;
-        *int_memory[i] = 0;
-        *dint_memory[i] = 0;
-        *lint_memory[i] = 0;
-    }
-
-    // initialize bool output buffer
-
-    for (int i = 0; i < BUFFER_SIZE; i++) {
-        byte_output[i] = new IEC_BYTE;
-        int_output[i] = new IEC_UINT;
-        dint_output[i] = new IEC_UDINT;
-        lint_output[i] = new IEC_ULINT;
-
-        for (int j = 0; j < 8; j++) {
-            bool_output[i][j] = new IEC_BOOL;
-        }
-    }
-
-    for (int i = 0; i < BUFFER_SIZE; i++) {
-        for (int j = 0; j < 8; j++) {
-            *bool_output[i][j] = 0;
-        }
-        *byte_output[i] = 0;
-        *int_output[i] = 0;
-        *dint_output[i] = 0;
-        *lint_output[i] = 0;
-    }
+    runtime_buffer_storage.attach_missing(bool_input, bool_output, byte_input, byte_output, int_input, int_output,
+                                          dint_input, dint_output, lint_input, lint_output, int_memory, dint_memory,
+                                          lint_memory);
 
     std::cout << "Initializing hardware layer done." << std::endl;
 
@@ -112,8 +70,11 @@ void initializeHardware() {
     //     }std::cout<<std::endl;
     // }
 
-    io_history.updateHistory(bool_input, bool_output, byte_input, byte_output, int_input, int_output, dint_input, dint_output,
-                             lint_input, lint_output, int_memory, int_memory, dint_memory, dint_memory);
+    if (!io_history.updateHistory(bool_input, bool_output, byte_input, byte_output, int_input, int_output, dint_input,
+                                  dint_output, lint_input, lint_output, int_memory, int_memory, dint_memory,
+                                  dint_memory)) {
+        throw std::runtime_error("runtime buffer mapping is incomplete during initialization");
+    }
     // io_history.updateBoolHistory(bool_input, bool_output);
 }
 
@@ -141,14 +102,14 @@ void showInput() {
 
 void updateBuffersIn() {
     // printf("Get input values:\n");
-    pthread_mutex_lock(&bufferLock);  // lock mutex
+    PthreadMutexGuard lock(bufferLock);
 
     // Advance every independently timed input stream exactly once per PLC cycle,
     // then apply the resulting composite snapshot to the OpenPLC buffers.
     const PLCInputBlock block = INPUT_PLC_DATA.get_current_block();
-    applyPLCInputBlock(block, bool_input, byte_input, int_input, dint_input, lint_input, int_memory, dint_memory);
-
-    pthread_mutex_unlock(&bufferLock);  // unlock mutex
+    if (!applyPLCInputBlock(block, bool_input, byte_input, int_input, dint_input, lint_input, int_memory, dint_memory)) {
+        throw std::runtime_error("runtime input mapping is incomplete");
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -159,15 +120,17 @@ void updateBuffersIn() {
 void updateBuffersOut() {
     // printf("update output values:\n");
     // std::cout << "UpdateBuffersOut :\n";
-    pthread_mutex_lock(&bufferLock);  // lock mutex
+    PthreadMutexGuard lock(bufferLock);
 
     // 经过程序执行，output这些数组里面已经存了本周期的运行结果。
     // 此时将output这些数组里面的内容给保存到当前的BufferHistory里面，以便于后续进行进一步的比较
-    io_history.updateHistory(bool_input, bool_output, byte_input, byte_output, int_input, int_output, dint_input, dint_output,
-                             lint_input, lint_output, int_memory, int_memory, dint_memory, dint_memory);
+    if (!io_history.updateHistory(bool_input, bool_output, byte_input, byte_output, int_input, int_output, dint_input,
+                                  dint_output, lint_input, lint_output, int_memory, int_memory, dint_memory,
+                                  dint_memory)) {
+        throw std::runtime_error("runtime history mapping is incomplete");
+    }
     // io_history.updateBoolHistory(bool_input, bool_output);
 
-    pthread_mutex_unlock(&bufferLock);  // unlock mutex
 }
 
 bool checkOutputChange() {

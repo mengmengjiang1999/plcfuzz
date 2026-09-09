@@ -110,14 +110,14 @@ void test_type_correct_application() {
         dint_memory_destinations[i] = &dint_memory_values[i];
     }
 
-    applyPLCInputBlock(block,
-                       bool_destinations,
-                       byte_destinations,
-                       int_destinations,
-                       dint_destinations,
-                       lint_destinations,
-                       int_memory_destinations,
-                       dint_memory_destinations);
+    assert(applyPLCInputBlock(block,
+                              bool_destinations,
+                              byte_destinations,
+                              int_destinations,
+                              dint_destinations,
+                              lint_destinations,
+                              int_memory_destinations,
+                              dint_memory_destinations));
 
     assert(byte_values[0] == 41);
     assert(int_values[0] == 42);

@@ -81,6 +81,8 @@ macOS 可以构建和测试新版 MatIEC；Apple 自带 Bison 2.3 不满足要�
 
 当前运行时保持离线边界：MatIEC 标准库声明的 TCP 辅助函数仅提供链接兼容定义，调用时统一返回“不支持”，不会建立连接或交换数据。
 
+运行时保留 MatIEC 生成代码使用的全局指针数组接口，但后备值由一个固定生命周期对象统一持有；初始化只补全空槽，不覆盖已生成的变量映射。输入槽位和位偏移在应用边界进行范围校验，输入写入与历史采样会先核对整组映射，避免产生部分状态；缓冲区互斥锁由作用域对象自动释放。
+
 精确复现信息见 [REPRODUCIBILITY.md](REPRODUCIBILITY.md)，第三方来源和许可状态见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
 ASan/UBSan 构建及非正常终止样本的本地整理流程见 [运行诊断说明](docs/RUNTIME_DIAGNOSTICS.md)。

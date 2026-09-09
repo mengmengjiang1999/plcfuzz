@@ -6,7 +6,6 @@
 
 class PLCInputBlock {
    public:
-    virtual ~PLCInputBlock() = default;
     BoolBlock input_bool_block;
     ByteBlock input_byte_block;
     IntBlock input_int_block;
@@ -20,13 +19,13 @@ class PLCInputBlock {
             plc_input_block.input_dint_mem_block;
         return is;
     }
-    virtual std::string serialize_data() const {
+    std::string serialize_data() const {
         return input_bool_block.serialize_data() + " " + input_byte_block.serialize_data() + " " +
                input_int_block.serialize_data() + " " + input_dint_block.serialize_data() + " " +
                input_lint_block.serialize_data() + " " + input_int_mem_block.serialize_data() + " " +
                input_dint_mem_block.serialize_data();
     }
-    void print() {
+    void print() const {
         input_bool_block.print();
         input_byte_block.print();
         input_int_block.print();

@@ -21,7 +21,7 @@ class ByteHistoryFixture {
 
     void record(IEC_BYTE value) {
         output_values[0] = value;
-        history.update_history(input, output);
+        assert(history.update_history(input, output));
     }
 };
 
@@ -60,11 +60,22 @@ void test_wraparound_uses_retained_chronology() {
     assert(!fixture.history.check_change());
 }
 
+void test_incomplete_mapping_does_not_advance_history() {
+    ByteHistoryFixture fixture;
+    fixture.record(3);
+    const std::size_t samples_before = fixture.history.sample_count();
+    fixture.output[5] = nullptr;
+
+    assert(!fixture.history.update_history(fixture.input, fixture.output));
+    assert(fixture.history.sample_count() == samples_before);
+}
+
 }  // namespace
 
 int main() {
     test_requires_two_valid_samples();
     test_stable_and_changed_outputs();
     test_wraparound_uses_retained_chronology();
+    test_incomplete_mapping_does_not_advance_history();
     return 0;
 }

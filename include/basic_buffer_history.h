@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
@@ -7,6 +8,28 @@
 #include "ladder.h"
 
 static const std::size_t MAX_RESULTS = 10;
+
+template <typename T>
+bool buffer_pointers_complete(T* input[OPENPLC_BUFFER_SIZE], T* output[OPENPLC_BUFFER_SIZE]) {
+    for (std::size_t slot = 0; slot < OPENPLC_BUFFER_SIZE; ++slot) {
+        if (input[slot] == nullptr || output[slot] == nullptr) {
+            return false;
+        }
+    }
+    return true;
+}
+
+template <typename T>
+bool buffer_pointers_complete(T* input[OPENPLC_BUFFER_SIZE][8], T* output[OPENPLC_BUFFER_SIZE][8]) {
+    for (std::size_t slot = 0; slot < OPENPLC_BUFFER_SIZE; ++slot) {
+        for (std::size_t bit = 0; bit < 8; ++bit) {
+            if (input[slot][bit] == nullptr || output[slot][bit] == nullptr) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
 
 class SuperBasicBufferHistory {
    protected:
@@ -31,16 +54,21 @@ class SuperBasicBufferHistory {
 
 template <typename T, int Dim = 1>
 class BasicBufferHistory : public SuperBasicBufferHistory {
-   public:
-    T buffer_input[OPENPLC_BUFFER_SIZE][MAX_RESULTS] = {};
-    T buffer_output[OPENPLC_BUFFER_SIZE][MAX_RESULTS] = {};
+   private:
+    std::array<std::array<T, MAX_RESULTS>, OPENPLC_BUFFER_SIZE> buffer_input_{};
+    std::array<std::array<T, MAX_RESULTS>, OPENPLC_BUFFER_SIZE> buffer_output_{};
 
-    void update_history(T* input[OPENPLC_BUFFER_SIZE], T* output[OPENPLC_BUFFER_SIZE]) {
+   public:
+    bool update_history(T* input[OPENPLC_BUFFER_SIZE], T* output[OPENPLC_BUFFER_SIZE]) {
+        if (!buffer_pointers_complete(input, output)) {
+            return false;
+        }
         for (std::size_t i = 0; i < OPENPLC_BUFFER_SIZE; ++i) {
-            buffer_input[i][next_index_] = *input[i];
-            buffer_output[i][next_index_] = *output[i];
+            buffer_input_[i][next_index_] = *input[i];
+            buffer_output_[i][next_index_] = *output[i];
         }
         finish_sample();
+        return true;
     }
 
     bool check_change() const {
@@ -51,7 +79,7 @@ class BasicBufferHistory : public SuperBasicBufferHistory {
             const std::size_t previous = chronological_index(offset - 1);
             const std::size_t current = chronological_index(offset);
             for (std::size_t slot = 0; slot < OPENPLC_BUFFER_SIZE; ++slot) {
-                if (buffer_output[slot][current] != buffer_output[slot][previous]) {
+                if (buffer_output_[slot][current] != buffer_output_[slot][previous]) {
                     return true;
                 }
             }
@@ -64,9 +92,9 @@ class BasicBufferHistory : public SuperBasicBufferHistory {
             const std::size_t history_index = chronological_index(offset);
             std::cout << "index: " << history_index << std::endl;
             for (std::size_t slot = 0; slot < OPENPLC_BUFFER_SIZE; ++slot) {
-                std::cout << "input[" << slot << "]=" << static_cast<uint64_t>(buffer_input[slot][history_index])
+                std::cout << "input[" << slot << "]=" << static_cast<uint64_t>(buffer_input_[slot][history_index])
                           << std::endl;
-                std::cout << "output[" << slot << "]=" << static_cast<uint64_t>(buffer_output[slot][history_index])
+                std::cout << "output[" << slot << "]=" << static_cast<uint64_t>(buffer_output_[slot][history_index])
                           << std::endl;
             }
         }
@@ -75,18 +103,24 @@ class BasicBufferHistory : public SuperBasicBufferHistory {
 
 template <typename T>
 class BasicBufferHistory<T, 2> : public SuperBasicBufferHistory {
-   public:
-    T buffer_input[OPENPLC_BUFFER_SIZE][8][MAX_RESULTS] = {};
-    T buffer_output[OPENPLC_BUFFER_SIZE][8][MAX_RESULTS] = {};
+   private:
+    using BitHistory = std::array<std::array<T, MAX_RESULTS>, 8>;
+    std::array<BitHistory, OPENPLC_BUFFER_SIZE> buffer_input_{};
+    std::array<BitHistory, OPENPLC_BUFFER_SIZE> buffer_output_{};
 
-    void update_history(T* input[OPENPLC_BUFFER_SIZE][8], T* output[OPENPLC_BUFFER_SIZE][8]) {
+   public:
+    bool update_history(T* input[OPENPLC_BUFFER_SIZE][8], T* output[OPENPLC_BUFFER_SIZE][8]) {
+        if (!buffer_pointers_complete(input, output)) {
+            return false;
+        }
         for (std::size_t slot = 0; slot < OPENPLC_BUFFER_SIZE; ++slot) {
             for (std::size_t bit = 0; bit < 8; ++bit) {
-                buffer_input[slot][bit][next_index_] = *input[slot][bit];
-                buffer_output[slot][bit][next_index_] = *output[slot][bit];
+                buffer_input_[slot][bit][next_index_] = *input[slot][bit];
+                buffer_output_[slot][bit][next_index_] = *output[slot][bit];
             }
         }
         finish_sample();
+        return true;
     }
 
     bool check_change() const {
@@ -98,7 +132,7 @@ class BasicBufferHistory<T, 2> : public SuperBasicBufferHistory {
             const std::size_t current = chronological_index(offset);
             for (std::size_t slot = 0; slot < OPENPLC_BUFFER_SIZE; ++slot) {
                 for (std::size_t bit = 0; bit < 8; ++bit) {
-                    if (buffer_output[slot][bit][current] != buffer_output[slot][bit][previous]) {
+                    if (buffer_output_[slot][bit][current] != buffer_output_[slot][bit][previous]) {
                         return true;
                     }
                 }
@@ -113,7 +147,7 @@ class BasicBufferHistory<T, 2> : public SuperBasicBufferHistory {
             std::cout << "index: " << history_index << std::endl;
             for (std::size_t slot = 0; slot < OPENPLC_BUFFER_SIZE; ++slot) {
                 for (std::size_t bit = 0; bit < 8; ++bit) {
-                    std::cout << static_cast<uint64_t>(buffer_output[slot][bit][history_index]) << ' ';
+                    std::cout << static_cast<uint64_t>(buffer_output_[slot][bit][history_index]) << ' ';
                 }
                 std::cout << std::endl;
             }

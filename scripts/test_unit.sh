@@ -36,6 +36,11 @@ compile_and_run \
     "$repo_root/tests/buffer_history_test.cpp"
 
 compile_and_run \
+    runtime_ownership_test \
+    "$repo_root/tests/runtime_ownership_test.cpp" \
+    -pthread
+
+compile_and_run \
     communication_compat_test \
     "$repo_root/tests/communication_compat_test.cpp" \
     "$repo_root/src/communication_compat.cpp"
@@ -69,3 +74,4 @@ bash "$repo_root/scripts/check_diagnostics_workflow.sh"
 bash "$repo_root/scripts/check_experiment_workflow.sh"
 PYTHONDONTWRITEBYTECODE=1 python3 "$repo_root/scripts/check_license_metadata.py"
 bash "$repo_root/scripts/check_entrypoints.sh"
+bash "$repo_root/scripts/check_runtime_ownership.sh"

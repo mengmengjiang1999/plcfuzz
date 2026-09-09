@@ -1,6 +1,6 @@
 # PLCFuzz 改进路线图
 
-本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **12 个主题完成**，另有 **2 个主题待处理**。每个待处理主题都应作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并在单独提交推送后更新本页状态。
+本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **13 个主题完成**，另有 **1 个主题待处理**。每个待处理主题都应作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并在单独提交推送后更新本页状态。
 
 ## 已完成
 
@@ -76,13 +76,13 @@ OpenSpec：[`audit-testcase-provenance`](../openspec/changes/archive/2026-09-09-
 
 OpenSpec：[`unify-script-entrypoints`](../openspec/changes/archive/2026-09-09-unify-script-entrypoints/)
 
+### 强化运行时资源所有权
+
+运行时后备值现在由固定生命周期的 `RuntimeBufferStorage` 统一持有，初始化只补全空槽并保留 MatIEC 生成映射。输入槽位和位偏移使用有界值类型；输入应用与历史采样会先核对全部目标，映射不完整时不产生部分状态。硬件缓冲区互斥锁改由作用域对象管理，内部固定数组改用 `std::array`。
+
+OpenSpec：[`strengthen-runtime-ownership`](../openspec/changes/archive/2026-09-09-strengthen-runtime-ownership/)
+
 ## P2：发布与长期维护
-
-### 10. 强化运行时资源所有权
-
-建议 change：`strengthen-runtime-ownership`
-
-继续用 RAII、明确所有权和强类型地址替代裸指针、整数索引与全局状态，重点检查 history buffer 的空指针和越界行为。
 
 ### 11. 完成 Linux 容器全流程验收
 

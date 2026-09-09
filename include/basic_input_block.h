@@ -1,42 +1,36 @@
 #pragma once
 
+#include <array>
 #include <iostream>
+#include <string>
+#include <typeinfo>
 
 #include "ladder.h"
 
-class SuperBasicInputBlock {};
-
 template <typename T, int Dim = 1>
-class BasicInputBlock : public SuperBasicInputBlock {
+class BasicInputBlock {
    public:
-    int cycles;
-    T input[PLC_INPUT_SIZE];
-    virtual ~BasicInputBlock() = default;
-    BasicInputBlock() {
-        cycles = 0;
-        for (int i = 0; i < PLC_INPUT_SIZE; i++) {
-            input[i] = 0;
-        }
-    }
+    int cycles = 0;
+    std::array<T, PLC_INPUT_SIZE> input{};
     friend std::istream& operator>>(std::istream& is, BasicInputBlock<T, Dim>& obj) {
         is >> obj.cycles;
 
         for (int i = 0; i < PLC_INPUT_SIZE; i++) {
             uint64_t tmp;
             is >> tmp;
-            obj.input[i] = (T)tmp;
+            obj.input[i] = static_cast<T>(tmp);
         }
         return is;
     }
-    virtual void print() {
+    void print() const {
         std::cout << "BasicInputBlock<" << typeid(T).name() << ", " << Dim << ">" << std::endl;
         std::cout << "cycles: " << cycles << std::endl;
         for (int i = 0; i < PLC_INPUT_SIZE; i++) {
             std::cout << input[i] << " ";
         }
         std::cout << std::endl;
-    };
-    virtual std::string serialize_data() const {
+    }
+    std::string serialize_data() const {
         std::string buffer = std::to_string(this->cycles);
         for (int i = 0; i < PLC_INPUT_SIZE; i++) {
             buffer += " " + std::to_string(this->input[i]);
@@ -53,17 +47,8 @@ class BasicInputBlock : public SuperBasicInputBlock {
 template <typename T>
 class BasicInputBlock<T, 2> {
    public:
-    int cycles;
-    T input[PLC_INPUT_SIZE][8];
-    virtual ~BasicInputBlock() = default;
-    BasicInputBlock() {
-        cycles = 0;
-        for (int i = 0; i < PLC_INPUT_SIZE; i++) {
-            for (int j = 0; j < 8; j++) {
-                input[i][j] = 0;
-            }
-        }
-    }
+    int cycles = 0;
+    std::array<std::array<T, 8>, PLC_INPUT_SIZE> input{};
     friend std::istream& operator>>(std::istream& is, BasicInputBlock<T, 2>& obj) {
         is >> obj.cycles;
         // std::cout << "cycles=" << obj.cycles << std::endl;
@@ -72,25 +57,25 @@ class BasicInputBlock<T, 2> {
                 uint64_t tmp;
                 is >> tmp;
                 // std::cout << "i=" << i << " j=" << j << " tmp=" << tmp << std::endl;
-                obj.input[i][j] = (T)tmp;
+                obj.input[i][j] = static_cast<T>(tmp);
                 // std::cout << "i=" << i << " j=" << j << " input=" << obj.input[i][j] << std::endl;
             }
         }
         return is;
     }
-    virtual void print() {
+    void print() const {
         std::cout << "BasicInputBlock<" << typeid(T).name() << ">" << std::endl;
         std::cout << "cycles: " << cycles << std::endl;
         for (int i = 0; i < PLC_INPUT_SIZE; i++) {
             for (int j = 0; j < 8; j++) {
-                std::cout << (uint64_t)input[i][j] << " ";
+                std::cout << static_cast<uint64_t>(input[i][j]) << " ";
             }
             std::cout << std::endl;
         }
         std::cout << std::endl;
-    };
+    }
 
-    virtual std::string serialize_data() const {
+    std::string serialize_data() const {
         std::string buffer = std::to_string(this->cycles);
         for (int i = 0; i < PLC_INPUT_SIZE; i++) {
             for (int j = 0; j < 8; j++) {
