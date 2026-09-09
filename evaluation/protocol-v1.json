@@ -1,0 +1,142 @@
+{
+  "aggregation": {
+    "center": [
+      "mean",
+      "median"
+    ],
+    "interval": "bootstrap-percentile-95",
+    "pair_by": "replicate_seed",
+    "variability": [
+      "sample-standard-deviation",
+      "minimum",
+      "maximum"
+    ]
+  },
+  "comparison_controls": [
+    "benchmark_id",
+    "program_sha256",
+    "target_sha256",
+    "input_samples_sha256",
+    "grammar_sha256",
+    "repository_commit",
+    "matiec_commit",
+    "input_tool_version",
+    "duration_seconds",
+    "timeout_milliseconds",
+    "cycle_count",
+    "cycle_delay_nanoseconds",
+    "machine_fingerprint"
+  ],
+  "metrics": [
+    {
+      "bounds": [
+        0.0,
+        1.0
+      ],
+      "definition": "Accepted target executions divided by all attempted target executions.",
+      "direction": "higher-is-better",
+      "formula": "accepted_executions / attempted_executions",
+      "id": "valid_input_ratio",
+      "missing_value": "null-with-reason",
+      "scope": "trial",
+      "unit": "ratio",
+      "value_type": "number"
+    },
+    {
+      "definition": "Final covered control-flow edges minus edges covered by the initial input set.",
+      "direction": "higher-is-better",
+      "formula": "final_covered_edges - initial_covered_edges",
+      "id": "path_coverage_delta",
+      "missing_value": "null-with-reason",
+      "scope": "trial",
+      "unit": "edges",
+      "value_type": "integer"
+    },
+    {
+      "bounds": [
+        0,
+        null
+      ],
+      "definition": "Number of distinct observed PLC state pairs connected by one execution step.",
+      "direction": "higher-is-better",
+      "formula": "count(distinct(previous_state, current_state))",
+      "id": "plc_state_transition_count",
+      "missing_value": "null-with-reason",
+      "scope": "trial",
+      "unit": "transitions",
+      "value_type": "integer"
+    },
+    {
+      "bounds": [
+        0,
+        null
+      ],
+      "definition": "Number of stable observations after content and behavior fingerprint deduplication.",
+      "direction": "higher-is-better",
+      "formula": "count(distinct(stable_observation_fingerprint))",
+      "id": "unique_observation_count",
+      "missing_value": "null-with-reason",
+      "scope": "trial",
+      "unit": "observations",
+      "value_type": "integer"
+    },
+    {
+      "bounds": [
+        0.0,
+        null
+      ],
+      "definition": "Elapsed experiment time before the first stable observation; null when no observation occurs.",
+      "direction": "lower-is-better",
+      "formula": "first_observation_timestamp - experiment_start_timestamp",
+      "id": "time_to_first_observation_seconds",
+      "missing_value": "null-with-reason",
+      "scope": "trial",
+      "unit": "seconds",
+      "value_type": "number"
+    },
+    {
+      "bounds": [
+        0.0,
+        1.0
+      ],
+      "definition": "Stable replay confirmations divided by all replay attempts for retained observations.",
+      "direction": "higher-is-better",
+      "formula": "confirmed_replays / replay_attempts",
+      "id": "replay_success_ratio",
+      "missing_value": "null-with-reason",
+      "scope": "trial",
+      "unit": "ratio",
+      "value_type": "number"
+    },
+    {
+      "definition": "Across-replicate dispersion reported for every numeric trial metric using the declared variability estimators.",
+      "direction": "lower-is-more-consistent",
+      "formula": "sample_standard_deviation(values_by_replicate_seed)",
+      "id": "replicate_variability",
+      "missing_value": "null-with-reason",
+      "scope": "aggregate",
+      "unit": "per-metric",
+      "value_type": "object"
+    }
+  ],
+  "protocol_id": "plc-robustness-comparison-v1",
+  "protocol_version": 1,
+  "purpose": "Controlled repeated comparison of offline PLC software-robustness input-generation strategies.",
+  "repeated_trials": {
+    "minimum_replicates": 5,
+    "seed_option": "-s",
+    "seeds": [
+      104729,
+      130363,
+      155921,
+      181081,
+      205759
+    ]
+  },
+  "schema": "PLC_LAB_EVALUATION_PROTOCOL_V1",
+  "varying_dimensions": [
+    "strategy_id",
+    "replicate_index",
+    "replicate_seed"
+  ]
+}

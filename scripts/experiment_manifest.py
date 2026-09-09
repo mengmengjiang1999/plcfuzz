@@ -12,6 +12,16 @@ import shutil
 import subprocess
 import tempfile
 
+from evaluation_protocol import (
+    atomic_write_json as write_evaluation_json,
+    create_result_template,
+    evaluation_context,
+    load_json,
+    sha256_file as evaluation_sha256_file,
+    validate_protocol,
+    validate_result,
+)
+
 
 SCHEMA = "PLC_LAB_EXPERIMENT_MANIFEST_V1"
 RECORDED_ENVIRONMENT = (
@@ -130,10 +140,22 @@ def create_manifest(args):
 
     repository_commit = git_revision(repo_root, "HEAD", "PLC_LAB_SOURCE_REVISION")
     matiec_commit = git_revision(repo_root, "HEAD:third_party/matiec", "PLC_LAB_MATIEC_REVISION")
+    protocol = None
+    evaluation = None
+    if args.evaluation_protocol is not None:
+        protocol, evaluation = evaluation_context(
+            args.evaluation_protocol,
+            args.evaluation_benchmark_id,
+            args.evaluation_strategy_id,
+            args.evaluation_replicate_index,
+            args.evaluation_replicate_seed,
+        )
     experiment_dir = create_directory(args.observations_root, args.experiment_dir, repository_commit)
     output_dir = experiment_dir / "afl-output"
-    command = [
-        str(input_tool),
+    command = [str(input_tool)]
+    if evaluation is not None:
+        command.extend(["-s", str(evaluation["replicate_seed"])])
+    command.extend([
         "-V",
         str(args.duration),
         "-t",
@@ -147,7 +169,7 @@ def create_manifest(args):
         "--",
         str(target),
         "@@",
-    ]
+    ])
     recorded_environment = {
         name: os.environ[name] for name in RECORDED_ENVIRONMENT if name in os.environ
     }
@@ -179,7 +201,14 @@ def create_manifest(args):
             "python": platform.python_version(),
         },
     }
+    if evaluation is not None:
+        manifest["evaluation"] = dict(evaluation)
+        manifest["evaluation"]["result"] = "evaluation-result.json"
     atomic_write_json(experiment_dir / "manifest.json", manifest)
+    if evaluation is not None:
+        result = create_result_template(protocol, evaluation)
+        validate_result(result, protocol, evaluation["protocol_sha256"])
+        write_evaluation_json(experiment_dir / "evaluation-result.json", result)
     print(experiment_dir)
 
 
@@ -199,6 +228,17 @@ def finish_manifest(args):
     else:
         manifest["status"] = "nonzero"
     atomic_write_json(manifest_path, manifest)
+    evaluation = manifest.get("evaluation")
+    if evaluation is not None:
+        result_path = manifest_path.parent / evaluation["result"]
+        protocol_path = pathlib.Path(evaluation["protocol_path"])
+        protocol = validate_protocol(load_json(protocol_path))
+        if evaluation_sha256_file(protocol_path) != evaluation["protocol_sha256"]:
+            raise ValueError("evaluation protocol changed after experiment creation")
+        result = load_json(result_path)
+        result["run_status"] = manifest["status"]
+        validate_result(result, protocol, evaluation["protocol_sha256"])
+        write_evaluation_json(result_path, result)
 
 
 def parse_args(argv=None):
@@ -216,6 +256,11 @@ def parse_args(argv=None):
     create.add_argument("--duration", required=True, type=int)
     create.add_argument("--timeout", required=True, type=int)
     create.add_argument("--input-tool", default="afl-fuzz")
+    create.add_argument("--evaluation-protocol", type=pathlib.Path)
+    create.add_argument("--evaluation-benchmark-id")
+    create.add_argument("--evaluation-strategy-id")
+    create.add_argument("--evaluation-replicate-index", type=int)
+    create.add_argument("--evaluation-replicate-seed", type=int)
     create.set_defaults(function=create_manifest)
 
     finish = subparsers.add_parser("finish", help="finalize an existing experiment manifest")
@@ -233,6 +278,17 @@ def main(argv=None):
             raise ValueError("duration must be positive")
         if args.timeout <= 0:
             raise ValueError("timeout must be positive")
+        evaluation_values = (
+            args.evaluation_protocol,
+            args.evaluation_benchmark_id,
+            args.evaluation_strategy_id,
+            args.evaluation_replicate_index,
+            args.evaluation_replicate_seed,
+        )
+        if any(value is not None for value in evaluation_values) and not all(
+            value is not None for value in evaluation_values
+        ):
+            raise ValueError("evaluation options must be supplied together")
     args.function(args)
     return 0
 

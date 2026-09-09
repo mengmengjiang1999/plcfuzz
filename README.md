@@ -248,6 +248,19 @@ EXPERIMENT_DIR=output/experiments/smoke-test-01 \
 ./scripts/plc-lab experiment
 ```
 
+需要进行可比较的重复实验时，使用版本化的[实验评价协议](docs/EVALUATION_PROTOCOL.md)。评价模式要求同时提供协议、基准、策略、重复序号和对应固定 seed，并额外生成可校验的 `evaluation-result.json`；普通开发实验无需设置这些变量。
+
+```bash
+EVALUATION_PROTOCOL=evaluation/protocol-v1.json \
+EVALUATION_BENCHMARK_ID=example-state-machine \
+EVALUATION_STRATEGY_ID=protocol-valid \
+EVALUATION_REPLICATE_INDEX=0 \
+EVALUATION_REPLICATE_SEED=104729 \
+./scripts/plc-lab experiment
+```
+
+可用 `./scripts/plc-lab evaluation validate-protocol` 校验维护中的协议。
+
 重放一个 AFL 输入：
 
 ```bash

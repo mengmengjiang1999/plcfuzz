@@ -12,6 +12,7 @@ import tempfile
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 HELPER = REPO_ROOT / "scripts" / "experiment_manifest.py"
 VERSION_TOOL = REPO_ROOT / "tests" / "fixtures" / "input_tool_version_fixture.py"
+PROTOCOL = REPO_ROOT / "evaluation" / "protocol-v1.json"
 
 
 def run(*arguments, environment=None, check=True):
@@ -144,6 +145,59 @@ def main():
         assert launched_manifest["status"] == "success"
         assert launched_manifest["exit_code"] == 0
         assert (launcher_run / "afl-output" / "fixture-complete").is_file()
+
+        evaluation_run = root / "evaluation-run"
+        evaluation_environment = dict(launcher_environment)
+        evaluation_environment.update(
+            {
+                "EXPERIMENT_DIR": str(evaluation_run),
+                "EVALUATION_PROTOCOL": str(PROTOCOL),
+                "EVALUATION_BENCHMARK_ID": "timer-simple",
+                "EVALUATION_STRATEGY_ID": "protocol-valid",
+                "EVALUATION_REPLICATE_INDEX": "0",
+                "EVALUATION_REPLICATE_SEED": "104729",
+            }
+        )
+        subprocess.run(
+            [str(REPO_ROOT / "scripts" / "plc-lab"), "experiment"],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            env=evaluation_environment,
+        )
+        evaluation_manifest = json.loads(
+            (evaluation_run / "manifest.json").read_text(encoding="utf-8")
+        )
+        assert evaluation_manifest["evaluation"]["protocol_id"] == "plc-robustness-comparison-v1"
+        assert evaluation_manifest["evaluation"]["replicate_seed"] == 104729
+        assert evaluation_manifest["command"][1:3] == ["-s", "104729"]
+        evaluation_result = json.loads(
+            (evaluation_run / "evaluation-result.json").read_text(encoding="utf-8")
+        )
+        assert evaluation_result["run_status"] == "success"
+        assert all(item["status"] == "pending" for item in evaluation_result["metrics"].values())
+        assert all(item["value"] is None for item in evaluation_result["metrics"].values())
+
+        partial_run = root / "partial-evaluation-run"
+        partial_environment = dict(launcher_environment)
+        partial_environment.update(
+            {
+                "EXPERIMENT_DIR": str(partial_run),
+                "EVALUATION_PROTOCOL": str(PROTOCOL),
+            }
+        )
+        partial = subprocess.run(
+            [str(REPO_ROOT / "scripts" / "plc-lab"), "experiment"],
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            env=partial_environment,
+        )
+        assert partial.returncode == 2
+        assert "must be supplied together" in partial.stderr
+        assert not partial_run.exists()
 
         compatibility_run = root / "compatibility-run"
         compatibility_environment = dict(os.environ)

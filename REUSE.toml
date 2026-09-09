@@ -10,6 +10,12 @@ SPDX-FileCopyrightText = "2024-2026 PLC Robustness Lab contributors"
 SPDX-License-Identifier = "GPL-3.0-only"
 
 [[annotations]]
+path = ["evaluation/*.json"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024-2026 PLC Robustness Lab contributors"
+SPDX-License-Identifier = "GPL-3.0-only"
+
+[[annotations]]
 path = ["testcases/LD-test/*.ld", "testcases/archive/incompatible-matiec/ctc_osr.st", "testcases/archive/incompatible-matiec/hello_ld_convert.st"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2004-2021 Jonathan Westhues and LDmicro contributors"

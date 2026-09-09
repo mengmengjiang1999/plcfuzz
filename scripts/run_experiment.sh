@@ -29,6 +29,29 @@ target=$(compat_value INSTRUMENTED_TARGET FUZZ_TARGET "$repo_root/openplc_instru
 duration=$(compat_value EXPERIMENT_DURATION FUZZ_DURATION 3600)
 timeout=$(compat_value EXECUTION_TIMEOUT FUZZ_TIMEOUT 10000)
 input_tool=$(compat_value AUTOMATED_INPUT_TOOL AFL_FUZZ_BINARY afl-fuzz)
+evaluation_protocol=${EVALUATION_PROTOCOL:-}
+evaluation_benchmark_id=${EVALUATION_BENCHMARK_ID:-}
+evaluation_strategy_id=${EVALUATION_STRATEGY_ID:-}
+evaluation_replicate_index=${EVALUATION_REPLICATE_INDEX:-}
+evaluation_replicate_seed=${EVALUATION_REPLICATE_SEED:-}
+
+evaluation_values=(
+    "$evaluation_protocol"
+    "$evaluation_benchmark_id"
+    "$evaluation_strategy_id"
+    "$evaluation_replicate_index"
+    "$evaluation_replicate_seed"
+)
+evaluation_count=0
+for evaluation_value in "${evaluation_values[@]}"; do
+    if [[ -n $evaluation_value ]]; then
+        evaluation_count=$((evaluation_count + 1))
+    fi
+done
+if [[ $evaluation_count -ne 0 && $evaluation_count -ne ${#evaluation_values[@]} ]]; then
+    echo "Evaluation environment variables must be supplied together." >&2
+    exit 2
+fi
 
 for required in "$input_samples_dir" "$grammar" "$input_transformer" "$target"; do
     if [[ ! -e $required ]]; then
@@ -61,6 +84,15 @@ create_arguments=(
 )
 if [[ -n $experiment_dir ]]; then
     create_arguments+=(--experiment-dir "$experiment_dir")
+fi
+if [[ $evaluation_count -ne 0 ]]; then
+    create_arguments+=(
+        --evaluation-protocol "$evaluation_protocol"
+        --evaluation-benchmark-id "$evaluation_benchmark_id"
+        --evaluation-strategy-id "$evaluation_strategy_id"
+        --evaluation-replicate-index "$evaluation_replicate_index"
+        --evaluation-replicate-seed "$evaluation_replicate_seed"
+    )
 fi
 
 experiment_dir=$(python3 "$repo_root/scripts/experiment_manifest.py" "${create_arguments[@]}")
@@ -95,10 +127,15 @@ trap 'handle_interrupt 143' TERM
 trap 'handle_interrupt 129' HUP
 
 echo "Experiment directory: $experiment_dir"
-"$input_tool" \
-    -V "$duration" \
-    -t "$timeout" \
-    -i "$input_samples_dir" \
-    -o "$experiment_dir/afl-output" \
-    -g "$grammar" \
+run_arguments=(
+    -V "$duration"
+    -t "$timeout"
+    -i "$input_samples_dir"
+    -o "$experiment_dir/afl-output"
+    -g "$grammar"
     -- "$target" @@
+)
+if [[ $evaluation_count -ne 0 ]]; then
+    run_arguments=(-s "$evaluation_replicate_seed" "${run_arguments[@]}")
+fi
+"$input_tool" "${run_arguments[@]}"

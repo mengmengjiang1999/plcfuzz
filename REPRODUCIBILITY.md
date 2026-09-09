@@ -133,6 +133,8 @@ OBSERVATIONS_DIR=output/reproduction-runs ./scripts/plc-lab experiment
 
 `scripts/plc-lab experiment` 默认运行 3600 秒，单次执行超时 10000 ms。`OBSERVATIONS_DIR` 是实验根目录；脚本会为每次启动创建独立子目录，并拒绝覆盖显式指定的 `EXPERIMENT_DIR`。仓库内已有的 `findings/` 和 `findings copy/` 是只读历史记录，不会被修改。
 
+用于策略比较的运行必须采用 [`evaluation/protocol-v1.json`](evaluation/protocol-v1.json) 和[实验评价协议](docs/EVALUATION_PROTOCOL.md)。每个 benchmark/strategy 组合至少使用协议中的五组固定 seed；同组实验保持程序、目标、输入集合、工具链、时限、PLC 周期参数和机器指纹一致。评价模式会把 seed 传给输入生成工具，并在实验目录创建带协议摘要的 `evaluation-result.json`。未收集指标必须记录为 `null` 和明确原因，不能当作零值。
+
 ## 已知限制
 
 - Ubuntu APT 软件包尚未按包哈希封存；验收清单会记录实际解析的软件包版本和最终本地镜像内容摘要，但该摘要不是已发布的 registry manifest digest。

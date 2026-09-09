@@ -12,13 +12,17 @@ import sys
 REQUIRED_ORIGINAL_PATHS = {
     "README.md",
     "docs/LICENSE_METADATA.md",
+    "docs/EVALUATION_PROTOCOL.md",
+    "evaluation/protocol-v1.json",
     "input_generation/plc_input_transformer.cpp",
     "include/plc_input_format.h",
     "runfuzz.sh",
     "scripts/check_license_metadata.py",
+    "scripts/evaluation_protocol.py",
     "src/plc_input_simulator.cpp",
     "static_analyse/main.py",
     "tests/plc_input_transformer_test.cpp",
+    "tests/evaluation_protocol_test.py",
 }
 OPENSPEC_METADATA_PATHS = {
     "openspec/changes/add-license-metadata/specs/project-license-metadata/spec.md",
@@ -81,7 +85,7 @@ def parse_metadata(path):
     blocks = text.split("[[annotations]]")
     if len(blocks) < 2:
         fail("at least one aggregate annotation is required")
-    project_patterns = None
+    project_patterns = []
     annotation_patterns = []
     for block in blocks[1:]:
         path_match = re.search(r"(?ms)^path\s*=\s*(\[.*?\])\s*$", block)
@@ -105,8 +109,8 @@ def parse_metadata(path):
         if fields["SPDX-FileCopyrightText"] == "2024-2026 PLC Robustness Lab contributors":
             if fields["SPDX-License-Identifier"] != "GPL-3.0-only":
                 fail("project-authored annotation must use GPL-3.0-only")
-            project_patterns = patterns
-    if project_patterns is None:
+            project_patterns.extend(patterns)
+    if not project_patterns:
         fail("project-authored aggregate annotation is missing")
     return project_patterns, annotation_patterns
 

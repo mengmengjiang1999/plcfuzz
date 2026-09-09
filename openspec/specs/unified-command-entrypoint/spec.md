@@ -5,12 +5,12 @@ TBD - created by archiving change unify-script-entrypoints. Update Purpose after
 ## Requirements
 ### Requirement: Unified project command
 
-The repository SHALL provide `scripts/plc-lab` as the single maintained user-facing dispatcher for setup, build, run, experiment, replay, test, batch, diagnostics, and line-count workflows.
+The repository SHALL provide `scripts/plc-lab` as the single maintained user-facing dispatcher for setup, build, run, experiment, replay, test, batch, diagnostics, evaluation-protocol validation, and line-count workflows.
 
-#### Scenario: User requests help
+#### Scenario: User requests evaluation help
 
-- **WHEN** a user runs `./scripts/plc-lab --help`
-- **THEN** the command lists supported workflows, canonical neutral build steps, and configuration guidance
+- **WHEN** a user runs `./scripts/plc-lab evaluation --help`
+- **THEN** the command documents protocol validation, result validation, and result-template operations without starting an experiment
 
 ### Requirement: Compatibility wrappers
 
