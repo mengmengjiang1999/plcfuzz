@@ -1,6 +1,6 @@
 # PLCFuzz 改进路线图
 
-本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **8 个主题完成**，另有 **6 个主题待处理**。每个待处理主题都应作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并在单独提交推送后更新本页状态。
+本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **9 个主题完成**，另有 **5 个主题待处理**。每个待处理主题都应作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并在单独提交推送后更新本页状态。
 
 ## 已完成
 
@@ -52,13 +52,11 @@ OpenSpec：[`add-linux-ci`](../openspec/changes/archive/2026-09-08-add-linux-ci/
 
 OpenSpec：[`add-runtime-diagnostics`](../openspec/changes/archive/2026-09-08-add-runtime-diagnostics/)
 
-## P1：自动化与结果分析
+### 自动生成实验目录和环境清单
 
-### 6. 自动记录实验目录和 manifest
+`runfuzz.sh` 现在为每次启动创建独立目录，并在执行前写入版本化 JSON 清单；清单记录仓库与 MatIEC 版本、工具版本、目标摘要、机器、参数、路径、环境和完整命令，结束时原子写入状态与退出码。显式目录已存在时会拒绝运行。
 
-建议 change：`record-experiment-manifests`
-
-每次实验应使用独立目录并生成 manifest，包括 Git commit、MatIEC commit、目标摘要、AFL++ 版本、机器信息、超时、持续时间和相关环境变量，从而避免覆盖历史记录并支持跨版本比较。
+OpenSpec：[`record-experiment-manifests`](../openspec/changes/archive/2026-09-09-record-experiment-manifests/)
 
 ## P2：发布与长期维护
 

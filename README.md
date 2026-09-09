@@ -218,16 +218,19 @@ cp -a "seeds copy/." seeds/
 | `FUZZ_DURATION` | `3600` | 运行秒数 |
 | `FUZZ_TIMEOUT` | `10000` | 单次执行超时（毫秒） |
 | `SEED_DIR` | `seeds/` | 种子目录 |
-| `FINDINGS_DIR` | `findings/` | 输出目录 |
+| `FINDINGS_DIR` | `findings/` | 自动创建独立实验目录的父目录 |
+| `EXPERIMENT_DIR` | 未设置 | 本次实验目录；必须是尚不存在的路径 |
 | `AFL_GRAMMAR` | `fuzz_config/plc.grammar` | grammar 文件 |
 | `AFL_CUSTOM_MUTATOR_LIBRARY` | `build/mutator/libplc_mutator.so` | 自定义变异器 |
+| `AFL_FUZZ_BINARY` | `afl-fuzz` | 自动输入生成工具入口 |
 | `FUZZ_TARGET` | `openplc_fuzz` | 插桩目标 |
 
-建议为新实验指定独立输出目录，避免覆盖历史结果：
+每次启动都会在 `FINDINGS_DIR` 下创建带时间和仓库版本前缀的独立目录，并在终端打印该路径。目录中的 `manifest.json` 会记录版本、目标摘要、工具版本、机器信息、参数、环境和最终状态；已有结果不会被覆盖。如需指定确切路径，可设置 `EXPERIMENT_DIR`，但该路径必须尚不存在：
 
 ```bash
 FUZZ_DURATION=60 \
-FINDINGS_DIR=output/smoke-test \
+FINDINGS_DIR=output/experiments \
+EXPERIMENT_DIR=output/experiments/smoke-test-01 \
 ./runfuzz.sh
 ```
 

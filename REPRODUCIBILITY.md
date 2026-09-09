@@ -98,7 +98,7 @@ PLCFUZZ_CYCLE_DELAY_NS=50000000 \
 
 ```sh
 PLCFUZZ_VARIABLE_MAPPING=/workspace/plcfuzz/plc_variables_mapping.csv \
-FINDINGS_DIR=output/reproduction \
+FINDINGS_DIR=output/reproduction-runs \
 ./runfuzz.sh
 ```
 
@@ -120,17 +120,17 @@ MATIEC_INCLUDE_DIR=./lib \
 ./build_scripts/build_plcfiles.sh ./testcases/race_test_success.st
 ```
 
-## 复现模糊测试
+## 复现自动输入生成实验
 
 原始种子保存在 `seeds copy/`。复制后运行，避免修改保留材料：
 
 ```sh
 mkdir -p seeds
 cp -a "seeds copy/." seeds/
-FINDINGS_DIR=output/reproduction ./runfuzz.sh
+FINDINGS_DIR=output/reproduction-runs ./runfuzz.sh
 ```
 
-`runfuzz.sh` 默认运行 3600 秒，单次执行超时 10000 ms。为每次实验设置独立的 `FINDINGS_DIR`，不要覆盖仓库内的 `findings/` 和 `findings copy/`。
+`runfuzz.sh` 默认运行 3600 秒，单次执行超时 10000 ms。`FINDINGS_DIR` 是实验根目录；脚本会为每次启动创建独立子目录，并拒绝覆盖显式指定的 `EXPERIMENT_DIR`。仓库内已有的 `findings/` 和 `findings copy/` 不会被修改。
 
 ## 已知限制
 
@@ -141,7 +141,9 @@ FINDINGS_DIR=output/reproduction ./runfuzz.sh
 
 ## 记录一次实验
 
-至少记录仓库 commit、MatIEC gitlink、镜像 digest、CPU、内存、内核、AFL++ 版本、`fuzzer_stats` 和实际命令行：
+`runfuzz.sh` 会在执行长期进程前写入版本化的 `manifest.json`，结束时再原子更新完成时间、退出码及最终状态。清单自动记录仓库 commit、MatIEC gitlink、AFL++ 版本、目标 SHA-256、CPU/内核信息、持续时间、单次超时、输入与输出路径、选定环境变量和完整命令。实验目录会在终端打印，也可以提前用尚不存在的 `EXPERIMENT_DIR` 指定。
+
+镜像 digest、内存容量以及保留二进制的摘要仍应作为外部验收记录补充：
 
 ```sh
 git rev-parse HEAD
