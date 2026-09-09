@@ -1,6 +1,6 @@
 # PLCFuzz 改进路线图
 
-本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **9 个主题完成**，另有 **5 个主题待处理**。每个待处理主题都应作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并在单独提交推送后更新本页状态。
+本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **10 个主题完成**，另有 **4 个主题待处理**。每个待处理主题都应作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并在单独提交推送后更新本页状态。
 
 ## 已完成
 
@@ -58,13 +58,13 @@ OpenSpec：[`add-runtime-diagnostics`](../openspec/changes/archive/2026-09-08-ad
 
 OpenSpec：[`record-experiment-manifests`](../openspec/changes/archive/2026-09-09-record-experiment-manifests/)
 
+### 原创文件版权与 SPDX 标识
+
+`REUSE.toml` 现在以标准聚合标注覆盖明确的原创实现、测试、脚本、构建配置、文档和 OpenSpec 记录。自动检查会核对路径、`GPL-3.0-only` 标识、完整 GPLv3 文本及代表性上游文件头，并明确排除生成物、历史结果和待核对材料。
+
+OpenSpec：[`add-license-metadata`](../openspec/changes/archive/2026-09-09-add-license-metadata/)
+
 ## P2：发布与长期维护
-
-### 7. 补充版权与 SPDX 标识
-
-建议 change：`add-license-metadata`
-
-为原创文件补充版权和 SPDX 标识，并添加第三方组件所需的完整 `LICENSES/` 文本。
 
 ### 8. 核对第三方测试材料来源
 

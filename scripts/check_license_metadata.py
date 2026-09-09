@@ -1,0 +1,130 @@
+#!/usr/bin/env python3
+"""Validate the repository's aggregate SPDX license metadata boundary."""
+
+import glob
+import json
+import pathlib
+import re
+import subprocess
+import sys
+
+
+REQUIRED_ORIGINAL_PATHS = {
+    "README.md",
+    "docs/LICENSE_METADATA.md",
+    "fuzz_config/plc_mutator.cpp",
+    "include/plc_input_format.h",
+    "runfuzz.sh",
+    "scripts/check_license_metadata.py",
+    "src/plc_input_simulator.cpp",
+    "static_analyse/main.py",
+    "tests/plc_mutator_test.cpp",
+}
+OPENSPEC_METADATA_PATHS = {
+    "openspec/changes/add-license-metadata/specs/project-license-metadata/spec.md",
+    "openspec/specs/project-license-metadata/spec.md",
+}
+INHERITED_PATHS = {
+    "include/ladder.h",
+    "lib/iec_std_functions.h",
+    "lib/iec_types_all.h",
+    "src/hardware_layer.cpp",
+    "src/main.cpp",
+}
+PRESERVED_NOTICES = {
+    "src/main.cpp": "Copyright 2018 Thiago Alves",
+    "src/hardware_layer.cpp": "Copyright 2015 Thiago Alves",
+    "lib/iec_std_functions.h": "copyright 2008 Edouard TISSERANT",
+    "lib/iec_types_all.h": "Copyright (C) 2007-2011",
+}
+
+
+def fail(message):
+    print("License metadata check failed: {}".format(message), file=sys.stderr)
+    raise SystemExit(1)
+
+
+def tracked_paths(repo_root):
+    output = subprocess.check_output(
+        ["git", "-C", str(repo_root), "ls-files", "--cached", "--others", "--exclude-standard", "-z"]
+    )
+    return {item.decode("utf-8") for item in output.split(b"\0") if item}
+
+
+def parse_metadata(path):
+    text = path.read_text(encoding="utf-8")
+    if not re.search(r"(?m)^version\s*=\s*1\s*$", text):
+        fail("REUSE.toml must declare version 1")
+    blocks = text.split("[[annotations]]")
+    if len(blocks) != 2:
+        fail("exactly one aggregate annotation is required")
+    block = blocks[1]
+    path_match = re.search(r"(?ms)^path\s*=\s*(\[.*?\])\s*$", block)
+    if path_match is None:
+        fail("annotation path list is missing")
+    try:
+        patterns = json.loads(path_match.group(1))
+    except json.JSONDecodeError as error:
+        fail("annotation path list is invalid: {}".format(error))
+    required_fields = {
+        "precedence": "aggregate",
+        "SPDX-FileCopyrightText": "2024-2026 PLCFuzz contributors",
+        "SPDX-License-Identifier": "GPL-3.0-only",
+    }
+    for name, expected in required_fields.items():
+        match = re.search(r'(?m)^{}\s*=\s*"([^"]+)"\s*$'.format(re.escape(name)), block)
+        if match is None or match.group(1) != expected:
+            fail("{} must be {!r}".format(name, expected))
+    return patterns
+
+
+def expand_patterns(repo_root, patterns, tracked):
+    covered = set()
+    for pattern in patterns:
+        matches = {
+            pathlib.Path(value).relative_to(repo_root).as_posix()
+            for value in glob.glob(str(repo_root / pattern), recursive=True)
+            if pathlib.Path(value).is_file()
+        }
+        untracked_matches = matches - tracked
+        if untracked_matches:
+            fail(
+                "annotation pattern includes untracked paths: {}".format(
+                    ", ".join(sorted(untracked_matches))
+                )
+            )
+        tracked_matches = matches & tracked
+        if not tracked_matches:
+            fail("annotation pattern matches no tracked file: {}".format(pattern))
+        covered.update(tracked_matches)
+    return covered
+
+
+def main():
+    repo_root = pathlib.Path(__file__).resolve().parents[1]
+    tracked = tracked_paths(repo_root)
+    patterns = parse_metadata(repo_root / "REUSE.toml")
+    covered = expand_patterns(repo_root, patterns, tracked)
+
+    missing = REQUIRED_ORIGINAL_PATHS - covered
+    if missing:
+        fail("required original paths are uncovered: {}".format(", ".join(sorted(missing))))
+    if not (OPENSPEC_METADATA_PATHS & covered):
+        fail("the active or archived license-metadata specification is uncovered")
+    overlap = INHERITED_PATHS & covered
+    if overlap:
+        fail("inherited paths are covered as original: {}".format(", ".join(sorted(overlap))))
+
+    license_text = (repo_root / "LICENSE").read_text(encoding="utf-8")
+    if "GNU GENERAL PUBLIC LICENSE" not in license_text or "Version 3, 29 June 2007" not in license_text:
+        fail("top-level LICENSE is not the complete GPL version 3 text")
+    for relative_path, notice in PRESERVED_NOTICES.items():
+        content = (repo_root / relative_path).read_text(encoding="utf-8", errors="replace")
+        if notice not in content:
+            fail("upstream notice is missing from {}".format(relative_path))
+
+    print("PASS license metadata")
+
+
+if __name__ == "__main__":
+    main()

@@ -67,3 +67,4 @@ echo "PASS experiment_manifest_test"
 
 bash "$repo_root/scripts/check_diagnostics_workflow.sh"
 bash "$repo_root/scripts/check_experiment_workflow.sh"
+PYTHONDONTWRITEBYTECODE=1 python3 "$repo_root/scripts/check_license_metadata.py"

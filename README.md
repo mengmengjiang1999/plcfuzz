@@ -339,6 +339,7 @@ cp plclogic/LOCATED_VARIABLES.h tests/fixtures/reference_LOCATED_VARIABLES.h
 
 - [可复现环境](REPRODUCIBILITY.md)
 - [第三方代码与许可说明](THIRD_PARTY_NOTICES.md)
+- [原创文件许可元数据边界](docs/LICENSE_METADATA.md)
 - [改进建议](docs/IMPROVEMENTS.md)
 - [变更记录](docs/CHANGELOG.md)
 - [构建脚本历史说明](build_scripts/README.md)
