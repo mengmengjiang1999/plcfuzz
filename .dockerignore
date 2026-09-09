@@ -8,6 +8,7 @@
 .vscode
 build
 output
+observations
 findings
 !findings/
 findings/*
@@ -21,8 +22,9 @@ findings_back
 results
 plclogic
 seeds
+input_samples
 openplc
-openplc_fuzz
+openplc_instrumented
 docs/LINUX_CONTAINER_ACCEPTANCE.md
 **/*.o
 **/*.so

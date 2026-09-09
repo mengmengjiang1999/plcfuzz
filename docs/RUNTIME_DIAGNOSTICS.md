@@ -7,20 +7,20 @@
 同时构建普通运行时和自定义输入组件：
 
 ```bash
-./scripts/plcfuzz diagnostics all
+./scripts/plc-lab diagnostics all
 ```
 
 也可以只构建一个目标：
 
 ```bash
-./scripts/plcfuzz diagnostics runtime
-./scripts/plcfuzz diagnostics mutator
+./scripts/plc-lab diagnostics runtime
+./scripts/plc-lab diagnostics transformer
 ```
 
 输出与普通构建相互隔离：
 
 - `build/diagnostics/runtime/openplc_diagnostic`
-- `build/diagnostics/mutator/` 下的平台共享库
+- `build/diagnostics/input-transformer/` 下的平台共享库
 
 两个构建都启用 AddressSanitizer、UndefinedBehaviorSanitizer、调试信息和 frame pointer。诊断目标用于复现和定位，不替代普通运行目标。
 

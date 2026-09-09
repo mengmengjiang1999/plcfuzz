@@ -70,6 +70,6 @@ $(BUILD_DIR):
 
 # 清理生成的文件
 clean:
-	rm -rf build openplc openplc_fuzz
+	rm -rf build openplc openplc_instrumented
 
 .PHONY: all clean

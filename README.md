@@ -1,6 +1,6 @@
-# PLCFuzz
+# PLC Robustness Lab
 
-PLCFuzz 是一个面向 PLC 控制逻辑的学术软件鲁棒性测试原型。它使用 MatIEC 将 IEC 61131-3 Structured Text（ST）程序转换为 C，构建基于 OpenPLC 的离线执行目标，提取 PLC 变量映射，再通过 AFL++ 和结构感知的自动输入生成观察非正常终止、异常状态变化和候选并发问题。
+PLC Robustness Lab 是一个面向 PLC 控制逻辑的学术软件鲁棒性测试原型。它使用 MatIEC 将 IEC 61131-3 Structured Text（ST）程序转换为 C，构建基于 OpenPLC 的离线执行目标，提取 PLC 变量映射，再通过 AFL++ 和结构感知的自动输入生成观察非正常终止、异常状态变化和候选并发问题。
 
 > [!IMPORTANT]
 > 本项目只用于经过授权的学术研究与软件质量实验。所有实验都应在隔离的仿真环境或专用实验台中进行，不得连接或控制生产 PLC、现场设备及在役工业系统。本项目不是可部署的 OpenPLC 发行版，也不提供认证、生产运行或运行可靠性结论。
@@ -28,9 +28,9 @@ MatIEC submodule ────────────────► 语法/语�
     ├──► 变量映射（plc_variables_mapping.csv）
     │         │
     │         ▼
-    │    AFL++ 自定义变异器
+    │    AFL++ 输入转换器
     │
-    └──► AFL++ 插桩目标（openplc_fuzz）
+    └──► AFL++ 插桩目标（openplc_instrumented）
               │
               ▼
         findings/ 与 results/
@@ -47,7 +47,7 @@ MatIEC submodule ────────────────► 语法/语�
 - 默认 `legacy` profile；
 - 可选 `iec61131-3:2025-experimental` profile，覆盖 UTF-8 字符串、引用初始化、命名空间、功能块方法和配置级 `VAR_ACCESS` 等实验性能力。
 
-实验 profile 不是完整或经认证的 IEC 61131-3:2025 符合性声明。PLCFuzz 的默认运行时构建继续使用 `legacy` profile；实验 profile 用例用于编译器兼容性验证。
+实验 profile 不是完整或经认证的 IEC 61131-3:2025 符合性声明。PLC Robustness Lab 的默认运行时构建继续使用 `legacy` profile；实验 profile 用例用于编译器兼容性验证。
 
 旧实验使用的 MatIEC 二进制已移至 `artifacts/legacy/matiec/`，仅用于复现，不再是当前默认编译器。
 
@@ -77,7 +77,7 @@ git submodule update --init --recursive
 - Python 3
 - AFL++ 5.03c
 
-macOS 可以构建和测试新版 MatIEC；Apple 自带 Bison 2.3 不满足要求，统一入口调用的 MatIEC 设置脚本会优先使用 Homebrew Bison。完整 PLCFuzz 运行时仍建议放在 Linux 容器中验证。
+macOS 可以构建和测试新版 MatIEC；Apple 自带 Bison 2.3 不满足要求，统一入口调用的 MatIEC 设置脚本会优先使用 Homebrew Bison。完整 PLC Robustness Lab 运行时仍建议放在 Linux 容器中验证。
 
 当前运行时保持离线边界：MatIEC 标准库声明的 TCP 辅助函数仅提供链接兼容定义，调用时统一返回“不支持”，不会建立连接或交换数据。
 
@@ -97,18 +97,18 @@ ASan/UBSan 构建及非正常终止样本的本地整理流程见 [运行诊断�
 
 ## 快速开始
 
-所有受维护的构建、运行和测试流程都从 `./scripts/plcfuzz` 进入；运行 `./scripts/plcfuzz --help` 可查看完整子命令。根目录旧脚本只用于兼容现有调用，会打印迁移提示。
+所有受维护的构建、运行和测试流程都从 `./scripts/plc-lab` 进入；运行 `./scripts/plc-lab --help` 可查看完整子命令。根目录旧脚本只用于兼容现有调用，会打印迁移提示。
 
 ### 1. 构建 MatIEC
 
 ```bash
-./scripts/plcfuzz setup
+./scripts/plc-lab setup
 ```
 
 同时运行 MatIEC 自身测试：
 
 ```bash
-MATIEC_RUN_TESTS=1 ./scripts/plcfuzz setup
+MATIEC_RUN_TESTS=1 ./scripts/plc-lab setup
 ```
 
 MatIEC 默认使用单作业构建，以避开其递归 Makefile 的共享目标顺序问题。需要自行评估并行构建时可设置 `MATIEC_BUILD_JOBS`；它与项目其他步骤使用的 `BUILD_JOBS` 相互独立。
@@ -118,39 +118,39 @@ MatIEC 默认使用单作业构建，以避开其递归 Makefile 的共享目标
 ### 2. 验证 ST 测试用例
 
 ```bash
-./scripts/plcfuzz test testcases
+./scripts/plc-lab test testcases
 ```
 
 验证器分别使用 `legacy` 和 `iec61131-3:2025-experimental` profile，将生成结果写入临时目录，不会覆盖 `plclogic/`。
 
-### 3. 构建 PLCFuzz
+### 3. 构建实验目标
 
 ```bash
-./scripts/plcfuzz build
+./scripts/plc-lab build
 ```
 
-默认输入是 `testcases/race_test_success.st`，依次执行：
+默认输入是 `testcases/concurrency_reference.st`，依次执行：
 
 1. ST 转 C；
 2. 构建普通运行目标；
 3. 生成变量映射；
-4. 构建 AFL++ 自定义变异器；
+4. 构建项目输入转换器；
 5. 构建 AFL++ 插桩目标。
 
 指定其他输入：
 
 ```bash
-./scripts/plcfuzz build all testcases/matiec/legacy/state_machine.st
+./scripts/plc-lab build all testcases/matiec/legacy/state_machine.st
 ```
 
 只执行某一步：
 
 ```bash
-./scripts/plcfuzz build plc testcases/race_test_success.st
-./scripts/plcfuzz build runtime
-./scripts/plcfuzz build analyze
-./scripts/plcfuzz build mutator
-./scripts/plcfuzz build instrumented
+./scripts/plc-lab build plc testcases/concurrency_reference.st
+./scripts/plc-lab build runtime
+./scripts/plc-lab build analyze
+./scripts/plc-lab build transformer
+./scripts/plc-lab build instrumented
 ```
 
 ## 手动构建
@@ -158,7 +158,7 @@ MatIEC 默认使用单作业构建，以避开其递归 Makefile 的共享目标
 ### ST 转 C
 
 ```bash
-./scripts/plcfuzz build plc testcases/race_test_success.st
+./scripts/plc-lab build plc testcases/concurrency_reference.st
 ```
 
 默认调用 `third_party/matiec/iec2c`，生成 `plclogic/Config0.c`、`Res0.c`、`LOCATED_VARIABLES.h` 等文件。可用环境变量覆盖：
@@ -174,7 +174,7 @@ MatIEC 默认使用单作业构建，以避开其递归 Makefile 的共享目标
 
 ```bash
 MATIEC_IEC2C=./artifacts/legacy/matiec/iec2c \
-./scripts/plcfuzz build plc testcases/race_test_success.st
+./scripts/plc-lab build plc testcases/concurrency_reference.st
 ```
 
 新版和历史 MatIEC 的生成结果不能默认视为等价；比较自动化测试数据时应记录使用的 MatIEC commit 或二进制 SHA-256。
@@ -182,84 +182,86 @@ MATIEC_IEC2C=./artifacts/legacy/matiec/iec2c \
 ### 普通目标与变量映射
 
 ```bash
-./scripts/plcfuzz build runtime
+./scripts/plc-lab build runtime
 python3 ./static_analyse/main.py
 ```
 
 输出：
 
 - `openplc`：非插桩运行目标；
-- `plc_variables_mapping.csv`：自定义变异器使用的 I/O 与内存变量映射。
+- `plc_variables_mapping.csv`：输入转换器使用的 I/O 与内存变量映射。
 
-### 自定义变异器与 fuzz 目标
+### 输入转换器与插桩目标
 
 ```bash
-./scripts/plcfuzz build mutator
-./scripts/plcfuzz build instrumented
+./scripts/plc-lab build transformer
+./scripts/plc-lab build instrumented
 ```
 
-如需指定插桩编译包装器，设置项目变量 `PLCFUZZ_INSTRUMENTED_CXX`。不要把包装器路径写入 AFL++ 自身使用的下游编译器变量，否则包装器会再次选择自身。
+如需指定插桩编译包装器，设置项目变量 `PLC_LAB_INSTRUMENTED_CXX`。不要把包装器路径写入 AFL++ 自身使用的下游编译器变量，否则包装器会再次选择自身。
 
 输出：
 
-- `build/mutator/libplc_mutator.so`：AFL++ 自定义变异器；
-- `openplc_fuzz`：AFL++ 插桩目标；
-- `build/runtime/` 与 `build/fuzz/`：互相隔离的对象文件。
+- `build/input-transformer/libplc_input_transformer.so`：项目输入转换器；
+- `openplc_instrumented`：AFL++ 插桩目标；
+- `build/runtime/` 与 `build/instrumented/`：互相隔离的对象文件。
 
 ## 运行自动化鲁棒性实验
 
-先复制保留的种子：
+先复制保留的输入样本：
 
 ```bash
-mkdir -p seeds
-cp -a "seeds copy/." seeds/
+mkdir -p input_samples
+cp -a "seeds copy/." input_samples/
 ```
 
 运行：
 
 ```bash
-./scripts/plcfuzz experiment
+./scripts/plc-lab experiment
 ```
 
-脚本默认启用 `build/mutator/libplc_mutator.so`，并使用仓库内的 `fuzz_config/plc.grammar`。常用配置：
+脚本默认启用 `build/input-transformer/libplc_input_transformer.so`，并使用仓库内的 `input_generation/plc.grammar`。常用配置：
 
-活动 grammar 和自定义变异器生成带 `PLCFUZZ_INPUT_V1` 标头的规范数据；保留的无标头历史种子仍可读取。完整字段顺序和兼容规则见 [PLC 自动化测试输入格式](docs/PLC_INPUT_FORMAT.md)。
+活动 grammar 和输入转换器生成带 `PLCFUZZ_INPUT_V1` 标头的规范数据；保留的无标头历史种子仍可读取。完整字段顺序和兼容规则见 [PLC 自动化测试输入格式](docs/PLC_INPUT_FORMAT.md)。
+
+`PLCFUZZ_INPUT_V1` 是已经版本化的磁盘兼容标记，不是新的项目命名。旧命令和旧项目变量仍由兼容层接受并提示迁移；AFL++ 规定的名称保持原样。
 
 | 变量 | 默认值 | 用途 |
 | --- | --- | --- |
-| `FUZZ_DURATION` | `3600` | 运行秒数 |
-| `FUZZ_TIMEOUT` | `10000` | 单次执行超时（毫秒） |
-| `SEED_DIR` | `seeds/` | 种子目录 |
-| `FINDINGS_DIR` | `findings/` | 自动创建独立实验目录的父目录 |
+| `EXPERIMENT_DURATION` | `3600` | 运行秒数 |
+| `EXECUTION_TIMEOUT` | `10000` | 单次执行超时（毫秒） |
+| `INPUT_SAMPLES_DIR` | `input_samples/` | 输入样本目录 |
+| `OBSERVATIONS_DIR` | `observations/` | 自动创建独立实验目录的父目录 |
 | `EXPERIMENT_DIR` | 未设置 | 本次实验目录；必须是尚不存在的路径 |
-| `AFL_GRAMMAR` | `fuzz_config/plc.grammar` | grammar 文件 |
-| `AFL_CUSTOM_MUTATOR_LIBRARY` | `build/mutator/libplc_mutator.so` | 自定义变异器 |
-| `AFL_FUZZ_BINARY` | `afl-fuzz` | 自动输入生成工具入口 |
-| `FUZZ_TARGET` | `openplc_fuzz` | 插桩目标 |
+| `INPUT_GRAMMAR` | `input_generation/plc.grammar` | grammar 文件 |
+| `PLC_LAB_INPUT_TRANSFORMER_LIBRARY` | `build/input-transformer/libplc_input_transformer.so` | 输入转换器 |
+| `AUTOMATED_INPUT_TOOL` | `afl-fuzz` | 自动输入生成工具入口 |
+| `INSTRUMENTED_TARGET` | `openplc_instrumented` | 插桩目标 |
 
-每次启动都会在 `FINDINGS_DIR` 下创建带时间和仓库版本前缀的独立目录，并在终端打印该路径。目录中的 `manifest.json` 会记录版本、目标摘要、工具版本、机器信息、参数、环境和最终状态；已有结果不会被覆盖。如需指定确切路径，可设置 `EXPERIMENT_DIR`，但该路径必须尚不存在：
+每次启动都会在 `OBSERVATIONS_DIR` 下创建带时间和仓库版本前缀的独立目录，并在终端打印该路径。目录中的 `manifest.json` 会记录版本、目标摘要、工具版本、机器信息、参数、环境和最终状态；已有结果不会被覆盖。如需指定确切路径，可设置 `EXPERIMENT_DIR`，但该路径必须尚不存在：
 
 ```bash
-FUZZ_DURATION=60 \
-FINDINGS_DIR=output/experiments \
+EXPERIMENT_DURATION=60 \
+OBSERVATIONS_DIR=output/experiments \
 EXPERIMENT_DIR=output/experiments/smoke-test-01 \
-./scripts/plcfuzz experiment
+./scripts/plc-lab experiment
 ```
 
 重放一个 AFL 输入：
 
 ```bash
-./scripts/plcfuzz replay findings/<experiment>/afl-output/default/queue/<input-file>
+./scripts/plc-lab replay observations/<experiment>/afl-output/default/queue/<input-file>
 ```
 
 ## 测试
 
 ```bash
 # MatIEC 自身完整测试
-MATIEC_RUN_TESTS=1 ./scripts/plcfuzz setup
+MATIEC_RUN_TESTS=1 ./scripts/plc-lab setup
 
-# PLCFuzz 新增的 MatIEC 合法用例
-./scripts/plcfuzz test testcases
+# PLC Robustness Lab 新增的 MatIEC 合法用例
+./scripts/plc-lab test testcases
 
 # 全部 ST/LD 清单结构与文件覆盖
 python3 ./scripts/check_testcase_manifest.py
@@ -276,8 +278,8 @@ bash ./scripts/check_ci_workflow.sh
 # 活动源码、归档与生成快照一致性
 ./scripts/check_source_layout.sh
 
-# 自定义变异器输入的解析/序列化往返测试
-./scripts/plcfuzz test unit
+# 输入转换器输入的解析/序列化往返测试
+./scripts/plc-lab test unit
 
 # 历史二进制和 findings 完整性
 ./scripts/verify_preserved_artifacts.sh
@@ -292,11 +294,11 @@ bash ./scripts/check_ci_workflow.sh
 | `third_party/matiec/` | 当前 MatIEC submodule |
 | `src/`、`include/`、`lib/` | OpenPLC 运行时及 PLC 输入模拟代码 |
 | `build_scripts/` | 统一命令调用的底层构建实现 |
-| `scripts/` | `plcfuzz` 统一入口及语义明确的维护脚本 |
-| `fuzz_config/` | AFL++ grammar、dictionary 与自定义变异器 |
+| `scripts/` | `plc-lab` 统一入口及语义明确的维护脚本 |
+| `input_generation/` | AFL++ grammar、dictionary 与输入转换器 |
 | `static_analyse/` | PLC 变量映射提取工具 |
 | `testcases/` | 活动 ST/LD 样例、MatIEC 兼容性用例和历史归档 |
-| `tests/` | PLCFuzz 单元测试 |
+| `tests/` | PLC Robustness Lab 单元测试 |
 | `artifacts/legacy/` | 历史 MatIEC/OpenPLC 二进制与快照 |
 | `seeds copy/` | 只读保留的历史种子 |
 | `findings/`、`findings copy/` | 历史 AFL++ 队列、异常终止样本和统计数据 |
@@ -328,9 +330,9 @@ bash ./scripts/check_ci_workflow.sh
 仓库有意跟踪 `src/glueVars.cpp`、根目录的 `plc_variables_mapping.csv` 和 `tests/fixtures/reference_LOCATED_VARIABLES.h`，三者对应 README 默认 ST 程序的同一份生成结果，使未运行完整工具链的检出也能进行代码审阅和轻量测试。更换参考程序时按以下顺序同时刷新：
 
 ```sh
-./scripts/plcfuzz build plc testcases/race_test_success.st
-./scripts/plcfuzz build runtime
-./scripts/plcfuzz build analyze
+./scripts/plc-lab build plc testcases/concurrency_reference.st
+./scripts/plc-lab build runtime
+./scripts/plc-lab build analyze
 cp plclogic/LOCATED_VARIABLES.h tests/fixtures/reference_LOCATED_VARIABLES.h
 ./scripts/check_source_layout.sh
 ```
@@ -341,7 +343,7 @@ cp plclogic/LOCATED_VARIABLES.h tests/fixtures/reference_LOCATED_VARIABLES.h
 
 - 竞争问题的判定目前基于最近输出变化，是实验性启发式，不等价于严格的数据竞争检测。
 - 13 个不满足新版 MatIEC 要求的历史 ST 文件已移至 `testcases/archive/incompatible-matiec/`，程序逻辑保持不变且不纳入活动语料。
-- 默认自动化测试输入格式是固定顺序的文本数值块，grammar、解析器和变异器需要同步演进。
+- 默认自动化测试输入格式是固定顺序的文本数值块，grammar、解析器和输入转换器需要同步演进。
 - Linux CI 会验证完整 OpenPLC/AFL++ 构建链；本地非 Linux 环境仍可能只覆盖轻量检查。
 - 仓库已提供顶层 GPLv3 `LICENSE`；收集的第三方测试语料和实验数据仍需逐项核对来源与再分发权。
 

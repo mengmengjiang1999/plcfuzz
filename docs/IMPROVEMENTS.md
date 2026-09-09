@@ -1,6 +1,6 @@
-# PLCFuzz 改进路线图
+# PLC Robustness Lab 改进路线图
 
-本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **16 个主题完成**，**0 个主题待处理**。每个主题均作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并单独提交和推送。
+本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **17 个主题完成**，**0 个主题待处理**。每个主题均作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并单独提交和推送。
 
 ## 已完成
 
@@ -10,9 +10,9 @@
 
 OpenSpec：[`stabilize-output-change-oracle`](../openspec/changes/archive/2026-09-08-stabilize-output-change-oracle/)
 
-### 确定性自定义变异
+### 确定性输入转换
 
-所有变异决策和值生成均使用 AFL++ 提供的实例级 seed；固定 seed、映射和输入会产生一致结果，且不受进程级随机状态影响。
+所有输入转换决策和值生成均使用 AFL++ 提供的实例级 seed；固定 seed、映射和输入会产生一致结果，且不受进程级随机状态影响。
 
 OpenSpec：[`make-mutator-deterministic`](../openspec/changes/archive/2026-09-08-make-mutator-deterministic/)
 
@@ -24,7 +24,7 @@ OpenSpec：[`make-mutator-deterministic`](../openspec/changes/archive/2026-09-08
 
 ### 版本化输入数据协议
 
-运行时和自定义变异器现在共用严格解析器；新数据使用 `PLCFUZZ_INPUT_V1` 标头和固定的 119 字段记录，未知版本、不完整记录及超范围数值会被拒绝。保留的无标头种子继续以只读兼容方式加载。
+运行时和输入转换器现在共用严格解析器；新数据使用 `PLCFUZZ_INPUT_V1` 标头和固定的 119 字段记录，未知版本、不完整记录及超范围数值会被拒绝。保留的无标头种子继续以只读兼容方式加载。
 
 OpenSpec：[`version-plc-input-format`](../openspec/changes/archive/2026-09-08-version-plc-input-format/)
 
@@ -36,13 +36,13 @@ OpenSpec：[`catalog-test-corpus`](../openspec/changes/archive/2026-09-08-catalo
 
 ### 结构化变量映射生成
 
-变量映射现在直接来自 MatIEC 的 `LOCATED_VARIABLES.h` 结构化宏记录，并在写入前校验类型、地址、索引、符号名和重复目标；输出继续使用自定义变异器现有的四列 CSV 接口。
+变量映射现在直接来自 MatIEC 的 `LOCATED_VARIABLES.h` 结构化宏记录，并在写入前校验类型、地址、索引、符号名和重复目标；输出继续使用输入转换器现有的四列 CSV 接口。
 
 OpenSpec：[`generate-structured-variable-map`](../openspec/changes/archive/2026-09-08-generate-structured-variable-map/)
 
 ### Linux 持续集成
 
-GitHub Actions 现在在 Ubuntu 22.04 上验证固定 MatIEC、项目测试、普通运行目标、结构化变量映射、自定义变异器和固定 AFL++ 5.03c 插桩目标，并使用仓库只读权限。
+GitHub Actions 现在在 Ubuntu 22.04 上验证固定 MatIEC、项目测试、普通运行目标、结构化变量映射、输入转换器和固定 AFL++ 5.03c 插桩目标，并使用仓库只读权限。
 
 OpenSpec：[`add-linux-ci`](../openspec/changes/archive/2026-09-08-add-linux-ci/)
 
@@ -54,7 +54,7 @@ OpenSpec：[`add-runtime-diagnostics`](../openspec/changes/archive/2026-09-08-ad
 
 ### 自动生成实验目录和环境清单
 
-`scripts/plcfuzz experiment` 现在为每次启动创建独立目录，并在执行前写入版本化 JSON 清单；清单记录仓库与 MatIEC 版本、工具版本、目标摘要、机器、参数、路径、环境和完整命令，结束时原子写入状态与退出码。显式目录已存在时会拒绝运行。
+`scripts/plc-lab experiment` 现在为每次启动创建独立目录，并在执行前写入版本化 JSON 清单；清单记录仓库与 MatIEC 版本、工具版本、目标摘要、机器、参数、路径、环境和完整命令，结束时原子写入状态与退出码。显式目录已存在时会拒绝运行。
 
 OpenSpec：[`record-experiment-manifests`](../openspec/changes/archive/2026-09-09-record-experiment-manifests/)
 
@@ -72,7 +72,7 @@ OpenSpec：[`audit-testcase-provenance`](../openspec/changes/archive/2026-09-09-
 
 ### 统一构建与运行脚本入口
 
-`scripts/plcfuzz` 现在统一提供 setup、build、run、experiment、replay、test、batch、diagnostics 和 lines 子命令。根目录历史脚本仅保留带迁移提示的参数转发；批量实验改用每个用例独立的实验目录和清单。
+`scripts/plc-lab` 现在统一提供 setup、build、run、experiment、replay、test、batch、diagnostics 和 lines 子命令。根目录历史脚本仅保留带迁移提示的参数转发；批量实验改用每个用例独立的实验目录和清单。
 
 OpenSpec：[`unify-script-entrypoints`](../openspec/changes/archive/2026-09-09-unify-script-entrypoints/)
 
@@ -96,9 +96,15 @@ OpenSpec：[`upgrade-checkout-node-runtime`](../openspec/changes/archive/2026-09
 
 ### Linux 固定工具链构建缓存
 
-Linux 质量工作流现在为 MatIEC 和固定 AFL++ 源码树使用精确构建缓存。缓存键包含系统、架构、编译器版本、固定源码标识和显式 schema；不使用模糊恢复前缀。MatIEC 命中缓存后仍清除旧测试结果并重跑全套测试，项目检查和产物核对保持不变。
+Linux 质量工作流现在为 MatIEC 和固定 AFL++ 源码树使用精确构建缓存。缓存键包含系统、架构、编译器版本、固定源码标识和显式 schema；不使用部分匹配恢复前缀。MatIEC 命中缓存后仍清除旧测试结果并重跑全套测试，项目检查和产物核对保持不变。
 
 OpenSpec：[`cache-linux-toolchain-builds`](../openspec/changes/archive/2026-09-09-cache-linux-toolchain-builds/)
+
+### 中性化项目自有标识
+
+项目展示名现在是 **PLC Robustness Lab**，`scripts/plc-lab` 是唯一受维护的统一入口。输入生成源码、输入转换组件、插桩目标、活动测试目录、实验观测目录和项目配置变量均使用中性名称；旧命令与旧变量只通过带迁移提示的兼容层接受。AFL++ 要求的命令、环境变量、ABI 导出及原始统计字段保持原样，自动检查同时覆盖维护文本、路径和项目自有标识。
+
+OpenSpec：[`neutralize-project-owned-identifiers`](../openspec/changes/archive/2026-09-09-neutralize-project-owned-identifiers/)
 
 ## 待处理
 

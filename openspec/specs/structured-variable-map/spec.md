@@ -11,7 +11,7 @@ The mapping generator SHALL derive runtime variable bindings from MatIEC `__LOCA
 - **THEN** the generator emits the corresponding four-column runtime mapping row
 
 ### Requirement: Deterministic mapping output
-The generator SHALL preserve source-record order and emit the established CSV header and column meanings used by the custom mutator.
+The generator SHALL preserve source-record order and emit the established CSV header and column meanings used by the input transformer.
 
 #### Scenario: Reference snapshot is regenerated
 - **WHEN** the tracked located-variable metadata is processed

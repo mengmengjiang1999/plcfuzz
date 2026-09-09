@@ -55,14 +55,14 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 ARG SOURCE_REVISION
 ARG MATIEC_REVISION
 
-COPY . /workspace/plcfuzz
-WORKDIR /workspace/plcfuzz
+COPY . /workspace/plc-lab
+WORKDIR /workspace/plc-lab
 
-ENV PLCFUZZ_BASE_IMAGE=${BASE_IMAGE} \
-    PLCFUZZ_SOURCE_REVISION=${SOURCE_REVISION} \
-    PLCFUZZ_MATIEC_REVISION=${MATIEC_REVISION}
+ENV PLC_LAB_BASE_IMAGE=${BASE_IMAGE} \
+    PLC_LAB_SOURCE_REVISION=${SOURCE_REVISION} \
+    PLC_LAB_MATIEC_REVISION=${MATIEC_REVISION}
 
-RUN mkdir -p /opt/plcfuzz-acceptance \
-    && ./scripts/run_linux_acceptance.sh /opt/plcfuzz-acceptance/report.json
+RUN mkdir -p /opt/plc-lab-acceptance \
+    && ./scripts/run_linux_acceptance.sh /opt/plc-lab-acceptance/report.json
 
 CMD ["/bin/bash"]

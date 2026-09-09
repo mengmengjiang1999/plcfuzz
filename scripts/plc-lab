@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+
+usage() {
+    cat <<'EOF'
+Usage: ./scripts/plc-lab <command> [arguments]
+
+Commands:
+  setup                         Build the pinned MatIEC compiler
+  build [step] [program.st]     Build project targets; step defaults to all
+  run [input-file]              Run the normal runtime with one input
+  experiment                    Start an isolated automated-input experiment
+  replay [input-file]           Replay one saved input with the instrumented target
+  test [unit|testcases|all]     Run project checks; defaults to all
+  batch [all|case-name]         Build and run isolated generated-concurrency cases
+  diagnostics [all|runtime|transformer]
+                                Build diagnostic targets
+  lines                         Count maintained C and C++ lines with cloc
+
+Build steps:
+  all, plc, runtime, analyze, transformer, instrumented
+
+Use the environment variables documented in README.md to configure individual
+commands. Historical root scripts remain compatibility wrappers only.
+EOF
+}
+
+build_usage() {
+    cat <<'EOF'
+Usage: ./scripts/plc-lab build [step] [program.st]
+
+Steps: all, plc, runtime, analyze, transformer, instrumented
+Default program: testcases/concurrency_reference.st
+EOF
+}
+
+build_targets() {
+    local step=${1:-all}
+    local input_file=${2:-testcases/concurrency_reference.st}
+
+    if [[ $step == -h || $step == --help ]]; then
+        build_usage
+        return 0
+    fi
+    case "$step" in
+        *.st)
+            input_file=$step
+            step=all
+            ;;
+        c) step=runtime ;;
+        analysis) step=analyze ;;
+        lib|library|mutator)
+            echo "Deprecated build step: use transformer." >&2
+            step=transformer
+            ;;
+        fuzz)
+            echo "Deprecated build step: use instrumented." >&2
+            step=instrumented
+            ;;
+    esac
+    case "$step" in
+        all)
+            "$repo_root/build_scripts/build_plcfiles.sh" "$input_file"
+            "$repo_root/build_scripts/build.sh"
+            python3 "$repo_root/static_analyse/main.py"
+            "$repo_root/build_scripts/build_input_transformer.sh"
+            "$repo_root/build_scripts/build_instrumented.sh"
+            ;;
+        plc) "$repo_root/build_scripts/build_plcfiles.sh" "$input_file" ;;
+        runtime) "$repo_root/build_scripts/build.sh" ;;
+        analyze) python3 "$repo_root/static_analyse/main.py" ;;
+        transformer) "$repo_root/build_scripts/build_input_transformer.sh" ;;
+        instrumented) "$repo_root/build_scripts/build_instrumented.sh" ;;
+        *)
+            echo "Unknown build step: $step" >&2
+            build_usage >&2
+            return 2
+            ;;
+    esac
+}
+
+run_tests() {
+    local mode=${1:-all}
+    case "$mode" in
+        -h|--help)
+            echo "Usage: ./scripts/plc-lab test [unit|testcases|all]"
+            ;;
+        unit) "$repo_root/scripts/test_unit.sh" ;;
+        testcases) "$repo_root/scripts/validate_testcases.sh" ;;
+        all)
+            "$repo_root/scripts/test_unit.sh"
+            "$repo_root/scripts/validate_testcases.sh"
+            ;;
+        *)
+            echo "Unknown test group: $mode" >&2
+            return 2
+            ;;
+    esac
+}
+
+command_name=${1:---help}
+shift || true
+case "$command_name" in
+    -h|--help|help) usage ;;
+    setup) exec "$repo_root/scripts/setup_matiec.sh" "$@" ;;
+    build) build_targets "$@" ;;
+    run) exec "$repo_root/scripts/run_runtime.sh" "$@" ;;
+    experiment) exec "$repo_root/scripts/run_experiment.sh" "$@" ;;
+    replay) exec "$repo_root/scripts/replay_input.sh" "$@" ;;
+    test) run_tests "$@" ;;
+    batch) exec "$repo_root/scripts/run_batch.sh" "$@" ;;
+    diagnostics) exec "$repo_root/scripts/build_diagnostics.sh" "$@" ;;
+    lines) exec cloc "$repo_root/src" "$repo_root/include" --csv --include-lang="C,C++,C/C++ Header" --by-file ;;
+    *)
+        echo "Unknown command: $command_name" >&2
+        usage >&2
+        exit 2
+        ;;
+esac

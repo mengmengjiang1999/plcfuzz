@@ -1,6 +1,6 @@
 # PLC 自动化测试输入格式
 
-PLCFuzz 使用空白分隔的十进制文本表达离线运行时输入。当前规范版本为 V1；所有新生成的数据都应以如下独立标头开始：
+PLC Robustness Lab 使用空白分隔的十进制文本表达离线运行时输入。当前规范版本为 V1；所有新生成的数据都应以如下独立标头开始：
 
 ```text
 PLCFUZZ_INPUT_V1
@@ -28,12 +28,12 @@ PLCFUZZ_INPUT_V1
 
 历史种子和实验记录没有版本标头，其第一项直接是布尔输入区块的周期字段。共享解析器仍以只读兼容方式接受完整的旧格式记录；规范序列化器和活动 grammar 始终输出 V1。
 
-`seeds copy/` 中的 5 个保留种子不会被改写。旧输入经过自定义变异器处理后，输出会自动转换为 V1，便于后续实验明确记录格式版本。
+`seeds copy/` 中的 5 个保留种子不会被改写。旧输入经过输入转换器处理后，输出会自动转换为 V1，便于后续实验明确记录格式版本。
 
 ## 实现位置
 
 - 共享解析与序列化：`include/plc_input_format.h`
-- 活动 grammar：`fuzz_config/plc.grammar`
+- 活动 grammar：`input_generation/plc.grammar`
 - 运行时加载：`src/main.cpp`
-- 自定义变异器：`fuzz_config/plc_mutator.cpp`
-- 格式测试：`tests/mutator_helper_test.cpp`
+- 输入转换器：`input_generation/plc_input_transformer.cpp`
+- 格式测试：`tests/input_transformer_helper_test.cpp`

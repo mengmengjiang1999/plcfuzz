@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include "mutator_helper.h"
+#include "input_transformer_helper.h"
 
 namespace {
 
@@ -89,7 +89,7 @@ int main() {
     assert(format == PLCInputFormat::Legacy);
     assert(parsed.size() == 1);
 
-    const char* repo_root = std::getenv("PLCFUZZ_TEST_REPO_ROOT");
+    const char* repo_root = std::getenv("PLC_LAB_TEST_REPO_ROOT");
     assert(repo_root != NULL);
     const std::string seed_path = std::string(repo_root) + "/seeds copy/seed_0";
     std::ifstream seed_file(seed_path.c_str(), std::ios::binary);

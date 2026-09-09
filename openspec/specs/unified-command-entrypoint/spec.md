@@ -4,18 +4,22 @@
 TBD - created by archiving change unify-script-entrypoints. Update Purpose after archive.
 ## Requirements
 ### Requirement: Unified project command
-The repository SHALL provide an executable `scripts/plcfuzz` entry point with documented setup, build, run, experiment, replay, test, batch, diagnostics, and line-count subcommands.
 
-#### Scenario: A contributor requests help
-- **WHEN** `scripts/plcfuzz --help` is executed
-- **THEN** the maintained subcommands and their canonical purpose are listed without starting a build or experiment
+The repository SHALL provide `scripts/plc-lab` as the single maintained user-facing dispatcher for setup, build, run, experiment, replay, test, batch, diagnostics, and line-count workflows.
+
+#### Scenario: User requests help
+
+- **WHEN** a user runs `./scripts/plc-lab --help`
+- **THEN** the command lists supported workflows, canonical neutral build steps, and configuration guidance
 
 ### Requirement: Compatibility wrappers
-Historical root entry points SHALL print a deprecation notice and forward all arguments and environment to the corresponding unified subcommand.
 
-#### Scenario: A historical command is invoked
-- **WHEN** its compatibility wrapper runs
-- **THEN** it identifies the replacement command and returns the forwarded command's status
+Former command entry points, including `scripts/plcfuzz`, SHALL contain only migration messaging and argument-preserving forwarding to the canonical dispatcher or maintained semantic scripts.
+
+#### Scenario: Former dispatcher is invoked
+
+- **WHEN** a user invokes `scripts/plcfuzz` with any arguments
+- **THEN** it prints a migration notice and forwards the arguments and resulting exit status to `scripts/plc-lab`
 
 ### Requirement: Maintained orchestration boundary
 Run, experiment, replay, and batch orchestration SHALL live in semantic scripts below `scripts/`, while root compatibility wrappers SHALL contain no workflow implementation.

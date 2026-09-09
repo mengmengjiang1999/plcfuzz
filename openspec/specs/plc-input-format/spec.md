@@ -15,7 +15,7 @@ The project SHALL serialize automated PLC input data as UTF-8-compatible ASCII t
 - **THEN** each record follows the same field order and the shared parser reconstructs every value
 
 ### Requirement: Shared strict parser
-The runtime and custom mutator SHALL use one shared parser that accepts only complete records, non-negative decimal integers, supported cycle counts, and values representable by their destination IEC types.
+The runtime and input transformer SHALL use one shared parser that accepts only complete records, non-negative decimal integers, supported cycle counts, and values representable by their destination IEC types.
 
 #### Scenario: Incomplete record is provided
 - **WHEN** the input ends before all 119 fields of a record are present
@@ -45,12 +45,12 @@ The shared parser SHALL report whether accepted input uses V1 or the unversioned
 - **THEN** parsing fails explicitly instead of treating the identifier as record data
 
 ### Requirement: Canonical generation sources
-The active grammar and custom mutator SHALL generate the canonical V1 representation, while preserved unversioned seeds and historical data SHALL remain unchanged.
+The active grammar and input transformer SHALL generate the canonical V1 representation, while preserved unversioned seeds and historical data SHALL remain unchanged.
 
 #### Scenario: Grammar generates an input
 - **WHEN** AFL++ uses the active PLC grammar
 - **THEN** the generated input starts with the V1 header and follows the documented record order
 
-#### Scenario: Legacy seed is mutated
-- **WHEN** the custom mutator receives a valid unversioned seed
+#### Scenario: Legacy input sample is transformed
+- **WHEN** the input transformer receives a valid unversioned seed
 - **THEN** it accepts the seed and emits canonical V1 output

@@ -2,9 +2,26 @@
 set -euo pipefail
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-platform=${PLCFUZZ_CONTAINER_PLATFORM:-linux/amd64}
-image_tag=${PLCFUZZ_CONTAINER_TAG:-plcfuzz:repro}
-output_dir=${PLCFUZZ_CONTAINER_REPORT_DIR:-"$repo_root/output/linux-container-acceptance"}
+
+compat_value() {
+    local canonical_name=$1
+    local legacy_name=$2
+    local default_value=$3
+    local canonical_value=${!canonical_name:-}
+    local legacy_value=${!legacy_name:-}
+    if [[ -n $canonical_value ]]; then
+        printf '%s' "$canonical_value"
+    elif [[ -n $legacy_value ]]; then
+        echo "Deprecated environment variable $legacy_name; use $canonical_name." >&2
+        printf '%s' "$legacy_value"
+    else
+        printf '%s' "$default_value"
+    fi
+}
+
+platform=$(compat_value PLC_LAB_CONTAINER_PLATFORM PLCFUZZ_CONTAINER_PLATFORM linux/amd64)
+image_tag=$(compat_value PLC_LAB_CONTAINER_TAG PLCFUZZ_CONTAINER_TAG plc-robustness-lab:repro)
+output_dir=$(compat_value PLC_LAB_CONTAINER_REPORT_DIR PLCFUZZ_CONTAINER_REPORT_DIR "$repo_root/output/linux-container-acceptance")
 base_image='public.ecr.aws/ubuntu/ubuntu:22.04@sha256:23bda685bd84a4d3b9caf2086a4c35f368bb7acd57ef38090b7a45ac92216ccf'
 internal_report="$output_dir/internal-report.json"
 combined_report="$output_dir/manifest.json"
@@ -22,7 +39,7 @@ docker build \
     -t "$image_tag" \
     "$repo_root"
 docker run --rm --platform "$platform" --entrypoint cat "$image_tag" \
-    /opt/plcfuzz-acceptance/report.json >"$internal_report"
+    /opt/plc-lab-acceptance/report.json >"$internal_report"
 
 base_image_id=$(docker image inspect --format '{{.Id}}' "$base_image")
 final_image_digest=$(docker image inspect --format '{{.Id}}' "$image_tag")

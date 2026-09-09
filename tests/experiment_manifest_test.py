@@ -11,7 +11,7 @@ import tempfile
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 HELPER = REPO_ROOT / "scripts" / "experiment_manifest.py"
-VERSION_TOOL = REPO_ROOT / "tests" / "fixtures" / "afl_version_tool.py"
+VERSION_TOOL = REPO_ROOT / "tests" / "fixtures" / "input_tool_version_fixture.py"
 
 
 def run(*arguments, environment=None, check=True):
@@ -26,50 +26,50 @@ def run(*arguments, environment=None, check=True):
 
 
 def main():
-    with tempfile.TemporaryDirectory(prefix="plcfuzz-experiment-test-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="plc-lab-experiment-test-") as temporary:
         root = pathlib.Path(temporary)
-        findings = root / "findings"
+        observations = root / "observations"
         explicit = root / "named-run"
-        seeds = root / "seeds"
-        seeds.mkdir()
-        (seeds / "sample").write_bytes(b"sample")
+        input_samples = root / "input_samples"
+        input_samples.mkdir()
+        (input_samples / "sample").write_bytes(b"sample")
         grammar = root / "plc.grammar"
         grammar.write_text('start = "sample"\n', encoding="utf-8")
-        mutator = root / "libplc_mutator.so"
-        mutator.write_bytes(b"component")
+        input_transformer = root / "libplc_input_transformer.so"
+        input_transformer.write_bytes(b"component")
         target = root / "target"
         target.write_bytes(b"target-content")
         target.chmod(0o755)
 
         environment = dict(os.environ)
-        environment["PLCFUZZ_CYCLE_COUNT"] = "250"
+        environment["PLC_LAB_CYCLE_COUNT"] = "250"
         created = run(
             "create",
             "--repo-root", REPO_ROOT,
-            "--findings-root", findings,
+            "--observations-root", observations,
             "--experiment-dir", explicit,
             "--target", target,
-            "--seed-dir", seeds,
+            "--input-samples-dir", input_samples,
             "--grammar", grammar,
-            "--mutator", mutator,
+            "--input-transformer", input_transformer,
             "--duration", "60",
             "--timeout", "2000",
-            "--afl-binary", VERSION_TOOL,
+            "--input-tool", VERSION_TOOL,
             environment=environment,
         )
         explicit = explicit.resolve()
         assert pathlib.Path(created.stdout.strip()) == explicit
         manifest_path = explicit / "manifest.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-        assert manifest["schema"] == "PLCFUZZ_EXPERIMENT_MANIFEST_V1"
+        assert manifest["schema"] == "PLC_LAB_EXPERIMENT_MANIFEST_V1"
         assert manifest["status"] == "running"
         assert len(manifest["repository_commit"]) == 40
         assert len(manifest["matiec_commit"]) == 40
-        assert manifest["afl_version"] == "afl-fuzz ++5.03c fixture"
+        assert manifest["input_tool_version"] == "afl-fuzz ++5.03c fixture"
         assert manifest["target_sha256"] == hashlib.sha256(b"target-content").hexdigest()
         assert manifest["duration_seconds"] == 60
         assert manifest["timeout_milliseconds"] == 2000
-        assert manifest["environment"]["PLCFUZZ_CYCLE_COUNT"] == "250"
+        assert manifest["environment"]["PLC_LAB_CYCLE_COUNT"] == "250"
         assert manifest["command"][-2:] == [str(target.resolve()), "@@"]
         assert manifest["output_dir"] == str(explicit / "afl-output")
         assert manifest["machine"]["cpu_count"] is not None
@@ -83,15 +83,15 @@ def main():
         repeated = run(
             "create",
             "--repo-root", REPO_ROOT,
-            "--findings-root", findings,
+            "--observations-root", observations,
             "--experiment-dir", explicit,
             "--target", target,
-            "--seed-dir", seeds,
+            "--input-samples-dir", input_samples,
             "--grammar", grammar,
-            "--mutator", mutator,
+            "--input-transformer", input_transformer,
             "--duration", "60",
             "--timeout", "2000",
-            "--afl-binary", VERSION_TOOL,
+            "--input-tool", VERSION_TOOL,
             check=False,
         )
         assert repeated.returncode == 2
@@ -100,37 +100,37 @@ def main():
         default_arguments = (
             "create",
             "--repo-root", REPO_ROOT,
-            "--findings-root", findings,
+            "--observations-root", observations,
             "--target", target,
-            "--seed-dir", seeds,
+            "--input-samples-dir", input_samples,
             "--grammar", grammar,
-            "--mutator", mutator,
+            "--input-transformer", input_transformer,
             "--duration", "60",
             "--timeout", "2000",
-            "--afl-binary", VERSION_TOOL,
+            "--input-tool", VERSION_TOOL,
         )
         first = pathlib.Path(run(*default_arguments).stdout.strip())
         second = pathlib.Path(run(*default_arguments).stdout.strip())
         assert first != second
-        assert first.parent == findings.resolve()
-        assert second.parent == findings.resolve()
+        assert first.parent == observations.resolve()
+        assert second.parent == observations.resolve()
 
         launcher_run = root / "launcher-run"
         launcher_environment = dict(os.environ)
         launcher_environment.update(
             {
-                "SEED_DIR": str(seeds),
+                "INPUT_SAMPLES_DIR": str(input_samples),
                 "EXPERIMENT_DIR": str(launcher_run),
                 "AFL_GRAMMAR": str(grammar),
-                "AFL_CUSTOM_MUTATOR_LIBRARY": str(mutator),
-                "FUZZ_TARGET": str(target),
-                "AFL_FUZZ_BINARY": str(VERSION_TOOL),
-                "FUZZ_DURATION": "10",
-                "FUZZ_TIMEOUT": "1000",
+                "PLC_LAB_INPUT_TRANSFORMER_LIBRARY": str(input_transformer),
+                "INSTRUMENTED_TARGET": str(target),
+                "AUTOMATED_INPUT_TOOL": str(VERSION_TOOL),
+                "EXPERIMENT_DURATION": "10",
+                "EXECUTION_TIMEOUT": "1000",
             }
         )
         launched = subprocess.run(
-            [str(REPO_ROOT / "scripts" / "plcfuzz"), "experiment"],
+            [str(REPO_ROOT / "scripts" / "plc-lab"), "experiment"],
             check=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -144,6 +144,38 @@ def main():
         assert launched_manifest["status"] == "success"
         assert launched_manifest["exit_code"] == 0
         assert (launcher_run / "afl-output" / "fixture-complete").is_file()
+
+        compatibility_run = root / "compatibility-run"
+        compatibility_environment = dict(os.environ)
+        compatibility_environment.update(
+            {
+                "SEED_DIR": str(input_samples),
+                "FINDINGS_DIR": str(root / "compatibility-observations"),
+                "EXPERIMENT_DIR": str(compatibility_run),
+                "AFL_GRAMMAR": str(grammar),
+                "AFL_CUSTOM_MUTATOR_LIBRARY": str(input_transformer),
+                "FUZZ_TARGET": str(target),
+                "AFL_FUZZ_BINARY": str(VERSION_TOOL),
+                "FUZZ_DURATION": "10",
+                "FUZZ_TIMEOUT": "1000",
+            }
+        )
+        compatibility = subprocess.run(
+            [str(REPO_ROOT / "scripts" / "plcfuzz"), "experiment"],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            env=compatibility_environment,
+        )
+        assert "Deprecated compatibility command" in compatibility.stderr
+        assert "use INPUT_SAMPLES_DIR" in compatibility.stderr
+        assert "use OBSERVATIONS_DIR" in compatibility.stderr
+        assert "use INSTRUMENTED_TARGET" in compatibility.stderr
+        assert "use AUTOMATED_INPUT_TOOL" in compatibility.stderr
+        assert "use EXPERIMENT_DURATION" in compatibility.stderr
+        assert "use EXECUTION_TIMEOUT" in compatibility.stderr
+        assert (compatibility_run / "manifest.json").is_file()
 
 
 if __name__ == "__main__":

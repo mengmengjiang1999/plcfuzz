@@ -15,16 +15,16 @@ compile_and_run() {
         -Wall -Wextra -Werror \
         -I"$repo_root/include" \
         -I"$repo_root/lib" \
-        -I"$repo_root/fuzz_config" \
+        -I"$repo_root/input_generation" \
         "$@" \
         -o "$build_dir/$name"
-    PLCFUZZ_TEST_REPO_ROOT="$repo_root" "$build_dir/$name"
+    PLC_LAB_TEST_REPO_ROOT="$repo_root" "$build_dir/$name"
     echo "PASS $name"
 }
 
 compile_and_run \
-    mutator_helper_test \
-    "$repo_root/tests/mutator_helper_test.cpp"
+    input_transformer_helper_test \
+    "$repo_root/tests/input_transformer_helper_test.cpp"
 
 compile_and_run \
     plc_input_simulator_test \
@@ -50,12 +50,12 @@ compile_and_run \
     "$repo_root/tests/runtime_timing_test.cpp"
 
 compile_and_run \
-    plc_mutator_test \
-    "$repo_root/tests/plc_mutator_test.cpp" \
-    "$repo_root/fuzz_config/plc_mutator.cpp"
+    plc_input_transformer_test \
+    "$repo_root/tests/plc_input_transformer_test.cpp" \
+    "$repo_root/input_generation/plc_input_transformer.cpp"
 
-rg --quiet '^start[[:space:]]*=[[:space:]]*format_header bigblocks$' "$repo_root/fuzz_config/plc.grammar"
-rg --quiet '^format_header[[:space:]]*=[[:space:]]*"PLCFUZZ_INPUT_V1"$' "$repo_root/fuzz_config/plc.grammar"
+rg --quiet '^start[[:space:]]*=[[:space:]]*format_header bigblocks$' "$repo_root/input_generation/plc.grammar"
+rg --quiet '^format_header[[:space:]]*=[[:space:]]*"PLCFUZZ_INPUT_V1"$' "$repo_root/input_generation/plc.grammar"
 echo "PASS plc_input_grammar_test"
 
 PYTHONDONTWRITEBYTECODE=1 python3 "$repo_root/tests/testcase_manifest_test.py"

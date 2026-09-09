@@ -20,7 +20,7 @@ jobs:
     env:
       BUILD_JOBS: "2"
       MATIEC_BUILD_JOBS: "1"
-      PLCFUZZ_TOOLCHAIN_BUILD_JOBS: "1"
+      PLC_LAB_TOOLCHAIN_BUILD_JOBS: "1"
     steps:
       - name: Check out pinned sources
         uses: actions/checkout@v5
@@ -64,34 +64,34 @@ jobs:
       - name: Build and test MatIEC
         env:
           MATIEC_USE_PREBUILT: ${{ steps.cache-matiec.outputs.cache-hit }}
-        run: MATIEC_RUN_TESTS=1 ./scripts/plcfuzz setup
+        run: MATIEC_RUN_TESTS=1 ./scripts/plc-lab setup
 
       - name: Run project checks
         run: |
           ./scripts/check_project_wording.sh
           ./scripts/check_source_layout.sh
-          ./scripts/plcfuzz test unit
+          ./scripts/plc-lab test unit
           python3 scripts/check_testcase_manifest.py --verify-compiler
-          ./scripts/plcfuzz test testcases
+          ./scripts/plc-lab test testcases
 
       - name: Build normal runtime and mapping
         run: |
-          ./scripts/plcfuzz build plc testcases/race_test_success.st
-          ./scripts/plcfuzz build runtime
-          ./scripts/plcfuzz build analyze
+          ./scripts/plc-lab build plc testcases/concurrency_reference.st
+          ./scripts/plc-lab build runtime
+          ./scripts/plc-lab build analyze
           test -x openplc
           test -s plc_variables_mapping.csv
 
-      - name: Build custom mutator
+      - name: Build input transformer
         run: |
-          ./scripts/plcfuzz build mutator
-          test -f build/mutator/libplc_mutator.so
+          ./scripts/plc-lab build transformer
+          test -f build/input-transformer/libplc_input_transformer.so
 
       - name: Build diagnostic targets
         run: |
-          ./scripts/plcfuzz diagnostics all
+          ./scripts/plc-lab diagnostics all
           test -x build/diagnostics/runtime/openplc_diagnostic
-          find build/diagnostics/mutator -maxdepth 1 -type f -name 'libplc_mutator.*' -print -quit | grep -q .
+          find build/diagnostics/input-transformer -maxdepth 1 -type f -name 'libplc_input_transformer.*' -print -quit | grep -q .
 
       - name: Restore AFL++ build cache
         id: cache-aflpp
@@ -107,12 +107,12 @@ jobs:
             git clone --branch v5.03c --depth 1 \
               https://github.com/AFLplusplus/AFLplusplus.git \
               "$RUNNER_TEMP/AFLplusplus"
-            make -C "$RUNNER_TEMP/AFLplusplus" source-only -j"$PLCFUZZ_TOOLCHAIN_BUILD_JOBS"
+            make -C "$RUNNER_TEMP/AFLplusplus" source-only -j"$PLC_LAB_TOOLCHAIN_BUILD_JOBS"
           fi
           test -x "$RUNNER_TEMP/AFLplusplus/afl-clang-fast++"
           "$RUNNER_TEMP/AFLplusplus/afl-clang-fast++" --version
 
       - name: Build instrumented runtime
         run: |
-          PLCFUZZ_INSTRUMENTED_CXX="$RUNNER_TEMP/AFLplusplus/afl-clang-fast++" ./scripts/plcfuzz build instrumented
-          test -x openplc_fuzz
+          PLC_LAB_INSTRUMENTED_CXX="$RUNNER_TEMP/AFLplusplus/afl-clang-fast++" ./scripts/plc-lab build instrumented
+          test -x openplc_instrumented

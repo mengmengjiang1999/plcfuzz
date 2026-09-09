@@ -5,7 +5,7 @@ from pathlib import Path
 import tempfile
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SPEC = importlib.util.spec_from_file_location("plcfuzz_static_analyse", REPO_ROOT / "static_analyse/main.py")
+SPEC = importlib.util.spec_from_file_location("plc_lab_static_analyse", REPO_ROOT / "static_analyse/main.py")
 MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 
@@ -32,7 +32,7 @@ def main():
         "__LOCATED_VAR(UINT,__MW10,M,W,10)", "__LOCATED_VAR(UDINT,__MD11,M,D,11)",
         "__LOCATED_VAR(ULINT,__ML12,M,L,12)",
     ]) + "\n"
-    with tempfile.TemporaryDirectory(prefix="plcfuzz-mapping-test-") as directory:
+    with tempfile.TemporaryDirectory(prefix="plc-lab-mapping-test-") as directory:
         mappings = MODULE.parse_located_variables(write_fixture(directory, fixture))
         assert [row[0] for row in mappings] == list(MODULE.IO_MAPPINGS.values())
         output = Path(directory) / "mapping.csv"

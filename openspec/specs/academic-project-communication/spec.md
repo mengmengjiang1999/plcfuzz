@@ -11,19 +11,18 @@ The project SHALL state before operational instructions that it is an academic s
 - **THEN** the academic purpose, authorization boundary, isolation expectation, and non-production status are visible without following another link
 
 ### Requirement: Neutral maintained terminology
-All project-authored tracked text SHALL describe automated input generation and observed software behavior using neutral, technically precise quality-assurance terms and SHALL exclude unrelated operational-risk framing.
 
-#### Scenario: Heuristic output change
-- **WHEN** the runtime reports an output-change candidate
-- **THEN** it describes a candidate or abnormal-behavior sample without claiming a confirmed defect or operational intent
+All project-authored tracked text, maintained paths, and project-owned identifiers SHALL describe automated input generation and observed software behavior using neutral, technically precise quality-assurance terms and SHALL exclude unrelated operational-risk framing. Exact externally required identifiers and preserved raw records MAY remain only within an explicit compatibility or provenance boundary.
 
-#### Scenario: Abnormal process ending
-- **WHEN** maintained documentation describes an AFL++ process-ending sample
-- **THEN** it uses “abnormal termination” or “failure sample” in prose
+#### Scenario: Repository terminology check
 
-#### Scenario: Repository wording check
-- **WHEN** project-authored tracked text contains a prohibited ambiguous phrase
-- **THEN** the automated wording check reports its path and fails
+- **WHEN** project-authored maintained text, a maintained path, or a project-owned identifier contains a prohibited or deprecated phrase
+- **THEN** the automated terminology check reports its location and fails
+
+#### Scenario: Required external identifier
+
+- **WHEN** an externally defined command, environment variable, ABI export, or raw measurement field is required for interoperability or reproducibility
+- **THEN** the exact name remains and the surrounding maintained interface uses neutral terminology
 
 ### Requirement: Required external terminology context
 The project SHALL preserve exact third-party identifiers only where required for a working interface or authentic raw measurement, and SHALL remove unrelated archived prose from the current tree.

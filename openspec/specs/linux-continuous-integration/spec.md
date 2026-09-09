@@ -18,7 +18,7 @@ The workflow SHALL initialize the recorded MatIEC submodule commit, build it wit
 - **THEN** MatIEC matches the repository gitlink and AFL++ is checked out at `v5.03c`
 
 ### Requirement: Complete verification sequence
-The workflow SHALL install every command used by maintained validation scripts, then run MatIEC tests, project validation scripts, ST conversion, normal runtime build, structured mapping generation, custom-mutator build, and instrumented-target build.
+The workflow SHALL install every command used by maintained validation scripts, then run MatIEC tests, project validation scripts, ST conversion, normal runtime build, structured mapping generation, input-transformer build, and instrumented-target build.
 
 #### Scenario: Required validation command is unavailable
 - **WHEN** a maintained validation script depends on a command not present in the base runner
@@ -29,7 +29,7 @@ The workflow SHALL install every command used by maintained validation scripts, 
 - **THEN** the workflow fails and later success is not reported for that revision
 
 ### Requirement: Build artifact assertions
-The workflow SHALL verify that the normal runtime, mapping CSV, custom-mutator library, and instrumented target exist after their build stages.
+The workflow SHALL verify that the normal runtime, mapping CSV, input-transformer library, and instrumented target exist after their build stages.
 
 #### Scenario: Build command exits without its expected output
 - **WHEN** an expected artifact is absent
@@ -43,18 +43,20 @@ The workflow and reproducibility container SHALL build the fixed AFL++ source wi
 - **THEN** the targets do not write `afl-cc` concurrently
 
 ### Requirement: Isolated instrumentation environment
-The workflow SHALL use `PLCFUZZ_TOOLCHAIN_BUILD_JOBS` for fixed toolchain parallelism and `PLCFUZZ_INSTRUMENTED_CXX` for the project compiler-wrapper path.
+The workflow SHALL use `PLC_LAB_TOOLCHAIN_BUILD_JOBS` for fixed toolchain parallelism and `PLC_LAB_INSTRUMENTED_CXX` for the project compiler-wrapper path.
 
 #### Scenario: The instrumented runtime stage starts
 - **WHEN** the workflow exports project build controls
 - **THEN** no project-only setting occupies an upstream `AFL_` variable name
 
 ### Requirement: Unified command use in CI
-Linux CI SHALL invoke maintained build and test workflows through `scripts/plcfuzz` rather than deprecated root compatibility wrappers.
 
-#### Scenario: CI workflow structure is checked
-- **WHEN** the Linux workflow is validated
-- **THEN** its project build steps use canonical unified subcommands and contain no deprecated root invocation
+Linux CI SHALL invoke maintained build and test workflows through `scripts/plc-lab`, use canonical neutral build-step names, and verify the neutral input-transformer and instrumented-runtime artifact paths.
+
+#### Scenario: Workflow structure is reviewed
+
+- **WHEN** the Linux workflow is checked
+- **THEN** maintained commands use `scripts/plc-lab` and no compatibility command or deprecated project-owned build step is used
 
 ### Requirement: Supported checkout action runtime
 

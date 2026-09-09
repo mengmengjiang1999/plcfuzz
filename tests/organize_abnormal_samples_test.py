@@ -38,7 +38,7 @@ def run_organizer(input_dir, output_dir):
     )
 
 
-with tempfile.TemporaryDirectory(prefix="plcfuzz-organizer-test-") as directory:
+with tempfile.TemporaryDirectory(prefix="plc-lab-organizer-test-") as directory:
     root = pathlib.Path(directory)
     input_dir = root / "inputs"
     output_dir = root / "organized"
@@ -51,7 +51,7 @@ with tempfile.TemporaryDirectory(prefix="plcfuzz-organizer-test-") as directory:
     result = run_organizer(input_dir, output_dir)
     assert result.returncode == 0, result.stderr
     manifest = json.loads((output_dir / "manifest.json").read_text(encoding="utf-8"))
-    assert manifest["schema"] == "PLCFUZZ_ABNORMAL_SAMPLE_MANIFEST_V1"
+    assert manifest["schema"] == "PLC_LAB_ABNORMAL_SAMPLE_MANIFEST_V1"
     assert manifest["scanned_files"] == 4
     assert manifest["unique_inputs"] == 3
     assert manifest["seed"] == "fixture-seed"

@@ -9,9 +9,9 @@
 namespace {
 
 static_assert(OPENPLC_BUFFER_SIZE == 1024, "OpenPLC glue compatibility requires 1024 runtime slots");
-static_assert(PLC_INPUT_SIZE == 8, "The serialized fuzz input model requires eight slots");
+static_assert(PLC_INPUT_SIZE == 8, "The serialized automated-input model requires eight slots");
 static_assert(sizeof(IntBlock().input) / sizeof(IEC_UINT) == PLC_INPUT_SIZE,
-              "Input blocks must use the fuzz input capacity");
+              "Input blocks must use the automated-input capacity");
 
 PLCInputBlock make_block(int cycles, unsigned int base) {
     PLCInputBlock block;

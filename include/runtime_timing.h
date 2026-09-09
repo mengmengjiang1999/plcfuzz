@@ -3,6 +3,7 @@
 
 #include <cerrno>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <limits>
 #include <stdexcept>
@@ -39,10 +40,26 @@ inline std::uint64_t parse_unsigned_environment(const char* name,
     return static_cast<std::uint64_t>(parsed);
 }
 
+inline std::uint64_t parse_compatible_unsigned_environment(const char* canonical_name,
+                                                           const char* legacy_name,
+                                                           std::uint64_t default_value,
+                                                           std::uint64_t minimum) {
+    if(std::getenv(canonical_name) != NULL) {
+        return parse_unsigned_environment(canonical_name, default_value, minimum);
+    }
+    if(std::getenv(legacy_name) != NULL) {
+        std::fprintf(stderr, "Deprecated environment variable %s; use %s.\n", legacy_name, canonical_name);
+        return parse_unsigned_environment(legacy_name, default_value, minimum);
+    }
+    return default_value;
+}
+
 inline Config load_config() {
     Config config;
-    config.cycle_count = parse_unsigned_environment("PLCFUZZ_CYCLE_COUNT", 100, 1);
-    config.cycle_delay_ns = parse_unsigned_environment("PLCFUZZ_CYCLE_DELAY_NS", 0, 0);
+    config.cycle_count =
+        parse_compatible_unsigned_environment("PLC_LAB_CYCLE_COUNT", "PLCFUZZ_CYCLE_COUNT", 100, 1);
+    config.cycle_delay_ns =
+        parse_compatible_unsigned_environment("PLC_LAB_CYCLE_DELAY_NS", "PLCFUZZ_CYCLE_DELAY_NS", 0, 0);
     return config;
 }
 

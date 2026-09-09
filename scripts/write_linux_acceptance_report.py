@@ -12,18 +12,18 @@ COMMANDS = [
     "./scripts/verify_preserved_artifacts.sh",
     "./scripts/check_source_layout.sh",
     "./scripts/check_project_wording.sh",
-    "MATIEC_RUN_TESTS=1 ./scripts/plcfuzz setup",
-    "./scripts/plcfuzz test unit",
+    "MATIEC_RUN_TESTS=1 ./scripts/plc-lab setup",
+    "./scripts/plc-lab test unit",
     "python3 scripts/check_testcase_manifest.py --verify-compiler",
-    "./scripts/plcfuzz test testcases",
-    "./scripts/plcfuzz build plc testcases/race_test_success.st",
-    "./scripts/plcfuzz build runtime",
-    "./scripts/plcfuzz build analyze",
-    "./scripts/plcfuzz build mutator",
-    "./scripts/plcfuzz diagnostics all",
-    "PLCFUZZ_INSTRUMENTED_CXX=afl-clang-fast++ ./scripts/plcfuzz build instrumented",
-    "./scripts/plcfuzz run 'seeds copy/seed_0' (expected output-change candidate signal)",
-    "./scripts/plcfuzz replay 'seeds copy/seed_0' (expected output-change candidate signal)",
+    "./scripts/plc-lab test testcases",
+    "./scripts/plc-lab build plc testcases/concurrency_reference.st",
+    "./scripts/plc-lab build runtime",
+    "./scripts/plc-lab build analyze",
+    "./scripts/plc-lab build transformer",
+    "./scripts/plc-lab diagnostics all",
+    "PLC_LAB_INSTRUMENTED_CXX=afl-clang-fast++ ./scripts/plc-lab build instrumented",
+    "./scripts/plc-lab run 'seeds copy/seed_0' (expected output-change candidate signal)",
+    "./scripts/plc-lab replay 'seeds copy/seed_0' (expected output-change candidate signal)",
 ]
 
 PACKAGES = [
@@ -61,15 +61,15 @@ def internal_report(path):
         package: output(["dpkg-query", "-W", "-f=${Version}", package]) for package in PACKAGES
     }
     report = {
-        "schema": "plcfuzz-linux-container-acceptance-v1",
+        "schema": "plc-lab-linux-container-acceptance-v1",
         "status": "passed",
-        "base_image": os.environ["PLCFUZZ_BASE_IMAGE"],
-        "source_revision": os.environ["PLCFUZZ_SOURCE_REVISION"],
-        "matiec_revision": os.environ["PLCFUZZ_MATIEC_REVISION"],
+        "base_image": os.environ["PLC_LAB_BASE_IMAGE"],
+        "source_revision": os.environ["PLC_LAB_SOURCE_REVISION"],
+        "matiec_revision": os.environ["PLC_LAB_MATIEC_REVISION"],
         "platform": {"machine": platform.machine(), "system": platform.system(), "release": platform.release()},
         "commands": COMMANDS,
         "tools": {
-            "afl_fuzz": output(["afl-fuzz", "--version"]),
+            "automated_input_tool": output(["afl-fuzz", "--version"]),
             "cmake": output(["cmake", "--version"]),
             "compiler": output(["c++", "--version"]),
             "matiec_iec2c": output(["./third_party/matiec/iec2c", "-v"]),
@@ -83,7 +83,7 @@ def internal_report(path):
 def combined_report(arguments):
     internal = json.loads(Path(arguments.internal_report).read_text(encoding="utf-8"))
     combined = {
-        "schema": "plcfuzz-linux-container-host-acceptance-v1",
+        "schema": "plc-lab-linux-container-host-acceptance-v1",
         "status": "passed",
         "completed_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "requested_platform": arguments.platform,

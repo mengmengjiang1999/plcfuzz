@@ -24,12 +24,12 @@
 
 1. 保留材料、源码布局、学术用语、版权元数据和统一入口检查；
 2. 从固定 submodule 构建 MatIEC，并通过其 14 组测试套件；
-3. 运行 PLCFuzz 单元测试，核对全部 40 个 ST 文件的预期编译结果和 31 个 LD 文件的清单；
+3. 运行 PLC Robustness Lab 单元测试，核对全部 40 个 ST 文件的预期编译结果和 31 个 LD 文件的清单；
 4. 构建普通运行目标、结构化变量映射、自定义输入组件、ASan/UBSan 诊断目标和 AFL++ 插桩目标；
 5. 使用保留的 `seed_0` 分别运行普通和插桩目标，并核对二者都以预期的输出变化候选信号结束；
 6. 在镜像内写入命令、平台、工具和 Ubuntu 软件包版本，再由主机补充镜像标识与完成时间。
 
-机器可读结果位于被 Git 忽略的 `output/linux-container-acceptance/manifest.json`。镜像内同时保留 `/opt/plcfuzz-acceptance/report.json`。
+机器可读结果位于被 Git 忽略的 `output/linux-container-acceptance/manifest.json`。镜像内同时保留 `/opt/plc-lab-acceptance/report.json`。
 
 ## 重新验收
 
@@ -40,6 +40,6 @@ git submodule update --init --recursive
 ./scripts/build_linux_container.sh
 ```
 
-命令固定请求 `linux/amd64`。可以通过 `PLCFUZZ_CONTAINER_TAG` 或 `PLCFUZZ_CONTAINER_REPORT_DIR` 修改本地镜像标签和报告输出目录；修改平台变量时应作为一次新的独立验收记录处理。
+命令固定请求 `linux/amd64`。可以通过 `PLC_LAB_CONTAINER_TAG` 或 `PLC_LAB_CONTAINER_REPORT_DIR` 修改本地镜像标签和报告输出目录；修改平台变量时应作为一次新的独立验收记录处理。
 
 Ubuntu 软件源未按单个包的下载摘要封存。组合报告会记录实际安装版本，以便后续运行识别环境差异。

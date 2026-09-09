@@ -7,7 +7,7 @@ python3 "$repo_root/scripts/check_testcase_manifest.py"
 iec2c=${MATIEC_IEC2C:-"$repo_root/third_party/matiec/iec2c"}
 include_dir=${MATIEC_INCLUDE_DIR:-"$repo_root/third_party/matiec/lib"}
 test_root="$repo_root/testcases/matiec"
-output_root=$(mktemp -d "${TMPDIR:-/tmp}/plcfuzz-matiec-tests.XXXXXX")
+output_root=$(mktemp -d "${TMPDIR:-/tmp}/plc-lab-matiec-tests.XXXXXX")
 trap 'rm -rf "$output_root"' EXIT
 
 if [[ ! -x $iec2c ]]; then

@@ -15,8 +15,8 @@ import tempfile
 DEFAULT_RECORDED_ENVIRONMENT = (
     "ASAN_OPTIONS",
     "UBSAN_OPTIONS",
-    "PLCFUZZ_CYCLE_COUNT",
-    "PLCFUZZ_CYCLE_DELAY_NS",
+    "PLC_LAB_CYCLE_COUNT",
+    "PLC_LAB_CYCLE_DELAY_NS",
 )
 
 
@@ -47,12 +47,12 @@ def diagnostic_environment():
     environment = os.environ.copy()
     environment.setdefault("ASAN_OPTIONS", "abort_on_error=1:disable_coredump=1:symbolize=1")
     environment.setdefault("UBSAN_OPTIONS", "halt_on_error=1:abort_on_error=1:print_stacktrace=1")
-    environment.setdefault("PLCFUZZ_CYCLE_DELAY_NS", "0")
+    environment.setdefault("PLC_LAB_CYCLE_DELAY_NS", "0")
     return environment
 
 
 def run_sample(target, data, timeout_seconds, environment):
-    with tempfile.TemporaryDirectory(prefix="plcfuzz-sample-") as directory:
+    with tempfile.TemporaryDirectory(prefix="plc-lab-sample-") as directory:
         sample_path = pathlib.Path(directory) / "sample.bin"
         sample_path.write_bytes(data)
         try:
@@ -253,7 +253,7 @@ def main(argv=None):
         retained_cases.append(case_metadata)
 
     manifest = {
-        "schema": "PLCFUZZ_ABNORMAL_SAMPLE_MANIFEST_V1",
+        "schema": "PLC_LAB_ABNORMAL_SAMPLE_MANIFEST_V1",
         "created_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "repository_commit": git_revision(repo_root, "HEAD"),
         "matiec_commit": compiler_commit,

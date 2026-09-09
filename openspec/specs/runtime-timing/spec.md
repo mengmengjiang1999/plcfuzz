@@ -3,26 +3,25 @@
 ## Purpose
 TBD - created by archiving change fix-runtime-timing. Update Purpose after archive.
 ## Requirements
-### Requirement: Explicit fuzz-loop timing configuration
-The runtime SHALL read the cycle count from `PLCFUZZ_CYCLE_COUNT` with a default of 100 and the wall-clock pacing delay in nanoseconds from `PLCFUZZ_CYCLE_DELAY_NS` with a default of zero.
+### Requirement: Explicit automated-input timing configuration
 
-#### Scenario: Default fast fuzz execution
-- **WHEN** neither timing environment variable is set
+The runtime SHALL read the cycle count from `PLC_LAB_CYCLE_COUNT` with a default of 100 and the wall-clock pacing delay from `PLC_LAB_CYCLE_DELAY_NS` with a default of zero. Former project timing variables SHALL remain compatibility aliases with migration guidance.
+
+#### Scenario: Default fast execution
+
+- **WHEN** neither canonical nor compatibility timing variable is set
 - **THEN** the runtime executes 100 cycles without an intentional wall-clock sleep
 
-#### Scenario: Valid timing overrides
-- **WHEN** the environment contains a positive cycle count and a non-negative nanosecond delay
-- **THEN** the runtime uses those values for the current input execution
+#### Scenario: Compatibility timing variables are set
 
-#### Scenario: Invalid timing override
-- **WHEN** a timing environment variable is malformed, out of range, or violates its allowed range
-- **THEN** the runtime fails startup with a configuration error
+- **WHEN** only former timing variables contain valid values
+- **THEN** the runtime uses those values and emits migration guidance naming the canonical variables
 
 ### Requirement: Logical and wall-clock time independence
 The runtime SHALL treat MatIEC logical time as independent from optional host wall-clock pacing.
 
 #### Scenario: Wall-clock delay disabled
-- **WHEN** `PLCFUZZ_CYCLE_DELAY_NS` is zero
+- **WHEN** `PLC_LAB_CYCLE_DELAY_NS` is zero
 - **THEN** PLC logical time continues to advance through the existing MatIEC runtime behavior while no host sleep is requested
 
 ### Requirement: Correct timing statistics

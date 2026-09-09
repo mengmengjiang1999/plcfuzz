@@ -13,8 +13,8 @@ build_runtime() {
         EXTRA_LDFLAGS="-fsanitize=address,undefined"
 }
 
-build_mutator() {
-    local build_dir="$repo_root/build/diagnostics/mutator"
+build_transformer() {
+    local build_dir="$repo_root/build/diagnostics/input-transformer"
     cmake \
         -S "$repo_root" \
         -B "$build_dir" \
@@ -27,16 +27,20 @@ build_mutator() {
 case "$mode" in
     all)
         build_runtime
-        build_mutator
+        build_transformer
         ;;
     runtime)
         build_runtime
         ;;
+    transformer)
+        build_transformer
+        ;;
     mutator)
-        build_mutator
+        echo "Deprecated diagnostic target: use transformer." >&2
+        build_transformer
         ;;
     *)
-        echo "Usage: $0 [all|runtime|mutator]" >&2
+        echo "Usage: $0 [all|runtime|transformer]" >&2
         exit 2
         ;;
 esac

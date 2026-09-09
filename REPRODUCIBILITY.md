@@ -1,6 +1,6 @@
 # 可复现环境
 
-PLCFuzz 同时保留两套需要区分的基线：当前开发基线使用仓库固定的 MatIEC submodule；历史实验基线使用仓库保存的旧二进制。比较测试结果时必须记录所用基线，二者生成的 C 代码不应默认视为等价。
+PLC Robustness Lab 同时保留两套需要区分的基线：当前开发基线使用仓库固定的 MatIEC submodule；历史实验基线使用仓库保存的旧二进制。比较测试结果时必须记录所用基线，二者生成的 C 代码不应默认视为等价。
 
 ## 当前开发基线
 
@@ -11,7 +11,7 @@ PLCFuzz 同时保留两套需要区分的基线：当前开发基线使用仓库
 | 容器基础系统 | Ubuntu 22.04，digest `sha256:23bda685...92216ccf` |
 | AFL++ | `v5.03c` |
 | OpenPLC v3 上游源码 | `091524e1d80120cbe6b2c130822e91369f12eccd` |
-| C/C++ 标准 | PLCFuzz 运行时使用 GNU++11；自定义变异器使用 C++11 |
+| C/C++ 标准 | PLC Robustness Lab 运行时使用 GNU++11；输入转换器使用 C++11 |
 | Python | Python 3，仅依赖标准库 |
 
 首次克隆必须初始化 submodule：
@@ -19,20 +19,20 @@ PLCFuzz 同时保留两套需要区分的基线：当前开发基线使用仓库
 ```sh
 git clone --recurse-submodules https://github.com/mengmengjiang1999/plcfuzz.git
 cd plcfuzz
-./scripts/plcfuzz setup
+./scripts/plc-lab setup
 ```
 
 已有工作树可执行：
 
 ```sh
 git submodule update --init --recursive
-./scripts/plcfuzz setup
+./scripts/plc-lab setup
 ```
 
 若要同时运行 MatIEC 自身测试：
 
 ```sh
-MATIEC_RUN_TESTS=1 ./scripts/plcfuzz setup
+MATIEC_RUN_TESTS=1 ./scripts/plc-lab setup
 ```
 
 `setup_matiec.sh` 默认使用 `MATIEC_BUILD_JOBS=1` 保证清洁构建顺序稳定。该变量专用于 MatIEC；项目其他构建步骤的 `BUILD_JOBS` 不会改变它。
@@ -69,46 +69,46 @@ Dockerfile 固定 OpenPLC 和 AFL++ 上游版本，并在镜像的 `/opt/upstrea
 
 `.github/workflows/linux-quality.yml` 在 Ubuntu 22.04 上按本节顺序执行完整验证，并从源码构建固定的 AFL++ 5.03c。它对 `main` 的推送和目标为 `main` 的 pull request 运行，只申请仓库只读权限。
 
-MatIEC 与 AFL++ 的源码构建分别使用 `MATIEC_BUILD_JOBS=1` 和 `PLCFUZZ_TOOLCHAIN_BUILD_JOBS=1`，防止递归构建共享输出；其他项目步骤仍使用独立的 `BUILD_JOBS` 设置。插桩编译包装器通过 `PLCFUZZ_INSTRUMENTED_CXX` 传给项目脚本，避免占用 AFL++ 自身解释的环境变量。
+MatIEC 与 AFL++ 的源码构建分别使用 `MATIEC_BUILD_JOBS=1` 和 `PLC_LAB_TOOLCHAIN_BUILD_JOBS=1`，防止递归构建共享输出；其他项目步骤仍使用独立的 `BUILD_JOBS` 设置。插桩编译包装器通过 `PLC_LAB_INSTRUMENTED_CXX` 传给项目脚本，避免占用 AFL++ 自身解释的环境变量。
 
 ```sh
 ./scripts/verify_preserved_artifacts.sh
 ./scripts/check_source_layout.sh
-./scripts/plcfuzz test testcases
-./scripts/plcfuzz test unit
-./scripts/plcfuzz build
+./scripts/plc-lab test testcases
+./scripts/plc-lab test unit
+./scripts/plc-lab build
 ```
 
-`scripts/plcfuzz build` 默认把 `testcases/race_test_success.st` 转为 C，然后依次构建普通运行目标、生成变量映射、构建自定义变异器和 AFL++ 插桩目标。
+`scripts/plc-lab build` 默认把 `testcases/concurrency_reference.st` 转为 C，然后依次构建普通运行目标、生成变量映射、构建输入转换器和 AFL++ 插桩目标。
 
-当前输入回放语义规定每个 OpenPLC 周期只推进每种输入类型一次。修复前的运行时会在同一周期重复推进 simulator，且把 UINT 输入误接到 UDINT 数据；因此修复前后的 findings 不能直接作为同一运行时基线比较，实验记录必须包含仓库 commit。
+当前输入回放语义规定每个 OpenPLC 周期只推进每种输入类型一次。早期运行时会在同一周期重复推进 simulator，且把 UINT 输入误接到 UDINT 数据；因此不同版本的观测结果不能直接作为同一运行时基线比较，实验记录必须包含仓库 commit。
 
-当前输出变化 oracle 只比较实际记录的 history 样本，并按环形缓冲区的时间顺序处理。旧版本会把未写入的零值槽位加入比较，因此旧 findings 还可能包含初始化导致的候选；跨版本评估必须分别记录 oracle 所在的仓库 commit。输出变化仍只是候选信号，不等价于严格的数据竞争证明。
+当前输出变化判定只比较实际记录的 history 样本，并按环形缓冲区的时间顺序处理。旧版本会把未写入的零值槽位加入比较，因此历史观测记录还可能包含初始化导致的候选；跨版本评估必须分别记录判定逻辑所在的仓库 commit。输出变化仍只是候选信号，不等价于严格的数据竞争证明。
 
-每个输入默认执行 100 个 PLC 周期，并且不主动等待墙钟时间，以保持 fuzzing 吞吐量。可按实验需要设置：
+每个输入默认执行 100 个 PLC 周期，并且不主动等待墙钟时间，以保持自动输入实验吞吐量。可按实验需要设置：
 
 ```sh
-PLCFUZZ_CYCLE_COUNT=250 \
-PLCFUZZ_CYCLE_DELAY_NS=50000000 \
-./openplc_fuzz seeds/example
+PLC_LAB_CYCLE_COUNT=250 \
+PLC_LAB_CYCLE_DELAY_NS=50000000 \
+./openplc_instrumented input_samples/example
 ```
 
-`PLCFUZZ_CYCLE_COUNT` 必须是正整数；`PLCFUZZ_CYCLE_DELAY_NS` 是非负的纳秒数。后者只控制宿主机的绝对时钟休眠，不改变 MatIEC 的 `common_ticktime__` 或 IEC 程序逻辑时间。运行摘要中的 latency 是实际唤醒时刻相对绝对截止时刻的非负迟到量；关闭墙钟 pacing 时该值为零。复现实验必须记录这两个变量，未设置时分别记为 `100` 和 `0`。
+`PLC_LAB_CYCLE_COUNT` 必须是正整数；`PLC_LAB_CYCLE_DELAY_NS` 是非负的纳秒数。后者只控制宿主机的绝对时钟休眠，不改变 MatIEC 的 `common_ticktime__` 或 IEC 程序逻辑时间。运行摘要中的 latency 是实际唤醒时刻相对绝对截止时刻的非负迟到量；关闭墙钟 pacing 时该值为零。复现实验必须记录这两个变量，未设置时分别记为 `100` 和 `0`。
 
-自定义变异器的随机流完全由 AFL++ 传入的 seed 驱动；在相同构建、映射和输入下，相同 seed 的首次变异结果一致，不再受进程全局 `random()` 状态影响。变量映射默认读取当前目录的 `plc_variables_mapping.csv`；从其他目录启动或比较不同 PLC 程序时，应显式记录并设置：
+输入转换器的随机流完全由 AFL++ 传入的 seed 驱动；在相同构建、映射和输入下，相同 seed 的首次转换结果一致，不再受进程全局 `random()` 状态影响。变量映射默认读取当前目录的 `plc_variables_mapping.csv`；从其他目录启动或比较不同 PLC 程序时，应显式记录并设置：
 
 ```sh
-PLCFUZZ_VARIABLE_MAPPING=/workspace/plcfuzz/plc_variables_mapping.csv \
-FINDINGS_DIR=output/reproduction-runs \
-./scripts/plcfuzz experiment
+PLC_LAB_VARIABLE_MAPPING=/workspace/plc-lab/plc_variables_mapping.csv \
+OBSERVATIONS_DIR=output/reproduction-runs \
+./scripts/plc-lab experiment
 ```
 
-映射文件缺失或存在不完整、越界、非数字字段时，变异器会在初始化阶段报告具体文件和行号并拒绝启动，避免退化成没有变量级变异的实验。
+映射文件缺失或存在不完整、越界、非数字字段时，输入转换器会在初始化阶段报告具体文件和行号并拒绝启动，避免退化成没有变量级转换的实验。
 
 只验证 ST 到 C：
 
 ```sh
-./scripts/plcfuzz build plc testcases/race_test_success.st
+./scripts/plc-lab build plc testcases/concurrency_reference.st
 test -s ./plclogic/Config0.c
 test -s ./plclogic/Res0.c
 ```
@@ -118,20 +118,20 @@ test -s ./plclogic/Res0.c
 ```sh
 MATIEC_IEC2C=./artifacts/legacy/matiec/iec2c \
 MATIEC_INCLUDE_DIR=./lib \
-./scripts/plcfuzz build plc testcases/race_test_success.st
+./scripts/plc-lab build plc testcases/concurrency_reference.st
 ```
 
 ## 复现自动输入生成实验
 
-原始种子保存在 `seeds copy/`。复制后运行，避免修改保留材料：
+原始输入样本保存在 `seeds copy/`。复制后运行，避免修改保留材料：
 
 ```sh
-mkdir -p seeds
-cp -a "seeds copy/." seeds/
-FINDINGS_DIR=output/reproduction-runs ./scripts/plcfuzz experiment
+mkdir -p input_samples
+cp -a "seeds copy/." input_samples/
+OBSERVATIONS_DIR=output/reproduction-runs ./scripts/plc-lab experiment
 ```
 
-`scripts/plcfuzz experiment` 默认运行 3600 秒，单次执行超时 10000 ms。`FINDINGS_DIR` 是实验根目录；脚本会为每次启动创建独立子目录，并拒绝覆盖显式指定的 `EXPERIMENT_DIR`。仓库内已有的 `findings/` 和 `findings copy/` 不会被修改。
+`scripts/plc-lab experiment` 默认运行 3600 秒，单次执行超时 10000 ms。`OBSERVATIONS_DIR` 是实验根目录；脚本会为每次启动创建独立子目录，并拒绝覆盖显式指定的 `EXPERIMENT_DIR`。仓库内已有的 `findings/` 和 `findings copy/` 是只读历史记录，不会被修改。
 
 ## 已知限制
 
@@ -142,7 +142,7 @@ FINDINGS_DIR=output/reproduction-runs ./scripts/plcfuzz experiment
 
 ## 记录一次实验
 
-`scripts/plcfuzz experiment` 会在执行长期进程前写入版本化的 `manifest.json`，结束时再原子更新完成时间、退出码及最终状态。清单自动记录仓库 commit、MatIEC gitlink、AFL++ 版本、目标 SHA-256、CPU/内核信息、持续时间、单次超时、输入与输出路径、选定环境变量和完整命令。实验目录会在终端打印，也可以提前用尚不存在的 `EXPERIMENT_DIR` 指定。
+`scripts/plc-lab experiment` 会在执行长期进程前写入版本化的 `manifest.json`，结束时再原子更新完成时间、退出码及最终状态。清单自动记录仓库 commit、MatIEC gitlink、AFL++ 版本、目标 SHA-256、CPU/内核信息、持续时间、单次超时、输入与输出路径、选定环境变量和完整命令。实验目录会在终端打印，也可以提前用尚不存在的 `EXPERIMENT_DIR` 指定。
 
 镜像 digest、内存容量以及保留二进制的摘要仍应作为外部验收记录补充：
 

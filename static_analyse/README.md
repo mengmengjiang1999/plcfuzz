@@ -14,6 +14,6 @@ python3 static_analyse/main.py \
   --output /tmp/plc_variables_mapping.csv
 ```
 
-不要在 `static_analyse/` 内保存第二份映射；自定义变异器默认读取根目录的 `plc_variables_mapping.csv`。
+不要在 `static_analyse/` 内保存第二份映射；输入转换器默认读取根目录的 `plc_variables_mapping.csv`。
 
 生成器校验 MatIEC 宏记录的字段数量、IEC 类型、位置区域、宽度、索引、符号名称和重复目标。全部记录通过后才替换输出文件。

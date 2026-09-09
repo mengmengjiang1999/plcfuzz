@@ -12,13 +12,13 @@ import sys
 REQUIRED_ORIGINAL_PATHS = {
     "README.md",
     "docs/LICENSE_METADATA.md",
-    "fuzz_config/plc_mutator.cpp",
+    "input_generation/plc_input_transformer.cpp",
     "include/plc_input_format.h",
     "runfuzz.sh",
     "scripts/check_license_metadata.py",
     "src/plc_input_simulator.cpp",
     "static_analyse/main.py",
-    "tests/plc_mutator_test.cpp",
+    "tests/plc_input_transformer_test.cpp",
 }
 OPENSPEC_METADATA_PATHS = {
     "openspec/changes/add-license-metadata/specs/project-license-metadata/spec.md",
@@ -56,8 +56,10 @@ def tracked_paths(repo_root):
             "build",
             "findings",
             "findings_back",
+            "input_samples",
+            "observations",
             "openplc",
-            "openplc_fuzz",
+            "openplc_instrumented",
             "output",
             "plclogic",
             "results",
@@ -100,7 +102,7 @@ def parse_metadata(path):
             fail("annotation precedence must be aggregate")
         if fields["SPDX-License-Identifier"] not in {"GPL-3.0-only", "GPL-3.0-or-later"}:
             fail("annotation uses an unsupported license identifier")
-        if fields["SPDX-FileCopyrightText"] == "2024-2026 PLCFuzz contributors":
+        if fields["SPDX-FileCopyrightText"] == "2024-2026 PLC Robustness Lab contributors":
             if fields["SPDX-License-Identifier"] != "GPL-3.0-only":
                 fail("project-authored annotation must use GPL-3.0-only")
             project_patterns = patterns

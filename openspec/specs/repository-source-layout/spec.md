@@ -11,15 +11,13 @@ The runtime build SHALL compile an explicit list of maintained translation units
 - **THEN** it is not compiled until the Makefile source manifest is deliberately updated
 
 ### Requirement: Isolated historical implementations
-Disabled protocol implementations and obsolete mutator or grammar variants SHALL reside under a documented archival tree, outside active source and configuration directories.
+
+Disabled protocol implementations and obsolete input-transformer or grammar variants SHALL reside under a documented archival tree, outside `src/` and the maintained `input_generation/` directory.
 
 #### Scenario: Maintainer inspects active directories
-- **WHEN** the maintainer lists `src/` and `fuzz_config/`
-- **THEN** fully disabled implementations and backup-named variants are absent
 
-#### Scenario: Researcher needs an old variant
-- **WHEN** a researcher follows the archival README
-- **THEN** the retained tagged grammar, old mutator, and disabled protocol sources can be located
+- **WHEN** the maintainer lists `src/` and `input_generation/`
+- **THEN** fully disabled implementations and backup-named variants are absent
 
 ### Requirement: Single variable mapping output
 The repository SHALL use the root `plc_variables_mapping.csv` as the sole tracked active mapping output.
@@ -39,5 +37,5 @@ The repository SHALL identify `src/glueVars.cpp` and `plc_variables_mapping.csv`
 The repository SHALL provide an automated check for the active source manifest, archival separation, and generated mapping consistency.
 
 #### Scenario: Obsolete backup returns to active tree
-- **WHEN** a backup mutator, backup grammar, or analyzer-local mapping is added to an active directory
+- **WHEN** a backup input transformer, backup grammar, or analyzer-local mapping is added to an active directory
 - **THEN** the structural check fails with the unexpected path

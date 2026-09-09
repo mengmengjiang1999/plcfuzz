@@ -44,29 +44,45 @@ void expect_invalid_config() {
 }  // namespace
 
 int main() {
-    EnvironmentGuard count_guard("PLCFUZZ_CYCLE_COUNT");
-    EnvironmentGuard delay_guard("PLCFUZZ_CYCLE_DELAY_NS");
+    EnvironmentGuard count_guard("PLC_LAB_CYCLE_COUNT");
+    EnvironmentGuard delay_guard("PLC_LAB_CYCLE_DELAY_NS");
+    EnvironmentGuard legacy_count_guard("PLCFUZZ_CYCLE_COUNT");
+    EnvironmentGuard legacy_delay_guard("PLCFUZZ_CYCLE_DELAY_NS");
 
+    unsetenv("PLC_LAB_CYCLE_COUNT");
+    unsetenv("PLC_LAB_CYCLE_DELAY_NS");
     unsetenv("PLCFUZZ_CYCLE_COUNT");
     unsetenv("PLCFUZZ_CYCLE_DELAY_NS");
     runtime_timing::Config config = runtime_timing::load_config();
     assert(config.cycle_count == 100);
     assert(config.cycle_delay_ns == 0);
 
-    setenv("PLCFUZZ_CYCLE_COUNT", "250", 1);
-    setenv("PLCFUZZ_CYCLE_DELAY_NS", "50000000", 1);
+    setenv("PLC_LAB_CYCLE_COUNT", "250", 1);
+    setenv("PLC_LAB_CYCLE_DELAY_NS", "50000000", 1);
     config = runtime_timing::load_config();
     assert(config.cycle_count == 250);
     assert(config.cycle_delay_ns == 50000000);
 
-    setenv("PLCFUZZ_CYCLE_COUNT", "0", 1);
+    unsetenv("PLC_LAB_CYCLE_COUNT");
+    unsetenv("PLC_LAB_CYCLE_DELAY_NS");
+    setenv("PLCFUZZ_CYCLE_COUNT", "125", 1);
+    setenv("PLCFUZZ_CYCLE_DELAY_NS", "25000000", 1);
+    config = runtime_timing::load_config();
+    assert(config.cycle_count == 125);
+    assert(config.cycle_delay_ns == 25000000);
+    unsetenv("PLCFUZZ_CYCLE_COUNT");
+    unsetenv("PLCFUZZ_CYCLE_DELAY_NS");
+    setenv("PLC_LAB_CYCLE_COUNT", "250", 1);
+    setenv("PLC_LAB_CYCLE_DELAY_NS", "50000000", 1);
+
+    setenv("PLC_LAB_CYCLE_COUNT", "0", 1);
     expect_invalid_config();
-    setenv("PLCFUZZ_CYCLE_COUNT", "12cycles", 1);
+    setenv("PLC_LAB_CYCLE_COUNT", "12cycles", 1);
     expect_invalid_config();
-    setenv("PLCFUZZ_CYCLE_COUNT", "", 1);
+    setenv("PLC_LAB_CYCLE_COUNT", "", 1);
     expect_invalid_config();
-    setenv("PLCFUZZ_CYCLE_COUNT", "100", 1);
-    setenv("PLCFUZZ_CYCLE_DELAY_NS", "-1", 1);
+    setenv("PLC_LAB_CYCLE_COUNT", "100", 1);
+    setenv("PLC_LAB_CYCLE_DELAY_NS", "-1", 1);
     expect_invalid_config();
 
     struct timespec deadline = {7, 900000000};

@@ -11,9 +11,9 @@ import sys
 import tempfile
 
 
-CATALOG_MARKER = "# plcfuzz-testcase-catalog-v1"
-PROVENANCE_MARKER = "# plcfuzz-testcase-provenance-v1"
-SOURCE_MAP_MARKER = "# plcfuzz-ldmicro-source-map-v1"
+CATALOG_MARKER = "# plc-lab-testcase-catalog-v1"
+PROVENANCE_MARKER = "# plc-lab-testcase-provenance-v1"
+SOURCE_MAP_MARKER = "# plc-lab-ldmicro-source-map-v1"
 FIELDS = [
     "path",
     "original_path",
@@ -217,7 +217,7 @@ def verify_compiler(rows, repo_root, errors):
         return
 
     checked = 0
-    with tempfile.TemporaryDirectory(prefix="plcfuzz-catalog-") as temporary_root:
+    with tempfile.TemporaryDirectory(prefix="plc-lab-catalog-") as temporary_root:
         for row in rows:
             if row["language"] != "st":
                 continue
@@ -247,7 +247,7 @@ def verify_compiler(rows, repo_root, errors):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Validate the PLCFuzz testcase catalog")
+    parser = argparse.ArgumentParser(description="Validate the PLC Robustness Lab testcase catalog")
     parser.add_argument("--verify-compiler", action="store_true", help="check all ST expectations with MatIEC")
     arguments = parser.parse_args()
 

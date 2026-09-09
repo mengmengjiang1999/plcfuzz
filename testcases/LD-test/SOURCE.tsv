@@ -1,4 +1,4 @@
-# plcfuzz-ldmicro-source-map-v1
+# plc-lab-ldmicro-source-map-v1
 path	upstream_path	upstream_blob	comparison	local_sha256
 LD-test/7seg-display.ld	ldmicro/sample/7seg-display.ld	b9d0c9dd7de6eb9057854d444644c427ad600520	modified	86a9a5e8788d15ef58621f68b0de3c55bbab6b93f2f8e071a19dea0d214b69a2
 LD-test/MasterRelay-Test.ld	ldmicro/sample/MasterRelay-Test.ld	251b185a49c396860f43976e11656599c03c31a7	modified	f6b6852d3fe56a4ee0458fb0d39f9b7d9c6c833baae3dd3a5598421cf684210b

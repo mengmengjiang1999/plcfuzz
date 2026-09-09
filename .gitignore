@@ -2,6 +2,7 @@
 build/
 output/
 seeds/
+input_samples/
 *.gch
 *.o
 *.so
@@ -12,11 +13,12 @@ seeds/
 *.pyc
 *.cfg
 openplc
-/openplc_fuzz
+/openplc_instrumented
 *.original
 *.txt
 !**/CMakeLists.txt
 findings/
 findings_back/
+observations/
 plclogic/
 image/

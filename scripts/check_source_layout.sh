@@ -20,9 +20,9 @@ for source_path in "$repo_root"/src/*.cpp; do
 done
 
 unexpected_paths=(
-    fuzz_config/plc_back.grammar
-    fuzz_config/tmp.grammar
-    fuzz_config/plc_mutator-back.cpp
+    input_generation/plc_back.grammar
+    input_generation/tmp.grammar
+    input_generation/plc_input_transformer-back.cpp
     static_analyse/plc_variables_mapping.csv
     src/server.cpp
     src/enip.cpp
@@ -59,7 +59,7 @@ for relative_path in "${required_archive_paths[@]}"; do
     fi
 done
 
-generated_mapping=$(mktemp "${TMPDIR:-/tmp}/plcfuzz-mapping.XXXXXX")
+generated_mapping=$(mktemp "${TMPDIR:-/tmp}/plc-lab-mapping.XXXXXX")
 trap 'rm -f "$generated_mapping"' EXIT
 python3 "$repo_root/static_analyse/main.py" \
     --input "$repo_root/tests/fixtures/reference_LOCATED_VARIABLES.h" \

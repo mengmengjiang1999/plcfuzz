@@ -13,14 +13,14 @@ import subprocess
 import tempfile
 
 
-SCHEMA = "PLCFUZZ_EXPERIMENT_MANIFEST_V1"
+SCHEMA = "PLC_LAB_EXPERIMENT_MANIFEST_V1"
 RECORDED_ENVIRONMENT = (
     "AFL_AUTORESUME",
     "AFL_CUSTOM_MUTATOR_LIBRARY",
     "AFL_MAP_SIZE",
     "AFL_SKIP_CPUFREQ",
-    "PLCFUZZ_CYCLE_COUNT",
-    "PLCFUZZ_CYCLE_DELAY_NS",
+    "PLC_LAB_CYCLE_COUNT",
+    "PLC_LAB_CYCLE_DELAY_NS",
 )
 
 
@@ -98,7 +98,7 @@ def resolve_executable(value):
     return resolved
 
 
-def create_directory(findings_root, explicit_directory, repository_commit):
+def create_directory(observations_root, explicit_directory, repository_commit):
     if explicit_directory is not None:
         directory = explicit_directory.resolve()
         if directory.exists():
@@ -106,7 +106,7 @@ def create_directory(findings_root, explicit_directory, repository_commit):
         directory.mkdir(parents=True)
         return directory
 
-    root = findings_root.resolve()
+    root = observations_root.resolve()
     root.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     prefix = "run-{}-{}-".format(timestamp, repository_commit[:12])
@@ -116,26 +116,30 @@ def create_directory(findings_root, explicit_directory, repository_commit):
 def create_manifest(args):
     repo_root = args.repo_root.resolve()
     target = resolve_executable(str(args.target))
-    afl_binary = resolve_executable(args.afl_binary)
-    seed_dir = args.seed_dir.resolve()
+    input_tool = resolve_executable(args.input_tool)
+    input_samples_dir = args.input_samples_dir.resolve()
     grammar = args.grammar.resolve()
-    mutator = args.mutator.resolve()
-    for path, label in ((seed_dir, "seed directory"), (grammar, "grammar"), (mutator, "custom input component")):
+    input_transformer = args.input_transformer.resolve()
+    for path, label in (
+        (input_samples_dir, "input samples directory"),
+        (grammar, "grammar"),
+        (input_transformer, "input transformer"),
+    ):
         if not path.exists():
             raise ValueError("{} does not exist: {}".format(label, path))
 
-    repository_commit = git_revision(repo_root, "HEAD", "PLCFUZZ_SOURCE_REVISION")
-    matiec_commit = git_revision(repo_root, "HEAD:third_party/matiec", "PLCFUZZ_MATIEC_REVISION")
-    experiment_dir = create_directory(args.findings_root, args.experiment_dir, repository_commit)
+    repository_commit = git_revision(repo_root, "HEAD", "PLC_LAB_SOURCE_REVISION")
+    matiec_commit = git_revision(repo_root, "HEAD:third_party/matiec", "PLC_LAB_MATIEC_REVISION")
+    experiment_dir = create_directory(args.observations_root, args.experiment_dir, repository_commit)
     output_dir = experiment_dir / "afl-output"
     command = [
-        str(afl_binary),
+        str(input_tool),
         "-V",
         str(args.duration),
         "-t",
         str(args.timeout),
         "-i",
-        str(seed_dir),
+        str(input_samples_dir),
         "-o",
         str(output_dir),
         "-g",
@@ -155,14 +159,14 @@ def create_manifest(args):
         "exit_code": None,
         "repository_commit": repository_commit,
         "matiec_commit": matiec_commit,
-        "afl_version": tool_version(afl_binary),
+        "input_tool_version": tool_version(input_tool),
         "target": str(target),
         "target_sha256": sha256_file(target),
         "duration_seconds": args.duration,
         "timeout_milliseconds": args.timeout,
-        "seed_dir": str(seed_dir),
+        "input_samples_dir": str(input_samples_dir),
         "grammar": str(grammar),
-        "custom_input_component": str(mutator),
+        "input_transformer": str(input_transformer),
         "output_dir": str(output_dir),
         "command": command,
         "environment": recorded_environment,
@@ -198,20 +202,20 @@ def finish_manifest(args):
 
 
 def parse_args(argv=None):
-    parser = argparse.ArgumentParser(description="Manage isolated PLCFuzz experiment manifests.")
+    parser = argparse.ArgumentParser(description="Manage isolated PLC Robustness Lab experiment manifests.")
     subparsers = parser.add_subparsers(dest="command_name", required=True)
 
     create = subparsers.add_parser("create", help="create a new experiment directory and manifest")
     create.add_argument("--repo-root", required=True, type=pathlib.Path)
-    create.add_argument("--findings-root", required=True, type=pathlib.Path)
+    create.add_argument("--observations-root", required=True, type=pathlib.Path)
     create.add_argument("--experiment-dir", type=pathlib.Path)
     create.add_argument("--target", required=True, type=pathlib.Path)
-    create.add_argument("--seed-dir", required=True, type=pathlib.Path)
+    create.add_argument("--input-samples-dir", required=True, type=pathlib.Path)
     create.add_argument("--grammar", required=True, type=pathlib.Path)
-    create.add_argument("--mutator", required=True, type=pathlib.Path)
+    create.add_argument("--input-transformer", required=True, type=pathlib.Path)
     create.add_argument("--duration", required=True, type=int)
     create.add_argument("--timeout", required=True, type=int)
-    create.add_argument("--afl-binary", default="afl-fuzz")
+    create.add_argument("--input-tool", default="afl-fuzz")
     create.set_defaults(function=create_manifest)
 
     finish = subparsers.add_parser("finish", help="finalize an existing experiment manifest")

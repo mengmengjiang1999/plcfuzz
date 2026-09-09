@@ -6,7 +6,7 @@
 #include <vector>
 #include <unistd.h>
 
-#include "mutator_helper.h"
+#include "input_transformer_helper.h"
 
 extern "C" {
 typedef struct afl_state afl_state_t;
@@ -24,7 +24,7 @@ void afl_custom_deinit(void* data);
 namespace {
 
 std::string temporary_mapping_path() {
-    return "/tmp/plcfuzz-mutator-test-" + std::to_string(static_cast<long long>(getpid())) + ".csv";
+    return "/tmp/plc-lab-input-transformer-test-" + std::to_string(static_cast<long long>(getpid())) + ".csv";
 }
 
 void write_mapping(const std::string& path, const std::string& body) {
@@ -34,7 +34,7 @@ void write_mapping(const std::string& path, const std::string& body) {
     assert(output.good());
 }
 
-std::string mutate_once(unsigned int seed, const std::string& input, size_t max_size) {
+std::string transform_once(unsigned int seed, const std::string& input, size_t max_size) {
     void* state = afl_custom_init(NULL, seed);
     assert(state != NULL);
     uint8_t* output = reinterpret_cast<uint8_t*>(1);
@@ -60,7 +60,7 @@ std::string mutate_once(unsigned int seed, const std::string& input, size_t max_
 
 int main() {
     const std::string mapping_path = temporary_mapping_path();
-    setenv("PLCFUZZ_VARIABLE_MAPPING", mapping_path.c_str(), 1);
+    setenv("PLC_LAB_VARIABLE_MAPPING", mapping_path.c_str(), 1);
     write_mapping(mapping_path,
                   "bool_inputs,0,0,__IX0_0\n"
                   "byte_inputs,0,,__IB0\n"
@@ -85,29 +85,29 @@ int main() {
     const std::string input = serialize_plc_data(std::vector<PLCInputBlock>(1, block));
 
     srandom(1);
-    const std::string first = mutate_once(12345, input, 1024 * 1024);
+    const std::string first = transform_once(12345, input, 1024 * 1024);
     srandom(999);
-    const std::string second = mutate_once(12345, input, 1024 * 1024);
+    const std::string second = transform_once(12345, input, 1024 * 1024);
     assert(!first.empty());
     assert(first == second);
 
     const std::string legacy_input =
         serialize_plc_data(std::vector<PLCInputBlock>(1, block), PLCInputFormat::Legacy);
-    const std::string migrated_output = mutate_once(12345, legacy_input, 1024 * 1024);
+    const std::string migrated_output = transform_once(12345, legacy_input, 1024 * 1024);
     assert(migrated_output.compare(0, sizeof(PLC_INPUT_FORMAT_V1_HEADER) - 1,
                                    PLC_INPUT_FORMAT_V1_HEADER) == 0);
 
     bool found_different_seed = false;
     for(unsigned int seed = 1; seed < 10; ++seed) {
-        if(mutate_once(seed, input, 1024 * 1024) != first) {
+        if(transform_once(seed, input, 1024 * 1024) != first) {
             found_different_seed = true;
             break;
         }
     }
     assert(found_different_seed);
 
-    assert(mutate_once(12345, input, 1).empty());
-    assert(mutate_once(12345, "not plc data", 1024).empty());
+    assert(transform_once(12345, input, 1).empty());
+    assert(transform_once(12345, "not plc data", 1024).empty());
     assert(unsigned_bit_mask<IEC_UDINT>(31) == 0x80000000U);
     assert(unsigned_bit_mask<IEC_ULINT>(63) == 0x8000000000000000ULL);
 
@@ -120,13 +120,21 @@ int main() {
     write_mapping(mapping_path, "bool_inputs,0,0,\n");
     assert(afl_custom_init(NULL, 1) == NULL);
 
-    setenv("PLCFUZZ_VARIABLE_MAPPING", "/tmp/plcfuzz-mutator-does-not-exist.csv", 1);
+    setenv("PLC_LAB_VARIABLE_MAPPING", "/tmp/plc-lab-transformer-does-not-exist.csv", 1);
     assert(afl_custom_init(NULL, 1) == NULL);
 
-    unsetenv("PLCFUZZ_VARIABLE_MAPPING");
+    unsetenv("PLC_LAB_VARIABLE_MAPPING");
     void* default_mapping_state = afl_custom_init(NULL, 1);
     assert(default_mapping_state != NULL);
     afl_custom_deinit(default_mapping_state);
+
+    write_mapping(mapping_path, "byte_inputs,0,,__IB0\n");
+    setenv("PLCFUZZ_VARIABLE_MAPPING", mapping_path.c_str(), 1);
+    void* compatibility_mapping_state = afl_custom_init(NULL, 1);
+    assert(compatibility_mapping_state != NULL);
+    afl_custom_deinit(compatibility_mapping_state);
+    unsetenv("PLCFUZZ_VARIABLE_MAPPING");
+
     std::remove(mapping_path.c_str());
     return 0;
 }

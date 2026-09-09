@@ -2,5 +2,5 @@
 set -euo pipefail
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-echo "Deprecated: use ./scripts/plcfuzz lines instead." >&2
-exec "$repo_root/scripts/plcfuzz" lines "$@"
+echo "Deprecated: use ./scripts/plc-lab lines instead." >&2
+exec "$repo_root/scripts/plc-lab" lines "$@"
