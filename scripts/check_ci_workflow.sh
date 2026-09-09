@@ -16,6 +16,7 @@ rg --quiet '^  contents: read$' "$workflow"
 rg --quiet '^    runs-on: ubuntu-22\.04$' "$workflow"
 rg --quiet '^      MATIEC_BUILD_JOBS: "1"$' "$workflow"
 rg --quiet '^      PLCFUZZ_TOOLCHAIN_BUILD_JOBS: "1"$' "$workflow"
+rg --quiet '^        uses: actions/checkout@v5$' "$workflow"
 rg --quiet 'submodules: recursive' "$workflow"
 rg --quiet 'MATIEC_RUN_TESTS=1 ./scripts/plcfuzz setup' "$workflow"
 rg --quiet 'pkg-config python3 ripgrep' "$workflow"
@@ -42,6 +43,10 @@ if rg --quiet 'AFL_CXX|AFL_BUILD_JOBS' "$workflow" "$instrumented_build_script";
 fi
 if rg --quiet 'contents: write' "$workflow"; then
     echo "CI workflow must not request repository write permission." >&2
+    exit 1
+fi
+if rg --quiet 'actions/checkout@v4' "$workflow"; then
+    echo "CI workflow must use the Node.js 24 checkout action line." >&2
     exit 1
 fi
 

@@ -23,10 +23,10 @@ The roadmap SHALL provide explicit counts of completed and pending themes, keep 
 - **WHEN** a contributor reads the roadmap
 - **THEN** the number, priority, and boundary of remaining themes are clear without reconstructing status from commit history
 
-#### Scenario: Final planned theme is completed
+#### Scenario: Workflow runtime maintenance is completed
 
-- **WHEN** Linux container acceptance is implemented, verified, archived, committed, and pushed
-- **THEN** the roadmap reports fourteen completed themes and zero pending themes
+- **WHEN** the checkout action runtime upgrade is implemented, verified, archived, committed, and pushed
+- **THEN** the roadmap reports fifteen completed themes and zero pending themes
 
 ### Requirement: Academic terminology
 The roadmap SHALL describe the project using neutral academic software-quality terminology consistent with the repository communication specification.

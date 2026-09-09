@@ -1,6 +1,6 @@
 # PLCFuzz 改进路线图
 
-本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **14 个主题完成**，**0 个主题待处理**。每个主题均作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并单独提交和推送。
+本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **15 个主题完成**，**0 个主题待处理**。每个主题均作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并单独提交和推送。
 
 ## 已完成
 
@@ -87,6 +87,12 @@ OpenSpec：[`strengthen-runtime-ownership`](../openspec/changes/archive/2026-09-
 `scripts/build_linux_container.sh` 现在构建固定的 `linux/amd64` 环境，并把仓库检查、MatIEC 全套测试、40 个 ST 预期核对、普通/插桩/诊断构建及代表性输入回放设为镜像构建门槛。机器可读清单记录基础镜像、工具和软件包版本、完整命令及最终本地镜像内容摘要。
 
 OpenSpec：[`verify-linux-container-build`](../openspec/changes/archive/2026-09-09-verify-linux-container-build/)
+
+### GitHub Actions checkout 运行时升级
+
+Linux 质量工作流已从 `actions/checkout@v4` 升级到使用 Node.js 24 的 v5 line，继续保持递归检出固定 MatIEC submodule 和仓库只读权限。结构检查会要求 v5 并阻止旧 v4 配置重新进入工作流。
+
+OpenSpec：[`upgrade-checkout-node-runtime`](../openspec/changes/archive/2026-09-09-upgrade-checkout-node-runtime/)
 
 ## 待处理
 
