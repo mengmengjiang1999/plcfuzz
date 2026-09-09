@@ -9,17 +9,27 @@ repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 ambiguous_phrases='attack|exploit|weapon|intrusion|hack|vulnerab|security research|crash capture|threat model|offensive|pentest|cybersecurity|malware|backdoor|寻找崩溃|崩溃|漏洞|攻击|利用|武器化|入侵|黑客|威胁模型|恶意代码|后门'
 
 cd "$repo_root"
-if git grep -I --line-number --ignore-case --extended-regexp "$ambiguous_phrases" -- . \
-    ':!scripts/check_project_wording.sh' \
-    ':!findings/**' \
-    ':!findings copy/**' \
-    ':!findings_compare_with_petrinet/default/fuzzer_stats' \
-    ':!findings_compare_with_petrinet/default/plot_data' \
-    ':!results/**' \
-    ':!artifacts/legacy/matiec/iec2c' \
-    ':!artifacts/legacy/matiec/iec2iec' \
-    ':!artifacts/legacy/openplc_fuzz' \
-    ':!tools/glue_generator'; then
+if [[ -d .git ]]; then
+    matches=$(git grep -I --line-number --ignore-case --extended-regexp "$ambiguous_phrases" -- . \
+        ':!scripts/check_project_wording.sh' \
+        ':!findings/**' \
+        ':!findings copy/**' \
+        ':!findings_compare_with_petrinet/default/fuzzer_stats' \
+        ':!findings_compare_with_petrinet/default/plot_data' \
+        ':!results/**' \
+        ':!artifacts/legacy/matiec/iec2c' \
+        ':!artifacts/legacy/matiec/iec2iec' \
+        ':!artifacts/legacy/openplc_fuzz' \
+        ':!tools/glue_generator' || true)
+else
+    matches=$(rg -I --line-number --ignore-case --hidden --glob '!scripts/check_project_wording.sh' \
+        --glob '!findings/**' --glob '!findings copy/**' --glob '!findings_compare_with_petrinet/**' \
+        --glob '!results/**' --glob '!artifacts/legacy/**' --glob '!third_party/**' --glob '!tools/glue_generator' \
+        "$ambiguous_phrases" . || true)
+fi
+
+if [[ -n $matches ]]; then
+    printf '%s\n' "$matches"
     echo "Project-authored text contains ambiguous wording; use the terminology in CONTRIBUTING.md." >&2
     exit 1
 fi

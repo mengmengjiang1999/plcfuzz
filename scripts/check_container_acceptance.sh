@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+dockerfile="$repo_root/Dockerfile.repro"
+flow="$repo_root/scripts/run_linux_acceptance.sh"
+host="$repo_root/scripts/build_linux_container.sh"
+writer="$repo_root/scripts/write_linux_acceptance_report.py"
+
+rg --quiet '^FROM \$\{BASE_IMAGE\}$' "$dockerfile"
+rg --quiet 'run_linux_acceptance\.sh /opt/plcfuzz-acceptance/report\.json' "$dockerfile"
+rg --quiet './scripts/plcfuzz test unit' "$flow"
+rg --quiet 'check_testcase_manifest\.py --verify-compiler' "$flow"
+rg --quiet './scripts/plcfuzz test testcases' "$flow"
+rg --quiet './scripts/plcfuzz build runtime' "$flow"
+rg --quiet './scripts/plcfuzz build analyze' "$flow"
+rg --quiet './scripts/plcfuzz build mutator' "$flow"
+rg --quiet './scripts/plcfuzz diagnostics all' "$flow"
+rg --quiet './scripts/plcfuzz build instrumented' "$flow"
+rg --quiet './scripts/plcfuzz run' "$flow"
+rg --quiet './scripts/plcfuzz replay' "$flow"
+rg --quiet 'status -ne 134' "$flow"
+rg --quiet 'Output-change candidate detected' "$flow"
+rg --quiet 'linux/amd64' "$host"
+rg --quiet 'SOURCE_REVISION' "$host"
+rg --quiet 'MATIEC_REVISION' "$host"
+rg --quiet 'base_image_id' "$host"
+rg --quiet 'final_image_digest' "$host"
+rg --quiet 'plcfuzz-linux-container-acceptance-v1' "$writer"
+rg --quiet 'plcfuzz-linux-container-host-acceptance-v1' "$writer"
+rg --quiet '^\.git$' "$repo_root/.dockerignore"
+rg --quiet '^output$' "$repo_root/.dockerignore"
+rg --quiet '^docs/LINUX_CONTAINER_ACCEPTANCE\.md$' "$repo_root/.dockerignore"
+
+echo "PASS Linux container acceptance structure"

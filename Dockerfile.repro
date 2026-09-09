@@ -1,14 +1,15 @@
-FROM public.ecr.aws/ubuntu/ubuntu:22.04@sha256:23bda685bd84a4d3b9caf2086a4c35f368bb7acd57ef38090b7a45ac92216ccf
+ARG BASE_IMAGE=public.ecr.aws/ubuntu/ubuntu:22.04@sha256:23bda685bd84a4d3b9caf2086a4c35f368bb7acd57ef38090b7a45ac92216ccf
+FROM ${BASE_IMAGE}
+ARG BASE_IMAGE
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG OPENPLC_COMMIT=091524e1d80120cbe6b2c130822e91369f12eccd
 ARG AFLPP_TAG=v5.03c
 
-RUN sed -i \
-        -E 's|[a-z]+\.ubuntu\.com/ubuntu|mirrors.aliyun.com/ubuntu|g' \
-        /etc/apt/sources.list \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    apt-get -o Acquire::Retries=5 update \
+    && apt-get -o Acquire::Retries=5 install -y --no-install-recommends \
         autoconf \
         automake \
         bison \
@@ -23,8 +24,7 @@ RUN sed -i \
         lld \
         pkg-config \
         python3 \
-        strace \
-    && rm -rf /var/lib/apt/lists/*
+        strace
 
 # Keep the exact upstream source trees in the image. Besides making rebuilds
 # auditable, this preserves the corresponding source and license texts for the
@@ -47,13 +47,22 @@ RUN git clone --branch "${AFLPP_TAG}" --depth 1 \
     && make -C /opt/upstream/AFLplusplus source-only -j1 \
     && make -C /opt/upstream/AFLplusplus install
 
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    apt-get -o Acquire::Retries=5 update \
+    && apt-get -o Acquire::Retries=5 install -y --no-install-recommends ripgrep
+
+ARG SOURCE_REVISION
+ARG MATIEC_REVISION
+
 COPY . /workspace/plcfuzz
 WORKDIR /workspace/plcfuzz
 
-RUN MATIEC_RUN_TESTS=1 ./scripts/setup_matiec.sh \
-    && ./scripts/validate_testcases.sh \
-    && ./scripts/verify_preserved_artifacts.sh \
-    && afl-fuzz --version \
-    && test -x ./third_party/matiec/iec2c
+ENV PLCFUZZ_BASE_IMAGE=${BASE_IMAGE} \
+    PLCFUZZ_SOURCE_REVISION=${SOURCE_REVISION} \
+    PLCFUZZ_MATIEC_REVISION=${MATIEC_REVISION}
+
+RUN mkdir -p /opt/plcfuzz-acceptance \
+    && ./scripts/run_linux_acceptance.sh /opt/plcfuzz-acceptance/report.json
 
 CMD ["/bin/bash"]

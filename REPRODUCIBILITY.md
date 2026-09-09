@@ -56,13 +56,14 @@ MATIEC_RUN_TESTS=1 ./scripts/plcfuzz setup
 在仓库根目录执行：
 
 ```sh
-docker build --platform linux/amd64 -f Dockerfile.repro -t plcfuzz:repro .
-docker run --rm -it --platform linux/amd64 -v "$PWD:/workspace/plcfuzz" plcfuzz:repro
+./scripts/build_linux_container.sh
 ```
 
-构建上下文中必须包含已初始化的 `third_party/matiec`。Apple Silicon 主机应显式使用 `linux/amd64`，因为保留的历史 MatIEC、OpenPLC 和 glue generator 二进制是 x86-64 ELF 文件；当前 MatIEC 本身可以在 macOS 上从源码构建。
+该入口固定使用 `linux/amd64`，构建完成后从镜像提取内部报告，并在 `output/linux-container-acceptance/manifest.json` 合并记录基础镜像 ID、最终本地镜像内容摘要、平台、命令、工具和软件包版本。完整验收记录见 [`docs/LINUX_CONTAINER_ACCEPTANCE.md`](docs/LINUX_CONTAINER_ACCEPTANCE.md)。
 
-Dockerfile 固定 OpenPLC 和 AFL++ 上游版本，并在镜像的 `/opt/upstream` 中保留源码。OpenPLC 提供项目链接的 OpenDNP3 和 libmodbus。由于原复现环境的网络限制，Ubuntu APT 使用阿里云镜像；包内容仍来自 Ubuntu 22.04 amd64。
+构建上下文中必须包含已初始化的 `third_party/matiec`。Apple Silicon 主机通过 Docker 的 `linux/amd64` 模拟运行，因为保留的历史 MatIEC、OpenPLC 和 glue generator 二进制是 x86-64 ELF 文件；当前 MatIEC 本身可以在 macOS 上从源码构建。
+
+Dockerfile 固定 OpenPLC 和 AFL++ 上游版本，并在镜像的 `/opt/upstream` 中保留源码。OpenPLC 提供项目链接的 OpenDNP3 和 libmodbus。Ubuntu 包从固定基础镜像配置的软件源解析，下载阶段使用有限重试和 BuildKit 缓存；实际解析出的包版本会写入容器验收清单。
 
 ## 当前编译流程
 
@@ -134,10 +135,10 @@ FINDINGS_DIR=output/reproduction-runs ./scripts/plcfuzz experiment
 
 ## 已知限制
 
-- Ubuntu APT 软件包尚未按包哈希封存；论文归档还应记录成功构建后的最终镜像 digest。
+- Ubuntu APT 软件包尚未按包哈希封存；验收清单会记录实际解析的软件包版本和最终本地镜像内容摘要，但该摘要不是已发布的 registry manifest digest。
 - 13 个不能通过当前 MatIEC profile 的历史 ST 文件已原样归档到 `testcases/archive/incompatible-matiec/`，不计入活动语料或新增合法用例套件。
 - 历史统计和笔记中可能包含原实验机绝对路径；这些只是元数据，不再被当前脚本使用。
-- 完整 OpenPLC/AFL++ 构建仍以 x86-64 Linux 为权威环境；远端 CI 使用 Ubuntu 22.04 覆盖该流程。
+- 完整 OpenPLC/AFL++ 构建仍以 x86-64 Linux 为权威环境；固定容器完成本地全流程验收，远端 CI 使用 Ubuntu 22.04 覆盖持续检查。
 
 ## 记录一次实验
 

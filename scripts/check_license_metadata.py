@@ -45,9 +45,30 @@ def fail(message):
 
 
 def tracked_paths(repo_root):
-    output = subprocess.check_output(
-        ["git", "-C", str(repo_root), "ls-files", "--cached", "--others", "--exclude-standard", "-z"]
-    )
+    try:
+        output = subprocess.check_output(
+            ["git", "-C", str(repo_root), "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
+            stderr=subprocess.DEVNULL,
+        )
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        excluded_roots = {
+            ".git",
+            "build",
+            "findings",
+            "findings_back",
+            "openplc",
+            "openplc_fuzz",
+            "output",
+            "plclogic",
+            "results",
+            "seeds",
+            "third_party",
+        }
+        return {
+            path.relative_to(repo_root).as_posix()
+            for path in repo_root.rglob("*")
+            if path.is_file() and path.relative_to(repo_root).parts[0] not in excluded_roots
+        }
     return {item.decode("utf-8") for item in output.split(b"\0") if item}
 
 

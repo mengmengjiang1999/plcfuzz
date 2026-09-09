@@ -85,6 +85,14 @@ macOS 可以构建和测试新版 MatIEC；Apple 自带 Bison 2.3 不满足要�
 
 精确复现信息见 [REPRODUCIBILITY.md](REPRODUCIBILITY.md)，第三方来源和许可状态见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
+在装有 Docker 的主机上，可用一个命令执行固定 `linux/amd64` 环境的完整验收。该命令构建镜像、运行 MatIEC 与项目测试、构建普通/插桩/诊断目标、核对代表性输入回放，并在 `output/linux-container-acceptance/manifest.json` 写入工具版本和镜像内容摘要：
+
+```bash
+./scripts/build_linux_container.sh
+```
+
+最近一次验收结果及复核方法见 [Linux 容器验收记录](docs/LINUX_CONTAINER_ACCEPTANCE.md)。
+
 ASan/UBSan 构建及非正常终止样本的本地整理流程见 [运行诊断说明](docs/RUNTIME_DIAGNOSTICS.md)。
 
 ## 快速开始

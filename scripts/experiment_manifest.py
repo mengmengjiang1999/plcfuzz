@@ -36,7 +36,7 @@ def sha256_file(path):
     return digest.hexdigest()
 
 
-def git_revision(repo_root, revision):
+def git_revision(repo_root, revision, fallback_environment):
     try:
         return subprocess.check_output(
             ["git", "-C", str(repo_root), "rev-parse", revision],
@@ -44,6 +44,9 @@ def git_revision(repo_root, revision):
             text=True,
         ).strip()
     except (OSError, subprocess.CalledProcessError):
+        fallback = os.environ.get(fallback_environment, "")
+        if len(fallback) == 40 and all(character in "0123456789abcdefABCDEF" for character in fallback):
+            return fallback.lower()
         return "unknown"
 
 
@@ -121,8 +124,8 @@ def create_manifest(args):
         if not path.exists():
             raise ValueError("{} does not exist: {}".format(label, path))
 
-    repository_commit = git_revision(repo_root, "HEAD")
-    matiec_commit = git_revision(repo_root, "HEAD:third_party/matiec")
+    repository_commit = git_revision(repo_root, "HEAD", "PLCFUZZ_SOURCE_REVISION")
+    matiec_commit = git_revision(repo_root, "HEAD:third_party/matiec", "PLCFUZZ_MATIEC_REVISION")
     experiment_dir = create_directory(args.findings_root, args.experiment_dir, repository_commit)
     output_dir = experiment_dir / "afl-output"
     command = [

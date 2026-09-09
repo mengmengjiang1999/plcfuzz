@@ -57,11 +57,20 @@ def report_error(errors, message):
 
 
 def tracked_testcases(repo_root):
-    result = subprocess.run(
-        ["git", "-C", str(repo_root), "ls-files", "-z", "--", "testcases"],
-        check=True,
-        stdout=subprocess.PIPE,
-    )
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(repo_root), "ls-files", "-z", "--", "testcases"],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+        )
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        testcase_root = repo_root / "testcases"
+        return {
+            path.relative_to(repo_root).as_posix()
+            for path in testcase_root.rglob("*")
+            if path.is_file() and path.suffix in {".st", ".ld"}
+        }
     return {
         path
         for path in result.stdout.decode("utf-8").split("\0")
