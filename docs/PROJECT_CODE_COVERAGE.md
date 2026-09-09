@@ -33,6 +33,6 @@ CI 会验证 `summary.json` 并上传名为 `project-code-coverage` 的完整目
 
 ## 基线策略
 
-[`coverage/baseline-v1.json`](../coverage/baseline-v1.json) 保存本 change 完成前的首次完整采集值与 scope 摘要。当前 `enforcement` 是 `report-only`：低于基线会记录负差值，但不会只因比例下降而阻断构建。这样可以先积累不同 CI 运行的稳定数据，再通过独立 OpenSpec change 设置有依据的最低门槛。
+[`coverage/baseline-v1.json`](../coverage/baseline-v1.json) 保存当前 scope 摘要及 Ubuntu 22.04 完整采集值：C++ 为 887/1355 行（65.46%），Python 为 649/1244 行（52.17%）。当前 `enforcement` 是 `report-only`：低于基线会记录负差值，但不会只因比例下降而阻断构建。这样可以先积累不同 CI 运行的稳定数据，再通过独立 OpenSpec change 设置有依据的最低门槛。
 
 提高门槛时应分别评估 C++ 和 Python，并优先补足运行时入口、输入应用与变量映射的未执行分支；不应通过移除低覆盖文件或加入生成代码来改变比例。

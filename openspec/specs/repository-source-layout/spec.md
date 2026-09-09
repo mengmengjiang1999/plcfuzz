@@ -4,11 +4,18 @@
 TBD - created by archiving change organize-runtime-sources. Update Purpose after archive.
 ## Requirements
 ### Requirement: Explicit active runtime sources
-The runtime build SHALL compile an explicit list of maintained translation units and SHALL NOT automatically include arbitrary `.cpp` files based on directory membership.
+
+The runtime build SHALL compile explicit lists of maintained and generated translation units, SHALL use separate compilation rules and warning controls for those groups, and SHALL NOT automatically include arbitrary `.cpp` files based on directory membership.
 
 #### Scenario: New source file appears
+
 - **WHEN** an unreviewed `.cpp` file is added under `src/`
-- **THEN** it is not compiled until the Makefile source manifest is deliberately updated
+- **THEN** it is not compiled until the maintained or generated Makefile source manifest is deliberately updated
+
+#### Scenario: Generated PLC source is compiled
+
+- **WHEN** a MatIEC or binding translation unit is built
+- **THEN** inherited generated-header diagnostics use the generated warning policy and do not obscure maintained-source warnings
 
 ### Requirement: Isolated historical implementations
 

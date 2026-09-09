@@ -124,7 +124,7 @@ extern int ignored_bool_outputs[];
 extern int ignored_int_inputs[];
 extern int ignored_int_outputs[];
 
-// main.cpp
+// runtime_support.cpp
 void log(char *logmsg);
 bool pinNotPresent(int *ignored_vector, int vector_size, int pinNumber);
 extern uint8_t run_openplc;
@@ -135,6 +135,6 @@ void handleSpecialFunctions();
 // Runtime clock state.
 extern time_t start_time;
 
-// modbus.cpp
+// modbus.cpp and runtime_buffer_map.cpp
 int processModbusMessage(unsigned char *buffer, int bufferSize);
 void mapUnusedIO();

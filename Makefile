@@ -12,28 +12,43 @@ GLUE_GENERATOR:= $(TOOLS_DIR)/glue_generator
 
 # Active source manifest. Add new translation units deliberately; archived or
 # experimental files are never selected by directory wildcard.
-C_SRCS        := $(PLCLOGIC_DIR)/Config0.c $(PLCLOGIC_DIR)/Res0.c
-CPP_SRCS      := \
+GENERATED_C_SRCS := $(PLCLOGIC_DIR)/Config0.c $(PLCLOGIC_DIR)/Res0.c
+PROJECT_CPP_SRCS := \
 	$(SRC_DIR)/buffer_history.cpp \
 	$(SRC_DIR)/communication_compat.cpp \
 	$(SRC_DIR)/hardware_layer.cpp \
 	$(SRC_DIR)/main.cpp \
 	$(SRC_DIR)/modbus.cpp \
+	$(SRC_DIR)/modbus_discrete.cpp \
+	$(SRC_DIR)/modbus_registers.cpp \
+	$(SRC_DIR)/offline_runtime.cpp \
 	$(SRC_DIR)/plc_input_simulator.cpp \
-	$(SRC_DIR)/runtime_globals.cpp
-ALL_CPP_SRCS  := $(CPP_SRCS) $(GENERATED_CPP)
+	$(SRC_DIR)/runtime_buffer_map.cpp \
+	$(SRC_DIR)/runtime_cycle_scheduler.cpp \
+	$(SRC_DIR)/runtime_globals.cpp \
+	$(SRC_DIR)/runtime_input_application.cpp \
+	$(SRC_DIR)/runtime_result_recorder.cpp \
+	$(SRC_DIR)/runtime_state_observer.cpp \
+	$(SRC_DIR)/runtime_support.cpp
+GENERATED_CPP_SRCS := $(GENERATED_CPP)
 
 # 对象文件生成规则：所有.o文件放在BUILD_DIR下
-C_OBJS        := $(patsubst $(PLCLOGIC_DIR)/%.c, $(BUILD_DIR)/%.o, $(C_SRCS))
-CPP_OBJS      := $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(ALL_CPP_SRCS))
-OBJS          := $(C_OBJS) $(CPP_OBJS)
+GENERATED_C_OBJS := $(patsubst $(PLCLOGIC_DIR)/%.c, $(BUILD_DIR)/%.o, $(GENERATED_C_SRCS))
+PROJECT_CPP_OBJS := $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(PROJECT_CPP_SRCS))
+GENERATED_CPP_OBJS := $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(GENERATED_CPP_SRCS))
+OBJS := $(GENERATED_C_OBJS) $(PROJECT_CPP_OBJS) $(GENERATED_CPP_OBJS)
 
 # 编译和链接标志
-CXXFLAGS      := -std=gnu++11 -I./lib -I$(PLCLOGIC_DIR) -I./include $(EXTRA_CXXFLAGS)
+COMMON_CXXFLAGS := -std=gnu++11 -I./include $(EXTRA_CXXFLAGS)
+PROJECT_WARNING_FLAGS ?= -Wall -Wextra
+GENERATED_WARNING_FLAGS ?= -w
+PROJECT_CXXFLAGS := $(COMMON_CXXFLAGS) -isystem ./lib -isystem $(PLCLOGIC_DIR) $(PROJECT_WARNING_FLAGS)
+GENERATED_CXXFLAGS := $(COMMON_CXXFLAGS) -I./lib -I$(PLCLOGIC_DIR) $(GENERATED_WARNING_FLAGS)
 LDFLAGS       := -pthread -fpermissive $(EXTRA_LDFLAGS)
 LDLIBS        :=
 ifdef ETHERCAT_INC
-    CXXFLAGS  += $(ETHERCAT_INC)
+    PROJECT_CXXFLAGS += $(ETHERCAT_INC)
+    GENERATED_CXXFLAGS += $(ETHERCAT_INC)
     LDFLAGS   += $(ETHERCAT_INC)
 endif
 
@@ -48,11 +63,15 @@ $(TARGET): $(OBJS) | $(BUILD_DIR)
 
 # 编译C源文件为对象文件（使用C++编译器）
 $(BUILD_DIR)/%.o: $(PLCLOGIC_DIR)/%.c | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(GENERATED_CXXFLAGS) -c $< -o $@
 
-# 编译CPP源文件为对象文件
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+# 编译项目维护的 C++ 源文件
+$(PROJECT_CPP_OBJS): $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
+	$(CXX) $(PROJECT_CXXFLAGS) -c $< -o $@
+
+# 编译生成的绑定源文件
+$(GENERATED_CPP_OBJS): $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
+	$(CXX) $(GENERATED_CXXFLAGS) -c $< -o $@
 
 # 生成glueVars.cpp的规则
 $(GENERATED_CPP): $(LOCATED_VARS) | $(GLUE_GENERATOR)

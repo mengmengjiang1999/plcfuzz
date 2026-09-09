@@ -76,6 +76,23 @@ compile_and_run \
     "$repo_root/tests/runtime_timing_test.cpp"
 
 compile_and_run \
+    runtime_layers_test \
+    "$repo_root/tests/runtime_layers_test.cpp" \
+    "$repo_root/src/plc_input_simulator.cpp" \
+    "$repo_root/src/runtime_input_application.cpp" \
+    "$repo_root/src/runtime_cycle_scheduler.cpp" \
+    "$repo_root/src/runtime_result_recorder.cpp"
+
+compile_and_run \
+    modbus_dispatch_test \
+    "$repo_root/tests/modbus_dispatch_test.cpp" \
+    "$repo_root/src/modbus.cpp" \
+    "$repo_root/src/modbus_discrete.cpp" \
+    "$repo_root/src/modbus_registers.cpp" \
+    "$repo_root/src/runtime_buffer_map.cpp" \
+    -pthread
+
+compile_and_run \
     plc_input_transformer_test \
     "$repo_root/tests/plc_input_transformer_test.cpp" \
     "$repo_root/input_generation/plc_input_transformer.cpp"
@@ -119,4 +136,5 @@ bash "$repo_root/scripts/check_coverage_workflow.sh"
 PYTHONDONTWRITEBYTECODE=1 python3 "$repo_root/scripts/check_license_metadata.py"
 bash "$repo_root/scripts/check_entrypoints.sh"
 bash "$repo_root/scripts/check_runtime_ownership.sh"
+bash "$repo_root/scripts/check_runtime_modules.sh"
 bash "$repo_root/scripts/check_container_acceptance.sh"

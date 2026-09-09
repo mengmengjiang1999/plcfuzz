@@ -17,6 +17,7 @@ REQUIRED_ORIGINAL_PATHS = {
     "docs/BASELINE_COMPARISON.md",
     "docs/EXPERIMENT_REPORTS.md",
     "docs/PROJECT_CODE_COVERAGE.md",
+    "docs/OFFLINE_RUNTIME_ARCHITECTURE.md",
     "benchmarks/manifest-v1.json",
     "evaluation/protocol-v1.json",
     "input_generation/plc_input_transformer.cpp",
@@ -49,14 +50,26 @@ OPENSPEC_METADATA_PATHS = {
 }
 INHERITED_PATHS = {
     "include/ladder.h",
+    "include/modbus_runtime_internal.h",
     "lib/iec_std_functions.h",
     "lib/iec_types_all.h",
     "src/hardware_layer.cpp",
     "src/main.cpp",
+    "src/modbus.cpp",
+    "src/modbus_discrete.cpp",
+    "src/modbus_registers.cpp",
+    "src/offline_runtime.cpp",
+    "src/runtime_buffer_map.cpp",
 }
 PRESERVED_NOTICES = {
+    "include/modbus_runtime_internal.h": "Copyright 2015 Thiago Alves",
     "src/main.cpp": "Copyright 2018 Thiago Alves",
     "src/hardware_layer.cpp": "Copyright 2015 Thiago Alves",
+    "src/modbus.cpp": "Copyright 2015 Thiago Alves",
+    "src/modbus_discrete.cpp": "Copyright 2015 Thiago Alves",
+    "src/modbus_registers.cpp": "Copyright 2015 Thiago Alves",
+    "src/offline_runtime.cpp": "Copyright 2018 Thiago Alves",
+    "src/runtime_buffer_map.cpp": "Copyright 2015 Thiago Alves",
     "lib/iec_std_functions.h": "copyright 2008 Edouard TISSERANT",
     "lib/iec_types_all.h": "Copyright (C) 2007-2011",
 }

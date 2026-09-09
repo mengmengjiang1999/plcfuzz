@@ -24,6 +24,13 @@ baseline = json.loads(pathlib.Path(sys.argv[3]).read_text(encoding="utf-8"))
 digest = module.validate_scope(scope, root)
 module.validate_baseline(baseline, digest)
 assert "src/main.cpp" in scope["cpp_sources"]
+assert "src/offline_runtime.cpp" in scope["cpp_sources"]
+assert "src/runtime_input_application.cpp" in scope["cpp_sources"]
+assert "src/runtime_cycle_scheduler.cpp" in scope["cpp_sources"]
+assert "src/runtime_state_observer.cpp" in scope["cpp_sources"]
+assert "src/runtime_result_recorder.cpp" in scope["cpp_sources"]
+assert "src/modbus_discrete.cpp" in scope["cpp_sources"]
+assert "src/modbus_registers.cpp" in scope["cpp_sources"]
 assert "include/plc_input_apply.h" in scope["cpp_sources"]
 assert "static_analyse/main.py" in scope["python_sources"]
 assert baseline["enforcement"] == "report-only"

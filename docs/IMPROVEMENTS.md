@@ -1,6 +1,6 @@
 # PLC Robustness Lab 改进路线图
 
-本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **22 个主题完成**，**1 个主题待处理**。每个主题均作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并单独提交和推送。
+本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **23 个主题完成**，**0 个主题待处理**。每个主题均作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并单独提交和推送。
 
 ## 已完成
 
@@ -136,8 +136,12 @@ OpenSpec：[`build-experiment-analysis-reports`](../openspec/changes/archive/202
 
 OpenSpec：[`add-project-code-coverage`](../openspec/changes/archive/2026-09-09-add-project-code-coverage/)
 
-## 待处理
-
 ### 离线运行时模块化
 
-拆分运行时入口与通信兼容实现，将周期调度、输入应用、状态观测和结果记录分层，并隔离第三方生成头文件的编译提示。
+运行时入口现在只负责转交控制；生命周期编排、输入应用、周期调度、状态观测和结果记录具有独立模块与测试。通信兼容实现按调度、离散值、寄存器值和后备映射拆分；构建系统分别声明受维护源码与生成源码，并隔离两类编译提示。
+
+OpenSpec：[`modularize-offline-runtime`](../openspec/changes/archive/2026-09-09-modularize-offline-runtime/)
+
+## 待处理
+
+当前路线图中的 23 个主题均已完成。后续研究方向应根据新的实验结果另建独立 OpenSpec change。
