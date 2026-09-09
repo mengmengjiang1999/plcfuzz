@@ -15,6 +15,7 @@ REQUIRED_ORIGINAL_PATHS = {
     "docs/EVALUATION_PROTOCOL.md",
     "docs/BENCHMARK_SUITE.md",
     "docs/BASELINE_COMPARISON.md",
+    "docs/EXPERIMENT_REPORTS.md",
     "benchmarks/manifest-v1.json",
     "evaluation/protocol-v1.json",
     "input_generation/plc_input_transformer.cpp",
@@ -25,6 +26,8 @@ REQUIRED_ORIGINAL_PATHS = {
     "scripts/check_benchmark_suite.py",
     "scripts/comparison_plan.py",
     "scripts/check_comparison_workflow.sh",
+    "scripts/experiment_report.py",
+    "scripts/check_report_workflow.sh",
     "scripts/generate_benchmark_suite.py",
     "src/plc_input_simulator.cpp",
     "static_analyse/main.py",
@@ -32,6 +35,7 @@ REQUIRED_ORIGINAL_PATHS = {
     "tests/evaluation_protocol_test.py",
     "tests/benchmark_suite_test.py",
     "tests/comparison_plan_test.py",
+    "tests/experiment_report_test.py",
 }
 OPENSPEC_METADATA_PATHS = {
     "openspec/changes/add-license-metadata/specs/project-license-metadata/spec.md",

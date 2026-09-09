@@ -79,9 +79,13 @@ echo "PASS benchmark_suite_test"
 PYTHONDONTWRITEBYTECODE=1 python3 "$repo_root/tests/comparison_plan_test.py"
 echo "PASS comparison_plan_test"
 
+PYTHONDONTWRITEBYTECODE=1 python3 "$repo_root/tests/experiment_report_test.py"
+echo "PASS experiment_report_test"
+
 bash "$repo_root/scripts/check_diagnostics_workflow.sh"
 bash "$repo_root/scripts/check_experiment_workflow.sh"
 bash "$repo_root/scripts/check_comparison_workflow.sh"
+bash "$repo_root/scripts/check_report_workflow.sh"
 PYTHONDONTWRITEBYTECODE=1 python3 "$repo_root/scripts/check_license_metadata.py"
 bash "$repo_root/scripts/check_entrypoints.sh"
 bash "$repo_root/scripts/check_runtime_ownership.sh"

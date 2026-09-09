@@ -207,6 +207,13 @@ def validate_result(result, protocol, protocol_sha256=None):
         if bounds:
             require(bounds[0] is None or value >= bounds[0], "measurement is below its lower bound for " + metric_id)
             require(bounds[1] is None or value <= bounds[1], "measurement is above its upper bound for " + metric_id)
+    observations = result.get("observations", [])
+    require(isinstance(observations, list), "observations must be a list")
+    for observation in observations:
+        require(isinstance(observation, dict) and set(observation) == {"stable_digest", "replay_sample"}, "invalid observation reference")
+        require(re.fullmatch(r"[0-9a-f]{64}", observation["stable_digest"] or ""), "observation stable_digest must be SHA-256")
+        replay_sample = pathlib.PurePosixPath(observation["replay_sample"])
+        require(not replay_sample.is_absolute() and ".." not in replay_sample.parts and replay_sample.parts, "observation replay path escapes its experiment directory")
     return result
 
 

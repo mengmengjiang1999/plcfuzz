@@ -1,6 +1,6 @@
 # PLC Robustness Lab 改进路线图
 
-本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **20 个主题完成**，**3 个主题待处理**。每个主题均作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并单独提交和推送。
+本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **21 个主题完成**，**2 个主题待处理**。每个主题均作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并单独提交和推送。
 
 ## 已完成
 
@@ -124,11 +124,13 @@ OpenSpec：[`add-representative-benchmark-suite`](../openspec/changes/archive/20
 
 OpenSpec：[`compare-input-generation-baselines`](../openspec/changes/archive/2026-09-09-compare-input-generation-baselines/)
 
-## 待处理
-
 ### 实验分析报告
 
-汇总重复运行，按稳定摘要去重，输出 CSV、JSON、统计区间与静态图表，并记录失败、缺失数据和可回放样本位置。
+报告工具现在递归校验新版评价运行，按 benchmark、策略和指标保留原始值并计算均值、中位数、样本标准差、范围和确定性 bootstrap 95% 区间。每个报告同时生成 JSON、CSV 和六项静态 SVG，显式列出失败与缺失数据，并按稳定摘要合并观测索引而保留全部可回放样本路径。
+
+OpenSpec：[`build-experiment-analysis-reports`](../openspec/changes/archive/2026-09-09-build-experiment-analysis-reports/)
+
+## 待处理
 
 ### 项目自有代码覆盖率
 

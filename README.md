@@ -274,6 +274,17 @@ EVALUATION_REPLICATE_SEED=104729 \
 
 策略隔离方式、可选状态反馈边界和单项执行命令见[输入生成策略对照](docs/BASELINE_COMPARISON.md)。
 
+汇总完成的评价实验并生成 JSON、CSV 和静态 SVG：
+
+```bash
+./scripts/plc-lab report generate \
+  --input-root output/comparison-runs \
+  --output-dir output/comparison-report
+./scripts/plc-lab report validate output/comparison-report
+```
+
+报告会显式保留失败运行、缺失指标和去重后的稳定观测来源，详见[实验分析报告](docs/EXPERIMENT_REPORTS.md)。
+
 重放一个 AFL 输入：
 
 ```bash
@@ -391,4 +402,5 @@ cp plclogic/LOCATED_VARIABLES.h tests/fixtures/reference_LOCATED_VARIABLES.h
 - [实验评价协议](docs/EVALUATION_PROTOCOL.md)
 - [代表性 PLC 基准用例集](docs/BENCHMARK_SUITE.md)
 - [输入生成策略对照](docs/BASELINE_COMPARISON.md)
+- [实验分析报告](docs/EXPERIMENT_REPORTS.md)
 - [Petri 网实验说明](lunwenfuxian/petrinet/README.md)

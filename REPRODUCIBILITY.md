@@ -137,6 +137,8 @@ OBSERVATIONS_DIR=output/reproduction-runs ./scripts/plc-lab experiment
 
 受维护的对照策略由 [`evaluation/strategies-v1.json`](evaluation/strategies-v1.json) 固定。`comparison generate` 会生成包含完整 benchmark/strategy/seed 笛卡尔积的 JSON 计划，并记录所有输入摘要；`comparison validate` 在执行前重新核对摘要和配对覆盖。`random-bytes`、`protocol-valid` 与 `structure-aware` 的 grammar/适配器组合互不相同，直接使用 `plc-lab experiment` 时默认仍为 `structure-aware`。详细语义见 [`docs/BASELINE_COMPARISON.md`](docs/BASELINE_COMPARISON.md)。
 
+重复运行完成后，用 `plc-lab report generate` 从只读实验根目录生成新的报告目录。工具只聚合明确完成的数值，分别列出失败和缺失数据，并用固定重采样规则计算区间；同一 benchmark 的关键控制项不一致时拒绝合并。相同输入目录可生成字节稳定的 JSON、CSV 和 SVG。完整格式见 [`docs/EXPERIMENT_REPORTS.md`](docs/EXPERIMENT_REPORTS.md)。
+
 ## 已知限制
 
 - Ubuntu APT 软件包尚未按包哈希封存；验收清单会记录实际解析的软件包版本和最终本地镜像内容摘要，但该摘要不是已发布的 registry manifest digest。
