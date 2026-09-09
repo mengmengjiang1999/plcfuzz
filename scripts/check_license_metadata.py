@@ -16,6 +16,7 @@ REQUIRED_ORIGINAL_PATHS = {
     "docs/BENCHMARK_SUITE.md",
     "docs/BASELINE_COMPARISON.md",
     "docs/EXPERIMENT_REPORTS.md",
+    "docs/PROJECT_CODE_COVERAGE.md",
     "benchmarks/manifest-v1.json",
     "evaluation/protocol-v1.json",
     "input_generation/plc_input_transformer.cpp",
@@ -27,6 +28,10 @@ REQUIRED_ORIGINAL_PATHS = {
     "scripts/comparison_plan.py",
     "scripts/check_comparison_workflow.sh",
     "scripts/experiment_report.py",
+    "scripts/coverage_report.py",
+    "scripts/run_project_coverage.sh",
+    "coverage/scope-v1.json",
+    "coverage/baseline-v1.json",
     "scripts/check_report_workflow.sh",
     "scripts/generate_benchmark_suite.py",
     "src/plc_input_simulator.cpp",
@@ -36,6 +41,7 @@ REQUIRED_ORIGINAL_PATHS = {
     "tests/benchmark_suite_test.py",
     "tests/comparison_plan_test.py",
     "tests/experiment_report_test.py",
+    "tests/coverage_report_test.py",
 }
 OPENSPEC_METADATA_PATHS = {
     "openspec/changes/add-license-metadata/specs/project-license-metadata/spec.md",

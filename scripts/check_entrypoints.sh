@@ -43,7 +43,7 @@ done
 
 bash -n "$entrypoint"
 help_output=$($entrypoint --help)
-for command_name in setup build run experiment evaluation benchmarks comparison report replay test batch diagnostics lines; do
+for command_name in setup build run experiment evaluation benchmarks comparison report coverage replay test batch diagnostics lines; do
     if [[ $help_output != *"$command_name"* ]]; then
         echo "Unified help is missing command: $command_name" >&2
         exit 1

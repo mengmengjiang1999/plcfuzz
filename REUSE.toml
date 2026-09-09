@@ -16,6 +16,12 @@ SPDX-FileCopyrightText = "2024-2026 PLC Robustness Lab contributors"
 SPDX-License-Identifier = "GPL-3.0-only"
 
 [[annotations]]
+path = ["coverage/*.json"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024-2026 PLC Robustness Lab contributors"
+SPDX-License-Identifier = "GPL-3.0-only"
+
+[[annotations]]
 path = ["benchmarks/**/*.json", "benchmarks/replay/*.txt", "testcases/benchmarks/*.st"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2024-2026 PLC Robustness Lab contributors"

@@ -16,6 +16,7 @@ Commands:
   benchmarks validate [...]     Validate the representative benchmark suite
   comparison <command> [...]     Generate, validate, or run comparison plans
   report <command> [...]         Generate or validate experiment reports
+  coverage <command> [...]       Generate or validate project coverage reports
   replay [input-file]           Replay one saved input with the instrumented target
   test [unit|testcases|all]     Run project checks; defaults to all
   batch [all|case-name]         Build and run isolated generated-concurrency cases
@@ -124,6 +125,14 @@ case "$command_name" in
         ;;
     comparison) exec python3 "$repo_root/scripts/comparison_plan.py" "$@" ;;
     report) exec python3 "$repo_root/scripts/experiment_report.py" "$@" ;;
+    coverage)
+        coverage_command=${1:-generate}
+        if [[ $coverage_command == validate ]]; then
+            shift
+            exec python3 "$repo_root/scripts/coverage_report.py" validate "$@"
+        fi
+        exec "$repo_root/scripts/run_project_coverage.sh" "$@"
+        ;;
     replay) exec "$repo_root/scripts/replay_input.sh" "$@" ;;
     test) run_tests "$@" ;;
     batch) exec "$repo_root/scripts/run_batch.sh" "$@" ;;

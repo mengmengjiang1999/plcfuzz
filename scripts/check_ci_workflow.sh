@@ -20,7 +20,7 @@ rg --quiet '^        uses: actions/checkout@v5$' "$workflow"
 test "$(rg --count '^        uses: actions/cache@v5$' "$workflow")" -eq 2
 rg --quiet 'submodules: recursive' "$workflow"
 rg --quiet 'MATIEC_RUN_TESTS=1 ./scripts/plc-lab setup' "$workflow"
-rg --quiet 'pkg-config python3 ripgrep' "$workflow"
+rg --quiet 'pkg-config python3 python3-coverage ripgrep' "$workflow"
 rg --quiet 'check_testcase_manifest\.py --verify-compiler' "$workflow"
 rg --quiet 'git clone --branch v5\.03c --depth 1' "$workflow"
 rg --quiet 'source-only -j"\$PLC_LAB_TOOLCHAIN_BUILD_JOBS"' "$workflow"
@@ -34,6 +34,11 @@ rg --quiet './scripts/plc-lab build transformer' "$workflow"
 rg --quiet './scripts/plc-lab build instrumented' "$workflow"
 rg --quiet './scripts/plc-lab test unit' "$workflow"
 rg --quiet './scripts/plc-lab test testcases' "$workflow"
+rg --quiet './scripts/plc-lab coverage generate' "$workflow"
+rg --quiet './scripts/plc-lab coverage validate output/coverage/summary.json' "$workflow"
+rg --quiet '^        uses: actions/upload-artifact@v7$' "$workflow"
+rg --quiet '^          name: project-code-coverage$' "$workflow"
+rg --quiet '^          path: output/coverage$' "$workflow"
 if rg --quiet './buildscript\.sh|./runfuzz\.sh' "$workflow"; then
     echo "CI workflow must use the maintained unified command." >&2
     exit 1

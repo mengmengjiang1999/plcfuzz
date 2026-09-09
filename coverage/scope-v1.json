@@ -1,0 +1,47 @@
+{
+  "schema": "plc-lab-project-coverage-scope-v1",
+  "cpp_sources": [
+    "include/basic_buffer_history.h",
+    "include/basic_input_block.h",
+    "include/buffer_history.h",
+    "include/input_data_simulator.h",
+    "include/plc_input_apply.h",
+    "include/plc_input_block.h",
+    "include/plc_input_format.h",
+    "include/plc_input_simulator.h",
+    "include/plc_runtime_address.h",
+    "include/pthread_mutex_guard.h",
+    "include/runtime_buffer_storage.h",
+    "include/runtime_timing.h",
+    "input_generation/input_transformer_helper.h",
+    "input_generation/plc_input_transformer.cpp",
+    "input_generation/variable_mapping.h",
+    "src/buffer_history.cpp",
+    "src/communication_compat.cpp",
+    "src/hardware_layer.cpp",
+    "src/main.cpp",
+    "src/modbus.cpp",
+    "src/plc_input_simulator.cpp",
+    "src/runtime_globals.cpp"
+  ],
+  "python_sources": [
+    "scripts/check_benchmark_suite.py",
+    "scripts/comparison_plan.py",
+    "scripts/evaluation_protocol.py",
+    "scripts/experiment_manifest.py",
+    "scripts/experiment_report.py",
+    "scripts/organize_abnormal_samples.py",
+    "static_analyse/main.py"
+  ],
+  "excluded_paths": [
+    "artifacts/legacy/",
+    "build/",
+    "lib/",
+    "output/",
+    "plclogic/",
+    "src/glueVars.cpp",
+    "testcases/archive/",
+    "tests/",
+    "third_party/"
+  ]
+}

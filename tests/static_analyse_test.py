@@ -2,6 +2,8 @@
 
 import importlib.util
 from pathlib import Path
+import subprocess
+import sys
 import tempfile
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -38,6 +40,17 @@ def main():
         output = Path(directory) / "mapping.csv"
         MODULE.save_to_csv(mappings, output)
         assert output.read_bytes().startswith("变量类型,数组索引".encode("utf-8"))
+        command_output = Path(directory) / "mapping-command.csv"
+        result = subprocess.run(
+            [sys.executable, str(REPO_ROOT / "static_analyse/main.py"),
+             "--input", str(Path(directory) / "LOCATED_VARIABLES.h"),
+             "--output", str(command_output)],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stderr
+        assert command_output.read_bytes() == output.read_bytes()
         expect_invalid(directory, "not a record\n", "expected one __LOCATED_VAR")
         expect_invalid(directory, "__LOCATED_VAR(BOOL,__IX0_0,I,X,0)\n", "requires a bit index")
         expect_invalid(directory, "__LOCATED_VAR(BOOL,__IX0_8,I,X,0,8)\n", "between 0 and 7")

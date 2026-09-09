@@ -1,6 +1,6 @@
 # PLC Robustness Lab 改进路线图
 
-本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **21 个主题完成**，**2 个主题待处理**。每个主题均作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并单独提交和推送。
+本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **22 个主题完成**，**1 个主题待处理**。每个主题均作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并单独提交和推送。
 
 ## 已完成
 
@@ -130,11 +130,13 @@ OpenSpec：[`compare-input-generation-baselines`](../openspec/changes/archive/20
 
 OpenSpec：[`build-experiment-analysis-reports`](../openspec/changes/archive/2026-09-09-build-experiment-analysis-reports/)
 
-## 待处理
-
 ### 项目自有代码覆盖率
 
-分别统计 C++ 与 Python 项目代码，排除 MatIEC 和生成代码，在 CI 记录基线并逐步设置合理门槛。
+版本化白名单现在分别界定受维护的 C++ 与 Python 源码，并明确排除 MatIEC、生成 PLC 源码和生成绑定代码。Linux CI 执行单元测试、变量映射命令与正常运行时集成检查，生成 LCOV、Coverage.py、HTML 和统一机器可读摘要，上传完整报告目录；首次实测基线采用只报告模式，为后续逐步设置门槛保留依据。
+
+OpenSpec：[`add-project-code-coverage`](../openspec/changes/archive/2026-09-09-add-project-code-coverage/)
+
+## 待处理
 
 ### 离线运行时模块化
 

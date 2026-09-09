@@ -32,7 +32,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             autoconf automake bison build-essential clang cmake flex git \
-            libtool lld llvm-dev pkg-config python3 ripgrep
+            lcov libtool lld llvm-dev pkg-config python3 python3-coverage ripgrep
 
       - name: Verify repository inputs
         shell: bash
@@ -92,6 +92,20 @@ jobs:
           ./scripts/plc-lab diagnostics all
           test -x build/diagnostics/runtime/openplc_diagnostic
           find build/diagnostics/input-transformer -maxdepth 1 -type f -name 'libplc_input_transformer.*' -print -quit | grep -q .
+
+      - name: Collect project code coverage
+        run: |
+          ./scripts/plc-lab coverage generate
+          ./scripts/plc-lab coverage validate output/coverage/summary.json
+          test -s output/coverage/cpp.info
+          test -s output/coverage/python.json
+
+      - name: Upload project coverage report
+        uses: actions/upload-artifact@v7
+        with:
+          name: project-code-coverage
+          path: output/coverage
+          if-no-files-found: error
 
       - name: Restore AFL++ build cache
         id: cache-aflpp

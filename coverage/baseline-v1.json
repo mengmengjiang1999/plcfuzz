@@ -1,0 +1,14 @@
+{
+  "schema": "plc-lab-project-coverage-baseline-v1",
+  "scope_schema": "plc-lab-project-coverage-scope-v1",
+  "scope_sha256": "4cbf3ee3efad09fdb243f03f5d5e39da5bafed74c2148040cee6b5b4e3effa2f",
+  "enforcement": "report-only",
+  "environment": "ubuntu-22.04-amd64-accepted-container-gcc-11.4.0",
+  "cpp": {
+    "line_percent": 57.3
+  },
+  "python": {
+    "line_percent": 52.17
+  },
+  "note": "Initial complete collection; report-only until repeated CI runs justify deliberate minimum thresholds."
+}
