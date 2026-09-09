@@ -1,6 +1,6 @@
 # PLC Robustness Lab 改进路线图
 
-本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **19 个主题完成**，**4 个主题待处理**。每个主题均作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并单独提交和推送。
+本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **20 个主题完成**，**3 个主题待处理**。每个主题均作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并单独提交和推送。
 
 ## 已完成
 
@@ -118,11 +118,13 @@ OpenSpec：[`define-experiment-evaluation-protocol`](../openspec/changes/archive
 
 OpenSpec：[`add-representative-benchmark-suite`](../openspec/changes/archive/2026-09-09-add-representative-benchmark-suite/)
 
-## 待处理
-
 ### 输入生成策略基线比较
 
-在相同实验预算下比较普通随机、仅符合数据协议、当前结构感知和可选状态反馈策略，量化结构信息带来的变化。
+版本化策略目录现在明确区分普通字节输入、仅协议约束、当前结构感知和可选状态反馈四种配置。计划工具会按选定基准、三个维护策略和五组固定 seed 生成完整同预算矩阵，核对所有引用摘要与配对覆盖，并一次只执行一个经过验证的 trial；缺少适配器时不会虚构状态反馈结果。
+
+OpenSpec：[`compare-input-generation-baselines`](../openspec/changes/archive/2026-09-09-compare-input-generation-baselines/)
+
+## 待处理
 
 ### 实验分析报告
 

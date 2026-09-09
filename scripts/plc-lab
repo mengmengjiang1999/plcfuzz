@@ -14,6 +14,7 @@ Commands:
   experiment                    Start an isolated automated-input experiment
   evaluation <command> [...]    Validate or instantiate the evaluation protocol
   benchmarks validate [...]     Validate the representative benchmark suite
+  comparison <command> [...]     Generate, validate, or run comparison plans
   replay [input-file]           Replay one saved input with the instrumented target
   test [unit|testcases|all]     Run project checks; defaults to all
   batch [all|case-name]         Build and run isolated generated-concurrency cases
@@ -120,6 +121,7 @@ case "$command_name" in
         fi
         exec python3 "$repo_root/scripts/check_benchmark_suite.py" "$@"
         ;;
+    comparison) exec python3 "$repo_root/scripts/comparison_plan.py" "$@" ;;
     replay) exec "$repo_root/scripts/replay_input.sh" "$@" ;;
     test) run_tests "$@" ;;
     batch) exec "$repo_root/scripts/run_batch.sh" "$@" ;;

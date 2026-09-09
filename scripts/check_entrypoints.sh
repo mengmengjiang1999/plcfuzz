@@ -43,7 +43,7 @@ done
 
 bash -n "$entrypoint"
 help_output=$($entrypoint --help)
-for command_name in setup build run experiment evaluation benchmarks replay test batch diagnostics lines; do
+for command_name in setup build run experiment evaluation benchmarks comparison replay test batch diagnostics lines; do
     if [[ $help_output != *"$command_name"* ]]; then
         echo "Unified help is missing command: $command_name" >&2
         exit 1
@@ -52,6 +52,7 @@ done
 $entrypoint build --help >/dev/null
 $entrypoint test --help >/dev/null
 $entrypoint benchmarks validate --help >/dev/null
+$entrypoint comparison --help >/dev/null
 if $entrypoint unsupported-command >/dev/null 2>&1; then
     echo "Unknown unified command unexpectedly succeeded." >&2
     exit 1

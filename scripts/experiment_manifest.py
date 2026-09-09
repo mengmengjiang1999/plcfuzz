@@ -27,6 +27,7 @@ SCHEMA = "PLC_LAB_EXPERIMENT_MANIFEST_V1"
 RECORDED_ENVIRONMENT = (
     "AFL_AUTORESUME",
     "AFL_CUSTOM_MUTATOR_LIBRARY",
+    "AFL_CUSTOM_MUTATOR_ONLY",
     "AFL_MAP_SIZE",
     "AFL_SKIP_CPUFREQ",
     "PLC_LAB_CYCLE_COUNT",
@@ -128,15 +129,26 @@ def create_manifest(args):
     target = resolve_executable(str(args.target))
     input_tool = resolve_executable(args.input_tool)
     input_samples_dir = args.input_samples_dir.resolve()
-    grammar = args.grammar.resolve()
-    input_transformer = args.input_transformer.resolve()
-    for path, label in (
-        (input_samples_dir, "input samples directory"),
-        (grammar, "grammar"),
-        (input_transformer, "input transformer"),
-    ):
+    grammar = args.grammar.resolve() if args.grammar is not None else None
+    adapter = args.adapter.resolve() if args.adapter is not None else None
+    for path, label in ((input_samples_dir, "input samples directory"),):
         if not path.exists():
             raise ValueError("{} does not exist: {}".format(label, path))
+    strategy_rules = {
+        "random-bytes": (False, False, False),
+        "protocol-valid": (True, False, False),
+        "structure-aware": (True, True, False),
+        "state-feedback": (True, True, True),
+    }
+    uses_grammar, uses_adapter, adapter_only = strategy_rules[args.input_strategy]
+    if uses_grammar and (grammar is None or not grammar.is_file()):
+        raise ValueError("strategy grammar does not exist: {}".format(grammar))
+    if not uses_grammar and grammar is not None:
+        raise ValueError("{} does not use a grammar".format(args.input_strategy))
+    if uses_adapter and (adapter is None or not adapter.is_file()):
+        raise ValueError("strategy adapter does not exist: {}".format(adapter))
+    if not uses_adapter and adapter is not None:
+        raise ValueError("{} does not use an adapter".format(args.input_strategy))
 
     repository_commit = git_revision(repo_root, "HEAD", "PLC_LAB_SOURCE_REVISION")
     matiec_commit = git_revision(repo_root, "HEAD:third_party/matiec", "PLC_LAB_MATIEC_REVISION")
@@ -162,10 +174,11 @@ def create_manifest(args):
         str(args.timeout),
         "-i",
         str(input_samples_dir),
-        "-o",
-        str(output_dir),
-        "-g",
-        str(grammar),
+        "-o", str(output_dir),
+    ])
+    if uses_grammar:
+        command.extend(["-g", str(grammar)])
+    command.extend([
         "--",
         str(target),
         "@@",
@@ -187,8 +200,18 @@ def create_manifest(args):
         "duration_seconds": args.duration,
         "timeout_milliseconds": args.timeout,
         "input_samples_dir": str(input_samples_dir),
-        "grammar": str(grammar),
-        "input_transformer": str(input_transformer),
+        "grammar": str(grammar) if grammar is not None else None,
+        "input_transformer": str(adapter) if adapter is not None else None,
+        "input_generation": {
+            "strategy_id": args.input_strategy,
+            "grammar_enabled": uses_grammar,
+            "grammar_path": str(grammar) if grammar is not None else None,
+            "grammar_sha256": sha256_file(grammar) if grammar is not None else None,
+            "adapter_enabled": uses_adapter,
+            "adapter_path": str(adapter) if adapter is not None else None,
+            "adapter_sha256": sha256_file(adapter) if adapter is not None else None,
+            "adapter_only": adapter_only,
+        },
         "output_dir": str(output_dir),
         "command": command,
         "environment": recorded_environment,
@@ -251,8 +274,13 @@ def parse_args(argv=None):
     create.add_argument("--experiment-dir", type=pathlib.Path)
     create.add_argument("--target", required=True, type=pathlib.Path)
     create.add_argument("--input-samples-dir", required=True, type=pathlib.Path)
-    create.add_argument("--grammar", required=True, type=pathlib.Path)
-    create.add_argument("--input-transformer", required=True, type=pathlib.Path)
+    create.add_argument("--grammar", type=pathlib.Path)
+    create.add_argument("--adapter", type=pathlib.Path)
+    create.add_argument(
+        "--input-strategy",
+        choices=("random-bytes", "protocol-valid", "structure-aware", "state-feedback"),
+        default="structure-aware",
+    )
     create.add_argument("--duration", required=True, type=int)
     create.add_argument("--timeout", required=True, type=int)
     create.add_argument("--input-tool", default="afl-fuzz")
@@ -289,6 +317,8 @@ def main(argv=None):
             value is not None for value in evaluation_values
         ):
             raise ValueError("evaluation options must be supplied together")
+        if args.evaluation_strategy_id is not None and args.evaluation_strategy_id != args.input_strategy:
+            raise ValueError("evaluation strategy must match the effective input strategy")
     args.function(args)
     return 0
 

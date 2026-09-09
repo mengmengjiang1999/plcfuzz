@@ -135,6 +135,8 @@ OBSERVATIONS_DIR=output/reproduction-runs ./scripts/plc-lab experiment
 
 用于策略比较的运行必须采用 [`evaluation/protocol-v1.json`](evaluation/protocol-v1.json) 和[实验评价协议](docs/EVALUATION_PROTOCOL.md)。每个 benchmark/strategy 组合至少使用协议中的五组固定 seed；同组实验保持程序、目标、输入集合、工具链、时限、PLC 周期参数和机器指纹一致。评价模式会把 seed 传给输入生成工具，并在实验目录创建带协议摘要的 `evaluation-result.json`。未收集指标必须记录为 `null` 和明确原因，不能当作零值。
 
+受维护的对照策略由 [`evaluation/strategies-v1.json`](evaluation/strategies-v1.json) 固定。`comparison generate` 会生成包含完整 benchmark/strategy/seed 笛卡尔积的 JSON 计划，并记录所有输入摘要；`comparison validate` 在执行前重新核对摘要和配对覆盖。`random-bytes`、`protocol-valid` 与 `structure-aware` 的 grammar/适配器组合互不相同，直接使用 `plc-lab experiment` 时默认仍为 `structure-aware`。详细语义见 [`docs/BASELINE_COMPARISON.md`](docs/BASELINE_COMPARISON.md)。
+
 ## 已知限制
 
 - Ubuntu APT 软件包尚未按包哈希封存；验收清单会记录实际解析的软件包版本和最终本地镜像内容摘要，但该摘要不是已发布的 registry manifest digest。

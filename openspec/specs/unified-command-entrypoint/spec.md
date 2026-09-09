@@ -5,7 +5,7 @@ TBD - created by archiving change unify-script-entrypoints. Update Purpose after
 ## Requirements
 ### Requirement: Unified project command
 
-The repository SHALL provide `scripts/plc-lab` as the single maintained user-facing dispatcher for setup, build, run, experiment, replay, test, batch, diagnostics, evaluation-protocol validation, benchmark validation, and line-count workflows.
+The repository SHALL provide `scripts/plc-lab` as the single maintained user-facing dispatcher for setup, build, run, experiment, replay, test, batch, diagnostics, evaluation-protocol validation, benchmark validation, comparison-plan management, and line-count workflows.
 
 #### Scenario: User requests evaluation help
 
@@ -16,6 +16,11 @@ The repository SHALL provide `scripts/plc-lab` as the single maintained user-fac
 
 - **WHEN** a user runs `./scripts/plc-lab benchmarks validate`
 - **THEN** the command validates the maintained benchmark catalog and replay artifacts without starting an experiment
+
+#### Scenario: User requests comparison help
+
+- **WHEN** a user runs `./scripts/plc-lab comparison --help`
+- **THEN** the command documents plan generation, validation, and single-trial execution without starting an experiment
 ### Requirement: Compatibility wrappers
 
 Former command entry points, including `scripts/plcfuzz`, SHALL contain only migration messaging and argument-preserving forwarding to the canonical dispatcher or maintained semantic scripts.

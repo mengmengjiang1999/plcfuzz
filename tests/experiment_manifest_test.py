@@ -52,7 +52,7 @@ def main():
             "--target", target,
             "--input-samples-dir", input_samples,
             "--grammar", grammar,
-            "--input-transformer", input_transformer,
+            "--adapter", input_transformer,
             "--duration", "60",
             "--timeout", "2000",
             "--input-tool", VERSION_TOOL,
@@ -74,6 +74,10 @@ def main():
         assert manifest["command"][-2:] == [str(target.resolve()), "@@"]
         assert manifest["output_dir"] == str(explicit / "afl-output")
         assert manifest["machine"]["cpu_count"] is not None
+        assert manifest["input_generation"]["strategy_id"] == "structure-aware"
+        assert manifest["input_generation"]["grammar_enabled"] is True
+        assert manifest["input_generation"]["adapter_enabled"] is True
+        assert manifest["input_generation"]["adapter_only"] is False
 
         run("finish", "--manifest", manifest_path, "--exit-code", "0")
         completed = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -89,7 +93,7 @@ def main():
             "--target", target,
             "--input-samples-dir", input_samples,
             "--grammar", grammar,
-            "--input-transformer", input_transformer,
+            "--adapter", input_transformer,
             "--duration", "60",
             "--timeout", "2000",
             "--input-tool", VERSION_TOOL,
@@ -105,7 +109,7 @@ def main():
             "--target", target,
             "--input-samples-dir", input_samples,
             "--grammar", grammar,
-            "--input-transformer", input_transformer,
+            "--adapter", input_transformer,
             "--duration", "60",
             "--timeout", "2000",
             "--input-tool", VERSION_TOOL,
@@ -145,6 +149,53 @@ def main():
         assert launched_manifest["status"] == "success"
         assert launched_manifest["exit_code"] == 0
         assert (launcher_run / "afl-output" / "fixture-complete").is_file()
+        structure_invocation = json.loads(
+            (launcher_run / "afl-output" / "fixture-invocation.json").read_text(encoding="utf-8")
+        )
+        assert "-g" in structure_invocation["arguments"]
+        assert structure_invocation["adapter"] == str(input_transformer)
+        assert structure_invocation["adapter_only"] is None
+
+        random_run = root / "random-run"
+        random_environment = dict(launcher_environment)
+        random_environment.update(
+            {"EXPERIMENT_DIR": str(random_run), "PLC_LAB_INPUT_STRATEGY": "random-bytes"}
+        )
+        subprocess.run(
+            [str(REPO_ROOT / "scripts" / "plc-lab"), "experiment"],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            env=random_environment,
+        )
+        random_manifest = json.loads((random_run / "manifest.json").read_text(encoding="utf-8"))
+        random_invocation = json.loads(
+            (random_run / "afl-output" / "fixture-invocation.json").read_text(encoding="utf-8")
+        )
+        assert random_manifest["input_generation"]["strategy_id"] == "random-bytes"
+        assert random_manifest["input_generation"]["grammar_enabled"] is False
+        assert random_manifest["input_generation"]["adapter_enabled"] is False
+        assert "-g" not in random_invocation["arguments"]
+        assert random_invocation["adapter"] is None
+        assert random_invocation["adapter_only"] is None
+
+        protocol_run = root / "protocol-run"
+        protocol_environment = dict(launcher_environment)
+        protocol_environment.update(
+            {"EXPERIMENT_DIR": str(protocol_run), "PLC_LAB_INPUT_STRATEGY": "protocol-valid"}
+        )
+        subprocess.run(
+            [str(REPO_ROOT / "scripts" / "plc-lab"), "experiment"],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            env=protocol_environment,
+        )
+        protocol_manifest = json.loads((protocol_run / "manifest.json").read_text(encoding="utf-8"))
+        protocol_invocation = json.loads(
+            (protocol_run / "afl-output" / "fixture-invocation.json").read_text(encoding="utf-8")
+        )
+        assert protocol_manifest["input_generation"]["strategy_id"] == "protocol-valid"
+        assert protocol_manifest["input_generation"]["grammar_enabled"] is True
+        assert protocol_manifest["input_generation"]["adapter_enabled"] is False
+        assert "-g" in protocol_invocation["arguments"]
+        assert protocol_invocation["adapter"] is None
 
         evaluation_run = root / "evaluation-run"
         evaluation_environment = dict(launcher_environment)
@@ -154,6 +205,7 @@ def main():
                 "EVALUATION_PROTOCOL": str(PROTOCOL),
                 "EVALUATION_BENCHMARK_ID": "timer-simple",
                 "EVALUATION_STRATEGY_ID": "protocol-valid",
+                "PLC_LAB_INPUT_STRATEGY": "protocol-valid",
                 "EVALUATION_REPLICATE_INDEX": "0",
                 "EVALUATION_REPLICATE_SEED": "104729",
             }
@@ -198,6 +250,23 @@ def main():
         assert partial.returncode == 2
         assert "must be supplied together" in partial.stderr
         assert not partial_run.exists()
+
+        mismatch_run = root / "mismatch-run"
+        mismatch_environment = dict(evaluation_environment)
+        mismatch_environment.update(
+            {
+                "EXPERIMENT_DIR": str(mismatch_run),
+                "PLC_LAB_INPUT_STRATEGY": "random-bytes",
+            }
+        )
+        mismatch = subprocess.run(
+            [str(REPO_ROOT / "scripts" / "plc-lab"), "experiment"],
+            check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            env=mismatch_environment,
+        )
+        assert mismatch.returncode == 2
+        assert "must match" in mismatch.stderr
+        assert not mismatch_run.exists()
 
         compatibility_run = root / "compatibility-run"
         compatibility_environment = dict(os.environ)

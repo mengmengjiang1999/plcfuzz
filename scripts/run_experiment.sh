@@ -25,10 +25,12 @@ observations_root=$(compat_value OBSERVATIONS_DIR FINDINGS_DIR "$repo_root/obser
 experiment_dir=${EXPERIMENT_DIR:-}
 grammar=${INPUT_GRAMMAR:-${AFL_GRAMMAR:-"$repo_root/input_generation/plc.grammar"}}
 input_transformer=${PLC_LAB_INPUT_TRANSFORMER_LIBRARY:-${AFL_CUSTOM_MUTATOR_LIBRARY:-"$repo_root/build/input-transformer/libplc_input_transformer.so"}}
+state_feedback_adapter=${PLC_LAB_STATE_FEEDBACK_ADAPTER:-}
 target=$(compat_value INSTRUMENTED_TARGET FUZZ_TARGET "$repo_root/openplc_instrumented")
 duration=$(compat_value EXPERIMENT_DURATION FUZZ_DURATION 3600)
 timeout=$(compat_value EXECUTION_TIMEOUT FUZZ_TIMEOUT 10000)
 input_tool=$(compat_value AUTOMATED_INPUT_TOOL AFL_FUZZ_BINARY afl-fuzz)
+input_strategy=${PLC_LAB_INPUT_STRATEGY:-structure-aware}
 evaluation_protocol=${EVALUATION_PROTOCOL:-}
 evaluation_benchmark_id=${EVALUATION_BENCHMARK_ID:-}
 evaluation_strategy_id=${EVALUATION_STRATEGY_ID:-}
@@ -52,8 +54,52 @@ if [[ $evaluation_count -ne 0 && $evaluation_count -ne ${#evaluation_values[@]} 
     echo "Evaluation environment variables must be supplied together." >&2
     exit 2
 fi
+if [[ $evaluation_count -ne 0 && $evaluation_strategy_id != "$input_strategy" ]]; then
+    echo "EVALUATION_STRATEGY_ID must match PLC_LAB_INPUT_STRATEGY." >&2
+    exit 2
+fi
 
-for required in "$input_samples_dir" "$grammar" "$input_transformer" "$target"; do
+grammar_arguments=()
+adapter_arguments=()
+case "$input_strategy" in
+    random-bytes)
+        unset AFL_CUSTOM_MUTATOR_LIBRARY AFL_CUSTOM_MUTATOR_ONLY
+        ;;
+    protocol-valid)
+        grammar_arguments=(-g "$grammar")
+        unset AFL_CUSTOM_MUTATOR_LIBRARY AFL_CUSTOM_MUTATOR_ONLY
+        ;;
+    structure-aware)
+        grammar_arguments=(-g "$grammar")
+        adapter_arguments=(--adapter "$input_transformer")
+        export AFL_CUSTOM_MUTATOR_LIBRARY="$input_transformer"
+        unset AFL_CUSTOM_MUTATOR_ONLY
+        ;;
+    state-feedback)
+        if [[ -z $state_feedback_adapter ]]; then
+            echo "PLC_LAB_STATE_FEEDBACK_ADAPTER is required for state-feedback." >&2
+            exit 2
+        fi
+        input_transformer=$state_feedback_adapter
+        grammar_arguments=(-g "$grammar")
+        adapter_arguments=(--adapter "$input_transformer")
+        export AFL_CUSTOM_MUTATOR_LIBRARY="$input_transformer"
+        export AFL_CUSTOM_MUTATOR_ONLY=1
+        ;;
+    *)
+        echo "Unknown input-generation strategy: $input_strategy" >&2
+        exit 2
+        ;;
+esac
+
+required_paths=("$input_samples_dir" "$target")
+if [[ ${#grammar_arguments[@]} -ne 0 ]]; then
+    required_paths+=("$grammar")
+fi
+if [[ ${#adapter_arguments[@]} -ne 0 ]]; then
+    required_paths+=("$input_transformer")
+fi
+for required in "${required_paths[@]}"; do
     if [[ ! -e $required ]]; then
         echo "Required experiment input is missing: $required" >&2
         exit 1
@@ -66,7 +112,6 @@ if ! command -v "$input_tool" >/dev/null 2>&1; then
 fi
 
 export AFL_AUTORESUME=${AFL_AUTORESUME:-1}
-export AFL_CUSTOM_MUTATOR_LIBRARY="$input_transformer"
 export AFL_MAP_SIZE=${AFL_MAP_SIZE:-10000000}
 export AFL_SKIP_CPUFREQ=${AFL_SKIP_CPUFREQ:-1}
 
@@ -76,12 +121,17 @@ create_arguments=(
     --observations-root "$observations_root"
     --target "$target"
     --input-samples-dir "$input_samples_dir"
-    --grammar "$grammar"
-    --input-transformer "$input_transformer"
+    --input-strategy "$input_strategy"
     --duration "$duration"
     --timeout "$timeout"
     --input-tool "$input_tool"
 )
+if [[ ${#grammar_arguments[@]} -ne 0 ]]; then
+    create_arguments+=(--grammar "$grammar")
+fi
+if [[ ${#adapter_arguments[@]} -ne 0 ]]; then
+    create_arguments+=("${adapter_arguments[@]}")
+fi
 if [[ -n $experiment_dir ]]; then
     create_arguments+=(--experiment-dir "$experiment_dir")
 fi
@@ -132,9 +182,11 @@ run_arguments=(
     -t "$timeout"
     -i "$input_samples_dir"
     -o "$experiment_dir/afl-output"
-    -g "$grammar"
     -- "$target" @@
 )
+if [[ ${#grammar_arguments[@]} -ne 0 ]]; then
+    run_arguments=("${grammar_arguments[@]}" "${run_arguments[@]}")
+fi
 if [[ $evaluation_count -ne 0 ]]; then
     run_arguments=(-s "$evaluation_replicate_seed" "${run_arguments[@]}")
 fi

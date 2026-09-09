@@ -1,0 +1,38 @@
+{
+  "registry_version": 1,
+  "schema": "PLC_LAB_INPUT_STRATEGY_REGISTRY_V1",
+  "strategies": [
+    {
+      "adapter_only": false,
+      "availability": "maintained",
+      "id": "random-bytes",
+      "summary": "Byte-level input changes without protocol grammar or project adapter.",
+      "uses_adapter": false,
+      "uses_grammar": false
+    },
+    {
+      "adapter_only": false,
+      "availability": "maintained",
+      "id": "protocol-valid",
+      "summary": "Versioned protocol grammar without the structure-aware project adapter.",
+      "uses_adapter": false,
+      "uses_grammar": true
+    },
+    {
+      "adapter_only": false,
+      "availability": "maintained",
+      "id": "structure-aware",
+      "summary": "Protocol grammar plus the current variable-mapping-aware project adapter.",
+      "uses_adapter": true,
+      "uses_grammar": true
+    },
+    {
+      "adapter_only": true,
+      "availability": "adapter-required",
+      "id": "state-feedback",
+      "summary": "Optional state-guided adapter supplied and reviewed separately.",
+      "uses_adapter": true,
+      "uses_grammar": true
+    }
+  ]
+}

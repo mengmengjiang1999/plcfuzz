@@ -50,3 +50,12 @@ The experiment launcher SHALL accept evaluation protocol path, benchmark ID, str
 
 - **WHEN** one or more but not all required evaluation variables are set
 - **THEN** the experiment is rejected before an output directory or long-running process is started
+
+### Requirement: Effective input-generation strategy
+
+Every experiment manifest SHALL record the effective strategy ID, whether grammar is enabled, whether an adapter is enabled, adapter-only mode, and applicable resource paths and checksums.
+
+#### Scenario: Evaluation strategy label differs
+
+- **WHEN** evaluation context names a strategy other than the effective launcher strategy
+- **THEN** the experiment is rejected before its output directory is created

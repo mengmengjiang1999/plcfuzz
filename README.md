@@ -238,6 +238,8 @@ cp -a "seeds copy/." input_samples/
 | `PLC_LAB_INPUT_TRANSFORMER_LIBRARY` | `build/input-transformer/libplc_input_transformer.so` | 输入转换器 |
 | `AUTOMATED_INPUT_TOOL` | `afl-fuzz` | 自动输入生成工具入口 |
 | `INSTRUMENTED_TARGET` | `openplc_instrumented` | 插桩目标 |
+| `PLC_LAB_INPUT_STRATEGY` | `structure-aware` | `random-bytes`、`protocol-valid`、`structure-aware` 或 `state-feedback` |
+| `PLC_LAB_STATE_FEEDBACK_ADAPTER` | 未设置 | 仅可选 `state-feedback` 策略使用的已审阅适配器 |
 
 每次启动都会在 `OBSERVATIONS_DIR` 下创建带时间和仓库版本前缀的独立目录，并在终端打印该路径。目录中的 `manifest.json` 会记录版本、目标摘要、工具版本、机器信息、参数、环境和最终状态；已有结果不会被覆盖。如需指定确切路径，可设置 `EXPERIMENT_DIR`，但该路径必须尚不存在：
 
@@ -260,6 +262,17 @@ EVALUATION_REPLICATE_SEED=104729 \
 ```
 
 可用 `./scripts/plc-lab evaluation validate-protocol` 校验维护中的协议。
+
+生成 15 个基准、3 个维护策略和 5 组固定 seed 的 225 项同预算对照计划：
+
+```bash
+./scripts/plc-lab comparison generate \
+  --duration 3600 --timeout 10000 \
+  --output output/comparison-plan.json
+./scripts/plc-lab comparison validate output/comparison-plan.json
+```
+
+策略隔离方式、可选状态反馈边界和单项执行命令见[输入生成策略对照](docs/BASELINE_COMPARISON.md)。
 
 重放一个 AFL 输入：
 
@@ -377,4 +390,5 @@ cp plclogic/LOCATED_VARIABLES.h tests/fixtures/reference_LOCATED_VARIABLES.h
 - [PLC 自动化测试输入格式](docs/PLC_INPUT_FORMAT.md)
 - [实验评价协议](docs/EVALUATION_PROTOCOL.md)
 - [代表性 PLC 基准用例集](docs/BENCHMARK_SUITE.md)
+- [输入生成策略对照](docs/BASELINE_COMPARISON.md)
 - [Petri 网实验说明](lunwenfuxian/petrinet/README.md)
