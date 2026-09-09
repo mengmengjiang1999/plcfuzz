@@ -1,0 +1,895 @@
+{
+  "cases": [
+    {
+      "category": "timer",
+      "complexity": "simple",
+      "expected_behavior": [
+        "Timed stages progress only while their declared enabling condition is active.",
+        "One primary transition demonstrates the control pattern."
+      ],
+      "expected_trace": {
+        "path": "benchmarks/traces/timer-simple.json",
+        "sha256": "128ae199bfc643d6dfcaedf070131733edb89166906e6ceba7ac730b5f0bf06f"
+      },
+      "id": "timer-simple",
+      "inputs": [
+        {
+          "address": "%IX0.0",
+          "name": "Enable",
+          "type": "BOOL"
+        }
+      ],
+      "modeled_state_count": 2,
+      "origin": {
+        "classification": "project-authored",
+        "evidence": "repository-history",
+        "license": "GPL-3.0-only"
+      },
+      "outputs": [
+        {
+          "address": "%QX0.0",
+          "name": "Ready",
+          "type": "BOOL"
+        }
+      ],
+      "profile": "legacy",
+      "replay": {
+        "path": "benchmarks/replay/timer-simple.txt",
+        "records": 6,
+        "sha256": "438f595f10402d08edd10edf7cec4ffb8bc0276c41d5235e646b303242c5a97e"
+      },
+      "source": "testcases/benchmarks/timer_simple.st",
+      "source_sha256": "1c9b64d7cb2d909cf465df27396db30e9fd97b44f88b7245c2f9126580d3fc96"
+    },
+    {
+      "category": "timer",
+      "complexity": "general",
+      "expected_behavior": [
+        "Timed stages progress only while their declared enabling condition is active.",
+        "Multiple inputs and outputs exercise branching or parallel status."
+      ],
+      "expected_trace": {
+        "path": "benchmarks/traces/timer-general.json",
+        "sha256": "06f7a8893d71c099daeb7437ea3210256992bfd1ee11f4f94c2ff4f5a225a908"
+      },
+      "id": "timer-general",
+      "inputs": [
+        {
+          "address": "%IX0.0",
+          "name": "Enable",
+          "type": "BOOL"
+        }
+      ],
+      "modeled_state_count": 4,
+      "origin": {
+        "classification": "project-authored",
+        "evidence": "repository-history",
+        "license": "GPL-3.0-only"
+      },
+      "outputs": [
+        {
+          "address": "%QX0.0",
+          "name": "Warm",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QX0.1",
+          "name": "Active",
+          "type": "BOOL"
+        }
+      ],
+      "profile": "legacy",
+      "replay": {
+        "path": "benchmarks/replay/timer-general.txt",
+        "records": 7,
+        "sha256": "f8ff44b6ff57a6fb3c86e5b6c437ae8d7bc56981dde82d3700e48ef916c875c7"
+      },
+      "source": "testcases/benchmarks/timer_general.st",
+      "source_sha256": "cecc23841fde2f5162a967d12a8a0da45ffc6dc77c3a9023f2e80efa3cccf4cc"
+    },
+    {
+      "category": "timer",
+      "complexity": "complex",
+      "expected_behavior": [
+        "Timed stages progress only while their declared enabling condition is active.",
+        "Several persistent states exercise an extended transition sequence."
+      ],
+      "expected_trace": {
+        "path": "benchmarks/traces/timer-complex.json",
+        "sha256": "04a47d362bef103291951dca1177eaa3641eb7ce38f8c6cf4e888d906ea7e4c4"
+      },
+      "id": "timer-complex",
+      "inputs": [
+        {
+          "address": "%IX0.0",
+          "name": "Start",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.1",
+          "name": "Reset",
+          "type": "BOOL"
+        }
+      ],
+      "modeled_state_count": 4,
+      "origin": {
+        "classification": "project-authored",
+        "evidence": "repository-history",
+        "license": "GPL-3.0-only"
+      },
+      "outputs": [
+        {
+          "address": "%QX0.0",
+          "name": "Preparing",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QX0.1",
+          "name": "Running",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QX0.2",
+          "name": "Complete",
+          "type": "BOOL"
+        }
+      ],
+      "profile": "legacy",
+      "replay": {
+        "path": "benchmarks/replay/timer-complex.txt",
+        "records": 9,
+        "sha256": "6e7b53dceb73275eac56090e1df7ba29a5d62943bd6cdc52c9956c25b88b2c92"
+      },
+      "source": "testcases/benchmarks/timer_complex.st",
+      "source_sha256": "0aa648c168829ddbd979fe2818c8781ae7a534d852cb72bb56e85abc9ca21606"
+    },
+    {
+      "category": "counter",
+      "complexity": "simple",
+      "expected_behavior": [
+        "Rising input events advance bounded count states and reset restores the initial count.",
+        "One primary transition demonstrates the control pattern."
+      ],
+      "expected_trace": {
+        "path": "benchmarks/traces/counter-simple.json",
+        "sha256": "f3a8dbd5c3c952b592b9014c39fe4afe416177aead54aeae158e711795e10c7c"
+      },
+      "id": "counter-simple",
+      "inputs": [
+        {
+          "address": "%IX0.0",
+          "name": "Pulse",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.1",
+          "name": "Reset",
+          "type": "BOOL"
+        }
+      ],
+      "modeled_state_count": 4,
+      "origin": {
+        "classification": "project-authored",
+        "evidence": "repository-history",
+        "license": "GPL-3.0-only"
+      },
+      "outputs": [
+        {
+          "address": "%QX0.0",
+          "name": "Reached",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QW0",
+          "name": "Value",
+          "type": "INT"
+        }
+      ],
+      "profile": "legacy",
+      "replay": {
+        "path": "benchmarks/replay/counter-simple.txt",
+        "records": 6,
+        "sha256": "438f595f10402d08edd10edf7cec4ffb8bc0276c41d5235e646b303242c5a97e"
+      },
+      "source": "testcases/benchmarks/counter_simple.st",
+      "source_sha256": "5593d61283b63d7181ebfba0e838eb898ff1616a74371c14d63e29ce726ca259"
+    },
+    {
+      "category": "counter",
+      "complexity": "general",
+      "expected_behavior": [
+        "Rising input events advance bounded count states and reset restores the initial count.",
+        "Multiple inputs and outputs exercise branching or parallel status."
+      ],
+      "expected_trace": {
+        "path": "benchmarks/traces/counter-general.json",
+        "sha256": "591cf5681f95bc033fd09e2f5eb5f36534e042db55bf0dfc47e374143ad68137"
+      },
+      "id": "counter-general",
+      "inputs": [
+        {
+          "address": "%IX0.0",
+          "name": "AcceptPulse",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.1",
+          "name": "RejectPulse",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.2",
+          "name": "Reset",
+          "type": "BOOL"
+        }
+      ],
+      "modeled_state_count": 15,
+      "origin": {
+        "classification": "project-authored",
+        "evidence": "repository-history",
+        "license": "GPL-3.0-only"
+      },
+      "outputs": [
+        {
+          "address": "%QX0.0",
+          "name": "BatchReady",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QX0.1",
+          "name": "ReviewNeeded",
+          "type": "BOOL"
+        }
+      ],
+      "profile": "legacy",
+      "replay": {
+        "path": "benchmarks/replay/counter-general.txt",
+        "records": 7,
+        "sha256": "f8ff44b6ff57a6fb3c86e5b6c437ae8d7bc56981dde82d3700e48ef916c875c7"
+      },
+      "source": "testcases/benchmarks/counter_general.st",
+      "source_sha256": "b9194bbbd7d3759cd04a0adbd7ebb700755e7313ea052d997ee20b50af54aa19"
+    },
+    {
+      "category": "counter",
+      "complexity": "complex",
+      "expected_behavior": [
+        "Rising input events advance bounded count states and reset restores the initial count.",
+        "Several persistent states exercise an extended transition sequence."
+      ],
+      "expected_trace": {
+        "path": "benchmarks/traces/counter-complex.json",
+        "sha256": "44afbfb640c65d3926dc287fa9691544ddd2008d64edbc20a23d3fde2316a4e2"
+      },
+      "id": "counter-complex",
+      "inputs": [
+        {
+          "address": "%IX0.0",
+          "name": "Pulse",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.1",
+          "name": "Reset",
+          "type": "BOOL"
+        }
+      ],
+      "modeled_state_count": 12,
+      "origin": {
+        "classification": "project-authored",
+        "evidence": "repository-history",
+        "license": "GPL-3.0-only"
+      },
+      "outputs": [
+        {
+          "address": "%QX0.0",
+          "name": "UnitReady",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QX0.1",
+          "name": "AllReady",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QW0",
+          "name": "Batches",
+          "type": "INT"
+        }
+      ],
+      "profile": "legacy",
+      "replay": {
+        "path": "benchmarks/replay/counter-complex.txt",
+        "records": 9,
+        "sha256": "6e7b53dceb73275eac56090e1df7ba29a5d62943bd6cdc52c9956c25b88b2c92"
+      },
+      "source": "testcases/benchmarks/counter_complex.st",
+      "source_sha256": "7e8824869ade9dc336c91005ad24f4d6c4c2db8bdba7d9f6bcb9966a283202c8"
+    },
+    {
+      "category": "state-machine",
+      "complexity": "simple",
+      "expected_behavior": [
+        "Boolean commands move the controller through explicitly enumerated logical modes.",
+        "One primary transition demonstrates the control pattern."
+      ],
+      "expected_trace": {
+        "path": "benchmarks/traces/state-machine-simple.json",
+        "sha256": "549869ff3ad7fc06562d78b9f3e74d9059b78eaf84f63603ecd7d7ef2492a716"
+      },
+      "id": "state-machine-simple",
+      "inputs": [
+        {
+          "address": "%IX0.0",
+          "name": "Start",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.1",
+          "name": "Stop",
+          "type": "BOOL"
+        }
+      ],
+      "modeled_state_count": 2,
+      "origin": {
+        "classification": "project-authored",
+        "evidence": "repository-history",
+        "license": "GPL-3.0-only"
+      },
+      "outputs": [
+        {
+          "address": "%QX0.0",
+          "name": "Active",
+          "type": "BOOL"
+        }
+      ],
+      "profile": "legacy",
+      "replay": {
+        "path": "benchmarks/replay/state-machine-simple.txt",
+        "records": 6,
+        "sha256": "438f595f10402d08edd10edf7cec4ffb8bc0276c41d5235e646b303242c5a97e"
+      },
+      "source": "testcases/benchmarks/state_machine_simple.st",
+      "source_sha256": "7d365b817cad3b61e5f2f6ce8b0af5b2b58228e04561c526f2842783d2d304df"
+    },
+    {
+      "category": "state-machine",
+      "complexity": "general",
+      "expected_behavior": [
+        "Boolean commands move the controller through explicitly enumerated logical modes.",
+        "Multiple inputs and outputs exercise branching or parallel status."
+      ],
+      "expected_trace": {
+        "path": "benchmarks/traces/state-machine-general.json",
+        "sha256": "8cfa75aa6f8d793f86eb550dcbba53050527036e2c38f57191ca9c8ac8a72866"
+      },
+      "id": "state-machine-general",
+      "inputs": [
+        {
+          "address": "%IX0.0",
+          "name": "Prepare",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.1",
+          "name": "Start",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.2",
+          "name": "Pause",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.3",
+          "name": "Reset",
+          "type": "BOOL"
+        }
+      ],
+      "modeled_state_count": 4,
+      "origin": {
+        "classification": "project-authored",
+        "evidence": "repository-history",
+        "license": "GPL-3.0-only"
+      },
+      "outputs": [
+        {
+          "address": "%QX0.0",
+          "name": "RunningOutput",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QX0.1",
+          "name": "Waiting",
+          "type": "BOOL"
+        }
+      ],
+      "profile": "legacy",
+      "replay": {
+        "path": "benchmarks/replay/state-machine-general.txt",
+        "records": 7,
+        "sha256": "f8ff44b6ff57a6fb3c86e5b6c437ae8d7bc56981dde82d3700e48ef916c875c7"
+      },
+      "source": "testcases/benchmarks/state_machine_general.st",
+      "source_sha256": "30bbf7622f983d958f84d06825afd149c3d8ef8f6edda3e88b9687426e02093d"
+    },
+    {
+      "category": "state-machine",
+      "complexity": "complex",
+      "expected_behavior": [
+        "Boolean commands move the controller through explicitly enumerated logical modes.",
+        "Several persistent states exercise an extended transition sequence."
+      ],
+      "expected_trace": {
+        "path": "benchmarks/traces/state-machine-complex.json",
+        "sha256": "2ac658188d224f63d0a84053bdb69d664b56b78a63d5f00e4af68921294e339f"
+      },
+      "id": "state-machine-complex",
+      "inputs": [
+        {
+          "address": "%IX0.0",
+          "name": "Start",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.1",
+          "name": "Ready",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.2",
+          "name": "Pause",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.3",
+          "name": "Resume",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.4",
+          "name": "Finish",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.5",
+          "name": "Reset",
+          "type": "BOOL"
+        }
+      ],
+      "modeled_state_count": 6,
+      "origin": {
+        "classification": "project-authored",
+        "evidence": "repository-history",
+        "license": "GPL-3.0-only"
+      },
+      "outputs": [
+        {
+          "address": "%QX0.0",
+          "name": "Busy",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QX0.1",
+          "name": "Held",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QX0.2",
+          "name": "Done",
+          "type": "BOOL"
+        }
+      ],
+      "profile": "legacy",
+      "replay": {
+        "path": "benchmarks/replay/state-machine-complex.txt",
+        "records": 9,
+        "sha256": "6e7b53dceb73275eac56090e1df7ba29a5d62943bd6cdc52c9956c25b88b2c92"
+      },
+      "source": "testcases/benchmarks/state_machine_complex.st",
+      "source_sha256": "1cc9f1eb7b509feb3eb56e62ed1f1fe0c908aa9ec5347757ae0c2ef0387477f3"
+    },
+    {
+      "category": "interlock",
+      "complexity": "simple",
+      "expected_behavior": [
+        "Mutually constrained requests never enable incompatible outputs at the same time.",
+        "One primary transition demonstrates the control pattern."
+      ],
+      "expected_trace": {
+        "path": "benchmarks/traces/interlock-simple.json",
+        "sha256": "92dcdfc941b0e74790c64518705f14f0a2d854ba9b9cc75684f0c7738b96b89d"
+      },
+      "id": "interlock-simple",
+      "inputs": [
+        {
+          "address": "%IX0.0",
+          "name": "Request",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.1",
+          "name": "GuardClosed",
+          "type": "BOOL"
+        }
+      ],
+      "modeled_state_count": 2,
+      "origin": {
+        "classification": "project-authored",
+        "evidence": "repository-history",
+        "license": "GPL-3.0-only"
+      },
+      "outputs": [
+        {
+          "address": "%QX0.0",
+          "name": "Enabled",
+          "type": "BOOL"
+        }
+      ],
+      "profile": "legacy",
+      "replay": {
+        "path": "benchmarks/replay/interlock-simple.txt",
+        "records": 6,
+        "sha256": "438f595f10402d08edd10edf7cec4ffb8bc0276c41d5235e646b303242c5a97e"
+      },
+      "source": "testcases/benchmarks/interlock_simple.st",
+      "source_sha256": "6bbc31e9ef8dcbdeaa998960d618c18977fe67febe33ebc94f0b68c7e848eecd"
+    },
+    {
+      "category": "interlock",
+      "complexity": "general",
+      "expected_behavior": [
+        "Mutually constrained requests never enable incompatible outputs at the same time.",
+        "Multiple inputs and outputs exercise branching or parallel status."
+      ],
+      "expected_trace": {
+        "path": "benchmarks/traces/interlock-general.json",
+        "sha256": "aaa74ca59c392e3bd05bbf1dea671ff9e0b462622ee45f89eb58612e68f8f789"
+      },
+      "id": "interlock-general",
+      "inputs": [
+        {
+          "address": "%IX0.0",
+          "name": "RequestA",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.1",
+          "name": "RequestB",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.2",
+          "name": "GuardClosed",
+          "type": "BOOL"
+        }
+      ],
+      "modeled_state_count": 4,
+      "origin": {
+        "classification": "project-authored",
+        "evidence": "repository-history",
+        "license": "GPL-3.0-only"
+      },
+      "outputs": [
+        {
+          "address": "%QX0.0",
+          "name": "EnableA",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QX0.1",
+          "name": "EnableB",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QX0.2",
+          "name": "Conflict",
+          "type": "BOOL"
+        }
+      ],
+      "profile": "legacy",
+      "replay": {
+        "path": "benchmarks/replay/interlock-general.txt",
+        "records": 7,
+        "sha256": "f8ff44b6ff57a6fb3c86e5b6c437ae8d7bc56981dde82d3700e48ef916c875c7"
+      },
+      "source": "testcases/benchmarks/interlock_general.st",
+      "source_sha256": "ca25a9a9566c6513f32bba02b69545c4b5589a7a9417724ac779fb710aee768e"
+    },
+    {
+      "category": "interlock",
+      "complexity": "complex",
+      "expected_behavior": [
+        "Mutually constrained requests never enable incompatible outputs at the same time.",
+        "Several persistent states exercise an extended transition sequence."
+      ],
+      "expected_trace": {
+        "path": "benchmarks/traces/interlock-complex.json",
+        "sha256": "6fb3c59f6e3b1cb151f0e7aa14d231028b1b0734fc99b93a812153f3c8bd71d8"
+      },
+      "id": "interlock-complex",
+      "inputs": [
+        {
+          "address": "%IX0.0",
+          "name": "RequestA",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.1",
+          "name": "RequestB",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.2",
+          "name": "RequestC",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.3",
+          "name": "Permit",
+          "type": "BOOL"
+        }
+      ],
+      "modeled_state_count": 5,
+      "origin": {
+        "classification": "project-authored",
+        "evidence": "repository-history",
+        "license": "GPL-3.0-only"
+      },
+      "outputs": [
+        {
+          "address": "%QX0.0",
+          "name": "EnableA",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QX0.1",
+          "name": "EnableB",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QX0.2",
+          "name": "EnableC",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QX0.3",
+          "name": "Waiting",
+          "type": "BOOL"
+        }
+      ],
+      "profile": "legacy",
+      "replay": {
+        "path": "benchmarks/replay/interlock-complex.txt",
+        "records": 9,
+        "sha256": "6e7b53dceb73275eac56090e1df7ba29a5d62943bd6cdc52c9956c25b88b2c92"
+      },
+      "source": "testcases/benchmarks/interlock_complex.st",
+      "source_sha256": "40355d978739a27a625ac0dc83d76fd38367399769443d1f7468075412f74e4f"
+    },
+    {
+      "category": "sequential-control",
+      "complexity": "simple",
+      "expected_behavior": [
+        "Completion inputs advance an ordered sequence and reset returns to its first step.",
+        "One primary transition demonstrates the control pattern."
+      ],
+      "expected_trace": {
+        "path": "benchmarks/traces/sequential-control-simple.json",
+        "sha256": "f2acb5f61781e58cfa2da81be53f71ba68d994e0bc36d7217fe672156ee8f1d1"
+      },
+      "id": "sequential-control-simple",
+      "inputs": [
+        {
+          "address": "%IX0.0",
+          "name": "Advance",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.1",
+          "name": "Reset",
+          "type": "BOOL"
+        }
+      ],
+      "modeled_state_count": 2,
+      "origin": {
+        "classification": "project-authored",
+        "evidence": "repository-history",
+        "license": "GPL-3.0-only"
+      },
+      "outputs": [
+        {
+          "address": "%QX0.0",
+          "name": "First",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QX0.1",
+          "name": "Second",
+          "type": "BOOL"
+        }
+      ],
+      "profile": "legacy",
+      "replay": {
+        "path": "benchmarks/replay/sequential-control-simple.txt",
+        "records": 6,
+        "sha256": "438f595f10402d08edd10edf7cec4ffb8bc0276c41d5235e646b303242c5a97e"
+      },
+      "source": "testcases/benchmarks/sequential_control_simple.st",
+      "source_sha256": "165444a077f7db58826f4c21bea3aaadd169eeae374fae4c697d82b72cdea07f"
+    },
+    {
+      "category": "sequential-control",
+      "complexity": "general",
+      "expected_behavior": [
+        "Completion inputs advance an ordered sequence and reset returns to its first step.",
+        "Multiple inputs and outputs exercise branching or parallel status."
+      ],
+      "expected_trace": {
+        "path": "benchmarks/traces/sequential-control-general.json",
+        "sha256": "d6605e28bae7e94ea7325e0f89672f76ae91ea5158696b7529208915a39a6ae0"
+      },
+      "id": "sequential-control-general",
+      "inputs": [
+        {
+          "address": "%IX0.0",
+          "name": "Start",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.1",
+          "name": "Station1Done",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.2",
+          "name": "Station2Done",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.3",
+          "name": "Reset",
+          "type": "BOOL"
+        }
+      ],
+      "modeled_state_count": 4,
+      "origin": {
+        "classification": "project-authored",
+        "evidence": "repository-history",
+        "license": "GPL-3.0-only"
+      },
+      "outputs": [
+        {
+          "address": "%QX0.0",
+          "name": "Station1",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QX0.1",
+          "name": "Station2",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QX0.2",
+          "name": "Complete",
+          "type": "BOOL"
+        }
+      ],
+      "profile": "legacy",
+      "replay": {
+        "path": "benchmarks/replay/sequential-control-general.txt",
+        "records": 7,
+        "sha256": "f8ff44b6ff57a6fb3c86e5b6c437ae8d7bc56981dde82d3700e48ef916c875c7"
+      },
+      "source": "testcases/benchmarks/sequential_control_general.st",
+      "source_sha256": "1143e895cb56d456fb63a4105e51828888d60626f7cecb2755de1c4dbf95eb7a"
+    },
+    {
+      "category": "sequential-control",
+      "complexity": "complex",
+      "expected_behavior": [
+        "Completion inputs advance an ordered sequence and reset returns to its first step.",
+        "Several persistent states exercise an extended transition sequence."
+      ],
+      "expected_trace": {
+        "path": "benchmarks/traces/sequential-control-complex.json",
+        "sha256": "af166878c4c3d6ebffd1dccfde3f85b94f6efe0f325ecd14ebda4d8fdb2cc398"
+      },
+      "id": "sequential-control-complex",
+      "inputs": [
+        {
+          "address": "%IX0.0",
+          "name": "Start",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.1",
+          "name": "Loaded",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.2",
+          "name": "Processed",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.3",
+          "name": "Inspected",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.4",
+          "name": "Released",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.5",
+          "name": "Hold",
+          "type": "BOOL"
+        },
+        {
+          "address": "%IX0.6",
+          "name": "Reset",
+          "type": "BOOL"
+        }
+      ],
+      "modeled_state_count": 6,
+      "origin": {
+        "classification": "project-authored",
+        "evidence": "repository-history",
+        "license": "GPL-3.0-only"
+      },
+      "outputs": [
+        {
+          "address": "%QX0.0",
+          "name": "Loading",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QX0.1",
+          "name": "Processing",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QX0.2",
+          "name": "Inspecting",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QX0.3",
+          "name": "Releasing",
+          "type": "BOOL"
+        },
+        {
+          "address": "%QX0.4",
+          "name": "Complete",
+          "type": "BOOL"
+        }
+      ],
+      "profile": "legacy",
+      "replay": {
+        "path": "benchmarks/replay/sequential-control-complex.txt",
+        "records": 9,
+        "sha256": "6e7b53dceb73275eac56090e1df7ba29a5d62943bd6cdc52c9956c25b88b2c92"
+      },
+      "source": "testcases/benchmarks/sequential_control_complex.st",
+      "source_sha256": "45ac5b08cf012da21febea6ea2537bb3cf60097729da31f9a9d400028d48be92"
+    }
+  ],
+  "catalog_version": 1,
+  "categories": [
+    "timer",
+    "counter",
+    "state-machine",
+    "interlock",
+    "sequential-control"
+  ],
+  "complexity_levels": [
+    "simple",
+    "general",
+    "complex"
+  ],
+  "schema": "PLC_LAB_BENCHMARK_CATALOG_V1",
+  "scope": "Project-authored offline PLC software-quality comparison programs.",
+  "suite_id": "plc-robustness-core-v1"
+}

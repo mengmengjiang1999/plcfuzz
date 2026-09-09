@@ -1,0 +1,114 @@
+{
+  "benchmark_id": "state-machine-complex",
+  "schema": "PLC_LAB_BENCHMARK_TRACE_V1",
+  "steps": [
+    {
+      "expected_phase": "complex-step-0",
+      "index": 0,
+      "inputs": {
+        "Finish": false,
+        "Pause": false,
+        "Ready": false,
+        "Reset": false,
+        "Resume": false,
+        "Start": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-1",
+      "index": 1,
+      "inputs": {
+        "Finish": false,
+        "Pause": false,
+        "Ready": false,
+        "Reset": false,
+        "Resume": false,
+        "Start": true
+      }
+    },
+    {
+      "expected_phase": "complex-step-2",
+      "index": 2,
+      "inputs": {
+        "Finish": false,
+        "Pause": false,
+        "Ready": true,
+        "Reset": false,
+        "Resume": false,
+        "Start": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-3",
+      "index": 3,
+      "inputs": {
+        "Finish": false,
+        "Pause": true,
+        "Ready": false,
+        "Reset": false,
+        "Resume": false,
+        "Start": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-4",
+      "index": 4,
+      "inputs": {
+        "Finish": false,
+        "Pause": false,
+        "Ready": false,
+        "Reset": false,
+        "Resume": true,
+        "Start": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-5",
+      "index": 5,
+      "inputs": {
+        "Finish": true,
+        "Pause": false,
+        "Ready": false,
+        "Reset": false,
+        "Resume": false,
+        "Start": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-6",
+      "index": 6,
+      "inputs": {
+        "Finish": false,
+        "Pause": false,
+        "Ready": false,
+        "Reset": true,
+        "Resume": false,
+        "Start": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-7",
+      "index": 7,
+      "inputs": {
+        "Finish": false,
+        "Pause": false,
+        "Ready": false,
+        "Reset": false,
+        "Resume": false,
+        "Start": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-8",
+      "index": 8,
+      "inputs": {
+        "Finish": false,
+        "Pause": false,
+        "Ready": false,
+        "Reset": false,
+        "Resume": false,
+        "Start": false
+      }
+    }
+  ]
+}

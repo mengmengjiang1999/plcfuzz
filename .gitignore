@@ -17,6 +17,7 @@ openplc
 *.original
 *.txt
 !**/CMakeLists.txt
+!benchmarks/replay/*.txt
 findings/
 findings_back/
 observations/

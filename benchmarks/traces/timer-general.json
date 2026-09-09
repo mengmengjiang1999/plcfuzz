@@ -1,0 +1,55 @@
+{
+  "benchmark_id": "timer-general",
+  "schema": "PLC_LAB_BENCHMARK_TRACE_V1",
+  "steps": [
+    {
+      "expected_phase": "general-step-0",
+      "index": 0,
+      "inputs": {
+        "Enable": false
+      }
+    },
+    {
+      "expected_phase": "general-step-1",
+      "index": 1,
+      "inputs": {
+        "Enable": true
+      }
+    },
+    {
+      "expected_phase": "general-step-2",
+      "index": 2,
+      "inputs": {
+        "Enable": false
+      }
+    },
+    {
+      "expected_phase": "general-step-3",
+      "index": 3,
+      "inputs": {
+        "Enable": false
+      }
+    },
+    {
+      "expected_phase": "general-step-4",
+      "index": 4,
+      "inputs": {
+        "Enable": true
+      }
+    },
+    {
+      "expected_phase": "general-step-5",
+      "index": 5,
+      "inputs": {
+        "Enable": false
+      }
+    },
+    {
+      "expected_phase": "general-step-6",
+      "index": 6,
+      "inputs": {
+        "Enable": false
+      }
+    }
+  ]
+}

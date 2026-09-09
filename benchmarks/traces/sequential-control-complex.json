@@ -1,0 +1,123 @@
+{
+  "benchmark_id": "sequential-control-complex",
+  "schema": "PLC_LAB_BENCHMARK_TRACE_V1",
+  "steps": [
+    {
+      "expected_phase": "complex-step-0",
+      "index": 0,
+      "inputs": {
+        "Hold": false,
+        "Inspected": false,
+        "Loaded": false,
+        "Processed": false,
+        "Released": false,
+        "Reset": false,
+        "Start": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-1",
+      "index": 1,
+      "inputs": {
+        "Hold": false,
+        "Inspected": false,
+        "Loaded": false,
+        "Processed": false,
+        "Released": false,
+        "Reset": false,
+        "Start": true
+      }
+    },
+    {
+      "expected_phase": "complex-step-2",
+      "index": 2,
+      "inputs": {
+        "Hold": false,
+        "Inspected": false,
+        "Loaded": true,
+        "Processed": false,
+        "Released": false,
+        "Reset": false,
+        "Start": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-3",
+      "index": 3,
+      "inputs": {
+        "Hold": false,
+        "Inspected": false,
+        "Loaded": false,
+        "Processed": true,
+        "Released": false,
+        "Reset": false,
+        "Start": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-4",
+      "index": 4,
+      "inputs": {
+        "Hold": false,
+        "Inspected": true,
+        "Loaded": false,
+        "Processed": false,
+        "Released": false,
+        "Reset": false,
+        "Start": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-5",
+      "index": 5,
+      "inputs": {
+        "Hold": false,
+        "Inspected": false,
+        "Loaded": false,
+        "Processed": false,
+        "Released": true,
+        "Reset": false,
+        "Start": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-6",
+      "index": 6,
+      "inputs": {
+        "Hold": true,
+        "Inspected": false,
+        "Loaded": false,
+        "Processed": false,
+        "Released": false,
+        "Reset": false,
+        "Start": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-7",
+      "index": 7,
+      "inputs": {
+        "Hold": false,
+        "Inspected": false,
+        "Loaded": false,
+        "Processed": false,
+        "Released": false,
+        "Reset": true,
+        "Start": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-8",
+      "index": 8,
+      "inputs": {
+        "Hold": false,
+        "Inspected": false,
+        "Loaded": false,
+        "Processed": false,
+        "Released": false,
+        "Reset": false,
+        "Start": false
+      }
+    }
+  ]
+}

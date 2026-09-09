@@ -27,12 +27,12 @@ FIELDS = [
 ]
 ALLOWED = {
     "language": {"st", "ld"},
-    "collection": {"active", "archived", "ld-reference", "matiec-experimental", "matiec-legacy"},
+    "collection": {"active", "archived", "benchmark", "ld-reference", "matiec-experimental", "matiec-legacy"},
     "profile": {"legacy", "iec61131-3:2025-experimental", "not-applicable"},
     "expected": {"pass", "fail", "not-checked"},
     "origin": {"project-authored", "ldmicro", "ldmicro-derived"},
     "license": {"GPL-3.0-only", "GPL-3.0-or-later"},
-    "purpose": {"runtime-example", "compiler-compatibility", "compatibility-reference", "ladder-reference"},
+    "purpose": {"runtime-example", "evaluation-benchmark", "compiler-compatibility", "compatibility-reference", "ladder-reference"},
 }
 PROVENANCE_FIELDS = [
     "origin",
@@ -59,7 +59,10 @@ def report_error(errors, message):
 def tracked_testcases(repo_root):
     try:
         result = subprocess.run(
-            ["git", "-C", str(repo_root), "ls-files", "-z", "--", "testcases"],
+            [
+                "git", "-C", str(repo_root), "ls-files", "--cached", "--others",
+                "--exclude-standard", "-z", "--", "testcases",
+            ],
             check=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,

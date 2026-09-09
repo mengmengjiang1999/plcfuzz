@@ -4,7 +4,7 @@
 TBD - created by archiving change catalog-test-corpus. Update Purpose after archive.
 ## Requirements
 ### Requirement: Complete testcase inventory
-The repository SHALL maintain a machine-readable manifest with exactly one entry for every tracked `.st` and `.ld` file below `testcases/`.
+The repository SHALL maintain a machine-readable manifest with exactly one entry for every tracked `.st` and `.ld` file below `testcases/`, including every ST source selected by the representative benchmark catalog.
 
 #### Scenario: Testcase is added or removed
 - **WHEN** the tracked testcase tree and manifest paths no longer match
@@ -14,6 +14,9 @@ The repository SHALL maintain a machine-readable manifest with exactly one entry
 - **WHEN** two manifest rows identify the same current path
 - **THEN** catalog validation fails
 
+#### Scenario: Benchmark source is not cataloged
+- **WHEN** a benchmark references an ST source without a matching testcase-catalog row
+- **THEN** benchmark validation fails with the source path
 ### Requirement: Explicit testcase metadata
 Each manifest entry SHALL record current path, original path, language, collection, compiler profile, expected result, resolved origin, SPDX license identifier, and research purpose using documented values.
 

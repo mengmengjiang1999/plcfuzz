@@ -13,6 +13,7 @@ Commands:
   run [input-file]              Run the normal runtime with one input
   experiment                    Start an isolated automated-input experiment
   evaluation <command> [...]    Validate or instantiate the evaluation protocol
+  benchmarks validate [...]     Validate the representative benchmark suite
   replay [input-file]           Replay one saved input with the instrumented target
   test [unit|testcases|all]     Run project checks; defaults to all
   batch [all|case-name]         Build and run isolated generated-concurrency cases
@@ -110,6 +111,15 @@ case "$command_name" in
     run) exec "$repo_root/scripts/run_runtime.sh" "$@" ;;
     experiment) exec "$repo_root/scripts/run_experiment.sh" "$@" ;;
     evaluation) exec python3 "$repo_root/scripts/evaluation_protocol.py" "$@" ;;
+    benchmarks)
+        benchmark_command=${1:-validate}
+        shift || true
+        if [[ $benchmark_command != validate ]]; then
+            echo "Unknown benchmark command: $benchmark_command" >&2
+            exit 2
+        fi
+        exec python3 "$repo_root/scripts/check_benchmark_suite.py" "$@"
+        ;;
     replay) exec "$repo_root/scripts/replay_input.sh" "$@" ;;
     test) run_tests "$@" ;;
     batch) exec "$repo_root/scripts/run_batch.sh" "$@" ;;

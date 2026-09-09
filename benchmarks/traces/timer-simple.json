@@ -1,0 +1,48 @@
+{
+  "benchmark_id": "timer-simple",
+  "schema": "PLC_LAB_BENCHMARK_TRACE_V1",
+  "steps": [
+    {
+      "expected_phase": "simple-step-0",
+      "index": 0,
+      "inputs": {
+        "Enable": false
+      }
+    },
+    {
+      "expected_phase": "simple-step-1",
+      "index": 1,
+      "inputs": {
+        "Enable": true
+      }
+    },
+    {
+      "expected_phase": "simple-step-2",
+      "index": 2,
+      "inputs": {
+        "Enable": true
+      }
+    },
+    {
+      "expected_phase": "simple-step-3",
+      "index": 3,
+      "inputs": {
+        "Enable": false
+      }
+    },
+    {
+      "expected_phase": "simple-step-4",
+      "index": 4,
+      "inputs": {
+        "Enable": false
+      }
+    },
+    {
+      "expected_phase": "simple-step-5",
+      "index": 5,
+      "inputs": {
+        "Enable": false
+      }
+    }
+  ]
+}

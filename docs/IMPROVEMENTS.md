@@ -1,6 +1,6 @@
 # PLC Robustness Lab 改进路线图
 
-本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **18 个主题完成**，**5 个主题待处理**。每个主题均作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并单独提交和推送。
+本路线图按对研究结论可靠性和持续维护的影响排序。当前已有 **19 个主题完成**，**4 个主题待处理**。每个主题均作为独立 OpenSpec change，依次完成探索、提案、实施、验证和归档，并单独提交和推送。
 
 ## 已完成
 
@@ -30,7 +30,7 @@ OpenSpec：[`version-plc-input-format`](../openspec/changes/archive/2026-09-08-v
 
 ### 测试语料机器可读清单
 
-`testcases/manifest.tsv` 现在覆盖全部 40 个 ST 和 31 个 LD 文件，记录路径、profile、预期结果、来源与许可核对状态和研究用途。校验器会检查 Git 文件覆盖，并可使用固定 MatIEC 核对全部 ST 预期结果。
+`testcases/manifest.tsv` 现在覆盖全部 55 个 ST 和 31 个 LD 文件，记录路径、profile、预期结果、来源与许可核对状态和研究用途。校验器会检查 Git 文件覆盖，并可使用固定 MatIEC 核对全部 ST 预期结果。
 
 OpenSpec：[`catalog-test-corpus`](../openspec/changes/archive/2026-09-08-catalog-test-corpus/)
 
@@ -84,7 +84,7 @@ OpenSpec：[`strengthen-runtime-ownership`](../openspec/changes/archive/2026-09-
 
 ### Linux 容器全流程验收
 
-`scripts/build_linux_container.sh` 现在构建固定的 `linux/amd64` 环境，并把仓库检查、MatIEC 全套测试、40 个 ST 预期核对、普通/插桩/诊断构建及代表性输入回放设为镜像构建门槛。机器可读清单记录基础镜像、工具和软件包版本、完整命令及最终本地镜像内容摘要。
+`scripts/build_linux_container.sh` 现在构建固定的 `linux/amd64` 环境，并把仓库检查、MatIEC 全套测试、55 个 ST 预期核对、普通/插桩/诊断构建及代表性输入回放设为镜像构建门槛。机器可读清单记录基础镜像、工具和软件包版本、完整命令及最终本地镜像内容摘要。
 
 OpenSpec：[`verify-linux-container-build`](../openspec/changes/archive/2026-09-09-verify-linux-container-build/)
 
@@ -112,11 +112,13 @@ OpenSpec：[`neutralize-project-owned-identifiers`](../openspec/changes/archive/
 
 OpenSpec：[`define-experiment-evaluation-protocol`](../openspec/changes/archive/2026-09-09-define-experiment-evaluation-protocol/)
 
-## 待处理
-
 ### 代表性基准用例集
 
-覆盖定时器、计数器、状态机、互锁和顺序控制，并按三个复杂度等级记录变量、状态、预期行为、来源、最小回放样本和确定性结果。
+`plc-robustness-core-v1` 现在以五类控制模式和三档复杂度构成完整的 15 用例矩阵。每个项目原创 ST 用例都有稳定 ID、变量接口、抽象状态数、预期行为、来源边界、最小 V1 回放输入、预期轨迹和内容摘要；自动检查还能用固定 MatIEC 双重编译并比较生成结果。
+
+OpenSpec：[`add-representative-benchmark-suite`](../openspec/changes/archive/2026-09-09-add-representative-benchmark-suite/)
+
+## 待处理
 
 ### 输入生成策略基线比较
 

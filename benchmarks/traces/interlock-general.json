@@ -1,0 +1,69 @@
+{
+  "benchmark_id": "interlock-general",
+  "schema": "PLC_LAB_BENCHMARK_TRACE_V1",
+  "steps": [
+    {
+      "expected_phase": "general-step-0",
+      "index": 0,
+      "inputs": {
+        "GuardClosed": false,
+        "RequestA": false,
+        "RequestB": false
+      }
+    },
+    {
+      "expected_phase": "general-step-1",
+      "index": 1,
+      "inputs": {
+        "GuardClosed": false,
+        "RequestA": true,
+        "RequestB": false
+      }
+    },
+    {
+      "expected_phase": "general-step-2",
+      "index": 2,
+      "inputs": {
+        "GuardClosed": false,
+        "RequestA": false,
+        "RequestB": true
+      }
+    },
+    {
+      "expected_phase": "general-step-3",
+      "index": 3,
+      "inputs": {
+        "GuardClosed": true,
+        "RequestA": false,
+        "RequestB": false
+      }
+    },
+    {
+      "expected_phase": "general-step-4",
+      "index": 4,
+      "inputs": {
+        "GuardClosed": false,
+        "RequestA": true,
+        "RequestB": true
+      }
+    },
+    {
+      "expected_phase": "general-step-5",
+      "index": 5,
+      "inputs": {
+        "GuardClosed": false,
+        "RequestA": false,
+        "RequestB": false
+      }
+    },
+    {
+      "expected_phase": "general-step-6",
+      "index": 6,
+      "inputs": {
+        "GuardClosed": false,
+        "RequestA": false,
+        "RequestB": false
+      }
+    }
+  ]
+}

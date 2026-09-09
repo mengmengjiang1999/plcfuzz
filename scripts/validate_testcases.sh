@@ -3,6 +3,7 @@ set -euo pipefail
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 python3 "$repo_root/scripts/check_testcase_manifest.py"
+python3 "$repo_root/scripts/check_benchmark_suite.py" --verify-compiler
 
 iec2c=${MATIEC_IEC2C:-"$repo_root/third_party/matiec/iec2c"}
 include_dir=${MATIEC_INCLUDE_DIR:-"$repo_root/third_party/matiec/lib"}

@@ -1,0 +1,96 @@
+{
+  "benchmark_id": "interlock-complex",
+  "schema": "PLC_LAB_BENCHMARK_TRACE_V1",
+  "steps": [
+    {
+      "expected_phase": "complex-step-0",
+      "index": 0,
+      "inputs": {
+        "Permit": false,
+        "RequestA": false,
+        "RequestB": false,
+        "RequestC": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-1",
+      "index": 1,
+      "inputs": {
+        "Permit": false,
+        "RequestA": true,
+        "RequestB": false,
+        "RequestC": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-2",
+      "index": 2,
+      "inputs": {
+        "Permit": false,
+        "RequestA": false,
+        "RequestB": true,
+        "RequestC": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-3",
+      "index": 3,
+      "inputs": {
+        "Permit": false,
+        "RequestA": false,
+        "RequestB": false,
+        "RequestC": true
+      }
+    },
+    {
+      "expected_phase": "complex-step-4",
+      "index": 4,
+      "inputs": {
+        "Permit": true,
+        "RequestA": false,
+        "RequestB": false,
+        "RequestC": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-5",
+      "index": 5,
+      "inputs": {
+        "Permit": false,
+        "RequestA": false,
+        "RequestB": false,
+        "RequestC": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-6",
+      "index": 6,
+      "inputs": {
+        "Permit": false,
+        "RequestA": false,
+        "RequestB": false,
+        "RequestC": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-7",
+      "index": 7,
+      "inputs": {
+        "Permit": false,
+        "RequestA": false,
+        "RequestB": false,
+        "RequestC": false
+      }
+    },
+    {
+      "expected_phase": "complex-step-8",
+      "index": 8,
+      "inputs": {
+        "Permit": false,
+        "RequestA": false,
+        "RequestB": false,
+        "RequestC": false
+      }
+    }
+  ]
+}

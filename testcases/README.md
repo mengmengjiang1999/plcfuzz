@@ -1,6 +1,6 @@
 # 测试用例清单
 
-`manifest.tsv` 是 `testcases/` 下 ST 与 LD 测试文件的机器可读目录。当前版本覆盖 40 个 ST 文件和 31 个 LD 文件，共 71 条记录。
+`manifest.tsv` 是 `testcases/` 下 ST 与 LD 测试文件的机器可读目录。当前版本覆盖 55 个 ST 文件和 31 个 LD 文件，共 86 条记录。
 
 ## 字段
 
@@ -9,7 +9,7 @@
 | `path` | 当前 Git 跟踪路径 |
 | `original_path` | 归档前路径；未移动文件与 `path` 相同 |
 | `language` | `st` 或 `ld` |
-| `collection` | 活动运行样例、MatIEC 兼容用例、归档参考或 LD 参考集合 |
+| `collection` | 活动运行样例、代表性 benchmark、MatIEC 兼容用例、归档参考或 LD 参考集合 |
 | `profile` | MatIEC profile；LD 使用 `not-applicable` |
 | `expected` | 编译器预期结果；LD 使用 `not-checked` |
 | `origin` | `project-authored`、`ldmicro` 或 `ldmicro-derived` |
@@ -28,10 +28,10 @@
 python3 scripts/check_testcase_manifest.py
 ```
 
-使用固定 MatIEC 核对全部 40 个 ST 条目的预期结果：
+使用固定 MatIEC 核对全部 55 个 ST 条目的预期结果：
 
 ```bash
 python3 scripts/check_testcase_manifest.py --verify-compiler
 ```
 
-`scripts/validate_testcases.sh` 会先执行快速检查，再编译 `testcases/matiec/` 下的 8 个重点兼容用例。LD 文件不是 MatIEC 输入，因此只登记、不在该命令中编译。
+`scripts/validate_testcases.sh` 会先执行快速检查与 15 个基准用例的双重确定性编译，再编译 `testcases/matiec/` 下的 8 个重点兼容用例。LD 文件不是 MatIEC 输入，因此只登记、不在该命令中编译。基准结构和使用方式见 [`docs/BENCHMARK_SUITE.md`](../docs/BENCHMARK_SUITE.md)。

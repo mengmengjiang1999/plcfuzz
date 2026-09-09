@@ -276,6 +276,9 @@ MATIEC_RUN_TESTS=1 ./scripts/plc-lab setup
 # PLC Robustness Lab 新增的 MatIEC 合法用例
 ./scripts/plc-lab test testcases
 
+# 代表性基准用例及确定性编译
+./scripts/plc-lab benchmarks validate --verify-compiler
+
 # 全部 ST/LD 清单结构与文件覆盖
 python3 ./scripts/check_testcase_manifest.py
 
@@ -311,6 +314,7 @@ bash ./scripts/check_ci_workflow.sh
 | `input_generation/` | AFL++ grammar、dictionary 与输入转换器 |
 | `static_analyse/` | PLC 变量映射提取工具 |
 | `testcases/` | 活动 ST/LD 样例、MatIEC 兼容性用例和历史归档 |
+| `benchmarks/` | 代表性基准目录、最小回放输入和预期轨迹 |
 | `tests/` | PLC Robustness Lab 单元测试 |
 | `artifacts/legacy/` | 历史 MatIEC/OpenPLC 二进制与快照 |
 | `seeds copy/` | 只读保留的历史种子 |
@@ -354,7 +358,7 @@ cp plclogic/LOCATED_VARIABLES.h tests/fixtures/reference_LOCATED_VARIABLES.h
 
 ## 当前限制
 
-- 竞争问题的判定目前基于最近输出变化，是实验性启发式，不等价于严格的数据竞争检测。
+- 并发输出候选的判定目前基于最近输出变化，是实验性启发式，不等价于完整的并发语义证明。
 - 13 个不满足新版 MatIEC 要求的历史 ST 文件已移至 `testcases/archive/incompatible-matiec/`，程序逻辑保持不变且不纳入活动语料。
 - 默认自动化测试输入格式是固定顺序的文本数值块，grammar、解析器和输入转换器需要同步演进。
 - Linux CI 会验证完整 OpenPLC/AFL++ 构建链；本地非 Linux 环境仍可能只覆盖轻量检查。
@@ -371,4 +375,6 @@ cp plclogic/LOCATED_VARIABLES.h tests/fixtures/reference_LOCATED_VARIABLES.h
 - [变更记录](docs/CHANGELOG.md)
 - [构建脚本历史说明](build_scripts/README.md)
 - [PLC 自动化测试输入格式](docs/PLC_INPUT_FORMAT.md)
+- [实验评价协议](docs/EVALUATION_PROTOCOL.md)
+- [代表性 PLC 基准用例集](docs/BENCHMARK_SUITE.md)
 - [Petri 网实验说明](lunwenfuxian/petrinet/README.md)

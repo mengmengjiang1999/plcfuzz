@@ -1,0 +1,76 @@
+{
+  "benchmark_id": "sequential-control-general",
+  "schema": "PLC_LAB_BENCHMARK_TRACE_V1",
+  "steps": [
+    {
+      "expected_phase": "general-step-0",
+      "index": 0,
+      "inputs": {
+        "Reset": false,
+        "Start": false,
+        "Station1Done": false,
+        "Station2Done": false
+      }
+    },
+    {
+      "expected_phase": "general-step-1",
+      "index": 1,
+      "inputs": {
+        "Reset": false,
+        "Start": true,
+        "Station1Done": false,
+        "Station2Done": false
+      }
+    },
+    {
+      "expected_phase": "general-step-2",
+      "index": 2,
+      "inputs": {
+        "Reset": false,
+        "Start": false,
+        "Station1Done": true,
+        "Station2Done": false
+      }
+    },
+    {
+      "expected_phase": "general-step-3",
+      "index": 3,
+      "inputs": {
+        "Reset": false,
+        "Start": false,
+        "Station1Done": false,
+        "Station2Done": true
+      }
+    },
+    {
+      "expected_phase": "general-step-4",
+      "index": 4,
+      "inputs": {
+        "Reset": false,
+        "Start": true,
+        "Station1Done": true,
+        "Station2Done": false
+      }
+    },
+    {
+      "expected_phase": "general-step-5",
+      "index": 5,
+      "inputs": {
+        "Reset": true,
+        "Start": false,
+        "Station1Done": false,
+        "Station2Done": false
+      }
+    },
+    {
+      "expected_phase": "general-step-6",
+      "index": 6,
+      "inputs": {
+        "Reset": false,
+        "Start": false,
+        "Station1Done": false,
+        "Station2Done": false
+      }
+    }
+  ]
+}
