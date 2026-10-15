@@ -1,0 +1,18 @@
+{
+  "<start>": ["<statement>"],
+  "<statement>": [
+    "<assignment>",
+    "<if_statement>",
+    "<for_loop>"
+  ],
+  "<assignment>": ["<var> := <expr>;"],
+  "<if_statement>": [
+    "IF <condition> THEN <statement> END_IF",
+    "IF <condition> THEN <statement> ELSE <statement> END_IF"
+  ],
+  "<condition>": [
+    "<var> = <value>",
+    "<var> > <value>",
+    "<expr> AND <expr>"
+  ]
+}

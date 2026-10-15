@@ -1,0 +1,31 @@
+language,filename,blank,comment,code,"github.com/AlDanial/cloc v 2.04  T=0.05 s (568.2 files/s 164311.9 lines/s)"
+Smalltalk,./IndustrialAuto15.st,9,0,3400
+Smalltalk,./IndustrialAuto12.st,6,0,1553
+Smalltalk,./Req4.st,6,0,496
+Smalltalk,./Req5.st,6,0,324
+Smalltalk,./Req3.st,6,0,252
+Smalltalk,./G4LTL_ST8.st,9,0,230
+Smalltalk,./IndustrialAuto8.st,9,0,230
+Smalltalk,./IndustrialAuto13.st,6,0,222
+Smalltalk,./IndustrialAuto10.st,6,0,202
+Smalltalk,./G4LTL_ST3.st,6,0,177
+Smalltalk,./IndustrialAuto3.st,6,0,177
+Smalltalk,./G4LTL_ST7.st,9,0,97
+Smalltalk,./IndustrialAuto7.st,9,0,97
+Smalltalk,./G4LTL_ST6.st,9,0,95
+Smalltalk,./IndustrialAuto6.st,9,0,95
+Smalltalk,./G4LTL_ST5.st,6,0,76
+Smalltalk,./IndustrialAuto5.st,6,0,76
+Smalltalk,./G4LTL_ST10.st,6,0,73
+Smalltalk,./IndustrialAuto11.st,6,0,73
+Smalltalk,./G4LTL_ST4.st,6,0,44
+Smalltalk,./IndustrialAuto4.st,6,0,44
+Text,./_cloc.txt,0,0,31
+Smalltalk,./G4LTL_ST1.st,3,0,23
+Smalltalk,./G4LTL_ST2.st,6,0,23
+Smalltalk,./G4LTL_ST9.st,6,0,23
+Smalltalk,./IndustrialAuto1.st,6,0,23
+Smalltalk,./IndustrialAuto2.st,6,0,23
+Smalltalk,./Req1.st,6,0,22
+Bourne Shell,./counter.sh,2,0,3
+SUM,,182,0,8204

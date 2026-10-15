@@ -1,0 +1,2 @@
+cd ./outputfiles
+rm *.st

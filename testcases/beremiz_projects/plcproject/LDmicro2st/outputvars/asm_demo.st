@@ -1,0 +1,8 @@
+PROGRAM MAIN_VAR
+VAR
+    Xled  AT IX0.0: BOOL;
+    YTEMP_HI  AT IX0.0: BOOL;
+    YUpdate  AT IX0.0: BOOL;
+    Ycycle2  AT IX0.0: BOOL;
+END_VAR
+END_PROGRAM

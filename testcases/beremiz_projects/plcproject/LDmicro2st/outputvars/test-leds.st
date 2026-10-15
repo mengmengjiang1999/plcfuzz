@@ -1,0 +1,6 @@
+PROGRAM MAIN_VAR
+VAR
+    Xbutton  AT IX0.0: BOOL;
+    Yled  AT IX0.0: BOOL;
+END_VAR
+END_PROGRAM
